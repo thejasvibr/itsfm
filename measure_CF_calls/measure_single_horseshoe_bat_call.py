@@ -30,6 +30,22 @@ def get_power_spectrum(audio, fs=250000.0):
     freqs = np.fft.rfftfreq(audio.size, 1.0/fs)
     return dB(abs(spectrum)), freqs
 
+def calc_sound_borders(audio, percentile=99):
+    '''Gives the start and stop of a sound based on the percentile 
+    cumulative energy values. 
+    
+    Returns
+    --------
+    start, end : int.
+    '''
+    audio_sq = audio**2.0
+    cum_energy = np.cumsum(audio_sq)
+    outside_percentile = (100-percentile)*0.5
+    lower, higher = outside_percentile, 100-outside_percentile
+    start, end = np.percentile(cum_energy,[lower, higher])
+    start_ind = np.argmin(abs(cum_energy-start))
+    end_ind = np.argmin(abs(cum_energy-end))
+    return start_ind, end_ind
 
 def get_robust_peak_frequency(audio, **kwargs):
     '''Makes a spectrogram from the audio 
@@ -124,7 +140,6 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape):
     # choose an Fm start/end fr equency :
     FM_bandwidth= xrange(5,25)
     fm_bw = np.random.choice(FM_bandwidth, 1)*10.0**3
-    print(fm_bw)
     start_f = cf_freq - fm_bw
     # 
     polynomial_num = 25
@@ -246,8 +261,13 @@ def measure_hbc_call(audio, **kwargs):
     ----------
     audio : np.array
 
+
+    Keyword Arguments
+    ---------
     fs : float>0.
          sampling rate in Hz.
+
+
 
     Returns
     --------
@@ -311,7 +331,7 @@ def measure_hbc_call(audio, **kwargs):
     call = audio[call_window[0]:call_window[1]]
     
     # call duration of the entire call
-    call_duration = call.size/float(fs)
+    call_duration = call.size/float(kwargs['fs'])
     #energy of the entire call
     call_energy = calc_energy(call)
 
@@ -346,9 +366,8 @@ def assemble_all_measurements(call_duration, call_energy, CF_energy, fm_energy,
             'cf_energy':[CF_energy],
             'peak_frequency':[peak_frequency],
             }
-    print(fm_times)
+
     for fm_time, fm_tf, fm_engy in zip(fm_times, fm_terminal_freqs, fm_energy):
-        print fm_time
         start_of_fm = fm_time[0]/float(kwargs['fs']) 
         end_of_fm = fm_time[1]/float(kwargs['fs']) 
         
@@ -474,7 +493,61 @@ def get_terminal_frequency(audio, **kwargs):
     terminal_frequency = np.min(all_frequencies_above_threshold)
     return terminal_frequency
   
+def make_overview_figure(audio, sounds, msmts, **kwargs):
+    '''
+    '''
+    fs = kwargs['fs']
+    fftsize = kwargs.get('fftsize', 128)
+    dyn_range = kwargs.get('dyn_range', 80)
     
+
+    dyn_vmin = 20*np.log10(np.max(abs(sounds[0]))) - dyn_range
+    
+    plt.figure(figsize=(8,7))
+    a0 = plt.subplot(231)
+    plt.title('Oscillogram')
+    plt.plot(sounds[0], label='whole call')
+    plt.plot(sounds[1], label='non CF')
+    plt.legend()
+    plt.subplot(232)
+    plt.title('Manual selection')
+    plt.specgram(audio, Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
+    plt.yticks([])
+    plt.subplot(233)
+    plt.title('Fine selection of call')
+    plt.specgram(sounds[0], Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
+    plt.tick_params(axis='y', which='both', labelleft='off', labelright='on')
+    # show CF peak frequency
+    plt.hlines(msmts['peak_frequency'],0,sounds[0].size/float(fs), 'k', 
+               linewidth=2.0)
+    # show FM sections along with the terminal frequencies
+    for fm_start, fm_end in [ ('downfm_start_time', 'downfm_end_time'), ('upfm_start_time','upfm_end_time')]:
+        try:
+            plt.vlines([msmts[fm_start],msmts[fm_end]], 50000, fs*0.5,'r' )
+            terminal_frequency = fm_start.split('_')[0]+'_terminal_frequency'
+            plt.hlines(msmts[terminal_frequency],msmts[fm_start],msmts[fm_end],'r')
+           
+        except:
+            pass
+
+    plt.subplot(234)
+    plt.title('Non-CF call')
+    plt.specgram(sounds[1], Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
+    plt.subplot(235)
+    plt.title('First FM')
+    # plot FM with 0.5*fftsize
+    half_winsize = int(fftsize*0.5)
+    plt.specgram(sounds[2], Fs=fs, NFFT=half_winsize, noverlap=half_winsize-1, vmin=dyn_vmin);
+    plt.yticks([])
+
+    try:
+        plt.subplot(236)
+        plt.title('Second FM')
+        plt.specgram(sounds[3], Fs=fs, NFFT=half_winsize, noverlap=half_winsize-1, vmin=dyn_vmin);
+        plt.tick_params(axis='y', which='both', labelleft='off', labelright='on')
+
+    except:
+        pass
     
 class FMIdentificationError(ValueError):
     pass
