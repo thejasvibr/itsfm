@@ -1,0 +1,789 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>measure_CF_calls.measure_single_horseshoe_bat_call &#8212; measure CF calls 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for measure_CF_calls.measure_single_horseshoe_bat_call</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python2</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Module that segments and measures</span>
+<span class="sd">parts of a horseshoebat CF call</span>
+
+<span class="sd">Created on Sun Feb  9 18:11:16 2020</span>
+
+<span class="sd">@author: tbeleyur</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;agg.path.chunksize&#39;</span><span class="p">]</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">peakutils</span> <span class="k">import</span> <span class="n">peak</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">soundfile</span> <span class="k">as</span> <span class="nn">sf</span>
+
+<div class="viewcode-block" id="dB"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.dB">[docs]</a><span class="k">def</span> <span class="nf">dB</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculates the 20log of X&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="mi">20</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="rms"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.rms">[docs]</a><span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mf">2.0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="calc_energy"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.calc_energy">[docs]</a><span class="k">def</span> <span class="nf">calc_energy</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_power_spectrum"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.get_power_spectrum">[docs]</a><span class="k">def</span> <span class="nf">get_power_spectrum</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mf">250000.0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculates an RFFT of the audio.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : int</span>
+<span class="sd">        Frequency of sampling in Hz</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dB_power_spectrum : np.array</span>
+<span class="sd">        dB(power_spectrum)</span>
+<span class="sd">    freqs : np.array</span>
+<span class="sd">        Centre frequencies of the RFFT. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">audio</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">dB_power_spectrum</span> <span class="o">=</span> <span class="n">dB</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">spectrum</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dB_power_spectrum</span><span class="p">,</span> <span class="n">freqs</span></div>
+
+<div class="viewcode-block" id="calc_sound_borders"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.calc_sound_borders">[docs]</a><span class="k">def</span> <span class="nf">calc_sound_borders</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">99</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Gives the start and stop of a sound based on the percentile </span>
+<span class="sd">    cumulative energy values. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    percentile : float, optional</span>
+<span class="sd">        Value between 100 and 0. The sound border is calcualted</span>
+<span class="sd">        as the border which encapsulates the percentile of energy</span>
+<span class="sd">        Defaults to 99.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    start, end : int</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">audio_sq</span> <span class="o">=</span> <span class="n">audio</span><span class="o">**</span><span class="mf">2.0</span>
+    <span class="n">cum_energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">audio_sq</span><span class="p">)</span>
+    <span class="n">outside_percentile</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="o">-</span><span class="n">percentile</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+    <span class="n">lower</span><span class="p">,</span> <span class="n">higher</span> <span class="o">=</span> <span class="n">outside_percentile</span><span class="p">,</span> <span class="mi">100</span><span class="o">-</span><span class="n">outside_percentile</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">cum_energy</span><span class="p">,[</span><span class="n">lower</span><span class="p">,</span> <span class="n">higher</span><span class="p">])</span>
+    <span class="n">start_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cum_energy</span><span class="o">-</span><span class="n">start</span><span class="p">))</span>
+    <span class="n">end_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cum_energy</span><span class="o">-</span><span class="n">end</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">start_ind</span><span class="p">,</span> <span class="n">end_ind</span></div>
+
+<div class="viewcode-block" id="get_robust_peak_frequency"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.get_robust_peak_frequency">[docs]</a><span class="k">def</span> <span class="nf">get_robust_peak_frequency</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Makes a spectrogram from the audio </span>
+<span class="sd">    and calcualtes the peak frequency by averaging</span>
+<span class="sd">    each slice of the spectrogram&#39;s FFT&#39;s. </span>
+
+<span class="sd">    This &#39;smooths&#39; out the structure of the power </span>
+<span class="sd">    spectrum and allows a single and clear peak </span>
+<span class="sd">    detection. </span>
+
+<span class="sd">    Thanks to Holger Goerlitz for the suggestion. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Frequency of sampling in Hz</span>
+<span class="sd">    seg_length : int, optional</span>
+<span class="sd">        The size of the FFt window used to calculate the moving FFT slices. </span>
+<span class="sd">        DEfaults to 256</span>
+<span class="sd">    noverlap : int, optional </span>
+<span class="sd">        The number of samples overlapping between one FFT slice and the next. </span>
+<span class="sd">        Defaults to seg_length -1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    peak_frequency : float</span>
+<span class="sd">        Frequency with highest power in the audio in Hz. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">seg_length</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seg_length&#39;</span><span class="p">,</span><span class="mi">256</span><span class="p">)</span>
+    <span class="n">frequency</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">sxx</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">spectrogram</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]),</span> <span class="n">nperseg</span><span class="o">=</span><span class="n">seg_length</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">seg_length</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">averaged_spectrogram</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sxx</span><span class="p">)</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">averaged_spectrogram</span><span class="p">)</span>
+    <span class="n">peak_frequency</span> <span class="o">=</span> <span class="n">frequency</span><span class="p">[</span><span class="n">peak</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">peak_frequency</span></div>
+    
+<div class="viewcode-block" id="remove_frequency"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.remove_frequency">[docs]</a><span class="k">def</span> <span class="nf">remove_frequency</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">target_frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    target_frequency : float</span>
+<span class="sd">        Frequency component to be filtered out from audio in Hz. </span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling frequency in Hz. </span>
+<span class="sd">    q_factor : float, optional</span>
+<span class="sd">              q_factor of the notch filter. See signal.iirnotch for more details. </span>
+<span class="sd">              Defaults to 1. </span>
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filtered_audio : np.array</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    ------</span>
+<span class="sd">    It may seem like setting a higher q_factor is better to remove the Cf. This is not true in </span>
+<span class="sd">    my experience. A higher q-factor leads to a very narrow filtering, which can leave a lot of </span>
+<span class="sd">    energy remaining in the CF part - even though the target_frequency per se is filtered out.</span>
+
+<span class="sd">    The CF part of a horseshoe bat call is not like a synthetised pure tone - it might have </span>
+<span class="sd">    a broader bandwidth. To effectively remove the CF part of a call lower may be better!</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">nyquist</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.5</span>
+    <span class="n">q_factor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;q_factor&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="n">b</span><span class="p">,</span><span class="n">a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">iirnotch</span><span class="p">(</span><span class="n">target_frequency</span><span class="o">/</span><span class="n">nyquist</span><span class="p">,</span><span class="n">q_factor</span><span class="p">)</span>
+    
+    <span class="n">filtered_audio</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">lfilter</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">audio</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filtered_audio</span></div>
+
+    
+<div class="viewcode-block" id="get_peak_frequency"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.get_peak_frequency">[docs]</a><span class="k">def</span> <span class="nf">get_peak_frequency</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="mi">250000</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">audio</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">peak_freq</span> <span class="o">=</span> <span class="n">freqs</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">peak_freq</span></div>
+
+
+<span class="c1">## from the make_CF_training_data module</span>
+<div class="viewcode-block" id="make_one_CFcall"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.make_one_CFcall">[docs]</a><span class="k">def</span> <span class="nf">make_one_CFcall</span><span class="p">(</span><span class="n">call_durn</span><span class="p">,</span> <span class="n">fm_durn</span><span class="p">,</span> <span class="n">cf_freq</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">call_shape</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A test function used to check how well the segmenting+measurement</span>
+<span class="sd">    functions in the module work. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    call_durn : float</span>
+<span class="sd">    fm_durn : float</span>
+<span class="sd">    cf_freq : float</span>
+<span class="sd">    fs : float</span>
+<span class="sd">    call_shape : str</span>
+<span class="sd">        One of either &#39;staplepin&#39; OR &#39;rightangle&#39;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    cfcall : np.array</span>
+<span class="sd">        The synthesised call. </span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    -------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If a call_shape that is not  &#39;staplepin&#39; OR &#39;rightangle&#39; is given</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    ------</span>
+<span class="sd">    This is not really the besssst kind of CF call to test the functions on, </span>
+<span class="sd">    but it works okay. The CF call is made by using the poly spline function </span>
+<span class="sd">    and this leads to weird jumps in frequency especially around the CF-FM</span>
+<span class="sd">    junctions. Longish calls with decently long FM parts look fine, but calls</span>
+<span class="sd">    with very short FM parts lead to rippling of the frequency. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># choose an Fm start/end fr equency :</span>
+    <span class="n">FM_bandwidth</span><span class="o">=</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>
+    <span class="n">fm_bw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">FM_bandwidth</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">10.0</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">start_f</span> <span class="o">=</span> <span class="n">cf_freq</span> <span class="o">-</span> <span class="n">fm_bw</span>
+    <span class="c1"># </span>
+    <span class="n">polynomial_num</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">call_durn</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">call_durn</span><span class="o">*</span><span class="n">fs</span><span class="p">))</span>
+    <span class="c1"># define the transition points in the staplepin</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">numfm_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">fm_durn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">call_shape</span> <span class="o">==</span> <span class="s1">&#39;staplepin&#39;</span><span class="p">:</span>       
+        <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_f</span><span class="p">,</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">polynomial_num</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">call_shape</span> <span class="o">==</span> <span class="s1">&#39;rightangle&#39;</span><span class="p">:</span>
+        <span class="c1"># alternate between rising and falling right angle shapes</span>
+        <span class="n">rightangle_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;rising&#39;</span><span class="p">,</span><span class="s1">&#39;falling&#39;</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rightangle_type</span> <span class="o">==</span> <span class="s1">&#39;rising&#39;</span><span class="p">:</span>
+            <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">rightangle_type</span> <span class="o">==</span> <span class="s1">&#39;falling&#39;</span><span class="p">:</span>
+            <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">polynomial_num</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong input given&#39;</span><span class="p">)</span>
+      
+    <span class="n">cfcall</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">sweep_poly</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+    <span class="c1">#windowing = np.random.choice([&#39;hann&#39;, &#39;nuttall&#39;, &#39;bartlett&#39;,&#39;boxcar&#39;], 1)[0]</span>
+    <span class="n">windowing</span><span class="o">=</span> <span class="s1">&#39;boxcar&#39;</span>
+    <span class="n">cfcall</span> <span class="o">*=</span> <span class="n">signal</span><span class="o">.</span><span class="n">get_window</span><span class="p">(</span><span class="n">windowing</span><span class="p">,</span> <span class="n">cfcall</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">cfcall</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="moving_rms"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.moving_rms">[docs]</a><span class="k">def</span> <span class="nf">moving_rms</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculates moving rms of a signal with given window size. </span>
+<span class="sd">    Outputs np.array of *same* size as X. The rms of the </span>
+<span class="sd">    last few samples &lt;= window_size away from the end are assigned</span>
+<span class="sd">    to last full-window rms calculated</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X :  np.array</span>
+<span class="sd">        Signal of interest. </span>
+
+<span class="sd">    window_size : int, optional</span>
+<span class="sd">                 Defaults to 125 samples. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    all_rms : np.array</span>
+<span class="sd">        Moving rms of the signal. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">window_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;window_size&#39;</span><span class="p">,</span> <span class="mi">125</span><span class="p">)</span>
+    <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">stops</span> <span class="o">=</span> <span class="n">starts</span><span class="o">+</span><span class="n">window_size</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">stops</span><span class="o">&lt;</span><span class="n">X</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">valid_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">starts</span><span class="p">[</span><span class="n">valid</span><span class="p">])</span>
+    <span class="n">valid_stops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">stops</span><span class="p">[</span><span class="n">valid</span><span class="p">])</span>
+    <span class="n">all_rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">valid_starts</span><span class="p">,</span> <span class="n">valid_stops</span><span class="p">)):</span>
+        <span class="n">rms_value</span> <span class="o">=</span> <span class="n">rms</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">])</span>
+        <span class="n">all_rms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rms_value</span>
+    
+    <span class="c1"># replace all un-assigned samples with the last rms value</span>
+    <span class="n">all_rms</span><span class="p">[</span><span class="n">all_rms</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">rms_value</span>
+
+    <span class="k">return</span> <span class="n">all_rms</span></div>
+
+<div class="viewcode-block" id="segment_sound_from_background"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.segment_sound_from_background">[docs]</a><span class="k">def</span> <span class="nf">segment_sound_from_background</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Selects the sound from an audio clip when the majority of the </span>
+<span class="sd">    clip is background, and the sound of interest only ocuppies a small</span>
+<span class="sd">    region of it. </span>
+
+<span class="sd">    Here a 95% energy window (as used in calc_sound_borders) will fail as it will lead </span>
+<span class="sd">    to extremely generous start-stop windows - and include a lot of the background. </span>
+<span class="sd">    </span>
+<span class="sd">    The moving dB rms of the audio clip is calcualted and portions of the audio clip</span>
+<span class="sd">    3dB above threshold dB rms are considered the signal. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    window_size : int, optional </span>
+<span class="sd">                Window size for moving rms calcualtions. </span>
+<span class="sd">                Defaults to 125 samples. </span>
+<span class="sd">    background_percentile: float, optional</span>
+<span class="sd">                A value between 0 and 100 indicating what percentile of the </span>
+<span class="sd">                audio is generally expected to be background. </span>
+<span class="sd">                Defaults to 50. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    start, stop : int</span>
+<span class="sd">        Start and stop indices of the sound in the audio clip. </span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    BackgroundSegmentationError</span>
+<span class="sd">        If there are no samples +3dB above the background_percentile </span>
+<span class="sd">        dB rms in the signal. This means the input signal is very uniform</span>
+<span class="sd">        in dB rms, and there is either no signal, or very </span>
+<span class="sd">        little background in the audio. This issue can be solved by </span>
+<span class="sd">        choosing a more generous selection of the input audio clip. </span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    ------</span>
+<span class="sd">    At this point, a +3dB threshold is implemented to keep things </span>
+<span class="sd">    simple. Future releases should look into making this a variable</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">signal_moving_rms</span> <span class="o">=</span> <span class="n">moving_rms</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">moving_dBrms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">dB</span><span class="p">(</span><span class="n">signal_moving_rms</span><span class="p">))</span>
+    <span class="n">moving_dBrms</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">moving_dBrms</span><span class="p">)</span>
+
+    <span class="n">background_percentile</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;background_percentile&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">moving_dBrms</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">background_percentile</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> 
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">above_threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">moving_dBrms</span><span class="o">&gt;</span><span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">above_threshold</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">above_threshold</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">BackgroundSegmentationError</span><span class="p">(</span><span class="s1">&#39;There is not enough background in the audio clip.</span><span class="se">\</span>
+<span class="s1">                                          Please check if the whole audio has signal!,</span><span class="se">\</span>
+<span class="s1">                                          or reduce the background_percentile  from current value.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="measure_hbc_call"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.measure_hbc_call">[docs]</a><span class="k">def</span> <span class="nf">measure_hbc_call</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : float&gt;0.</span>
+<span class="sd">         Frequency of sampling in Hz.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------   </span>
+<span class="sd">    measurements : pd.DataFrame </span>
+<span class="sd">        With the following columns and entries</span>
+<span class="sd">        call_duration : float&gt;0</span>
+<span class="sd">                        The duration of the entire call</span>
+<span class="sd">        call_energy : float&gt;0</span>
+<span class="sd">                    Eenrgy in the whole call.</span>
+<span class="sd">        FM_energy : float&gt;0</span>
+<span class="sd">                    The energy of the FM portion/s. This is the energy in the call </span>
+<span class="sd">                    post CF removal. </span>
+<span class="sd">        CF_energy : float&gt;0</span>
+<span class="sd">                    Energy in the CF component. This is calculated by subtracting the </span>
+<span class="sd">                    whole calls energy from the energy remaining post CF removal.</span>
+<span class="sd">        CF_duration : float&gt;0</span>
+<span class="sd">                      Duration of whole call in seconds. </span>
+<span class="sd">        FM_duration : array, list-like</span>
+<span class="sd">                      Duration of the FM portions. if there are up and down FM sweeps, then </span>
+<span class="sd">                      two values are returned. </span>
+<span class="sd">        peak_CF : float&gt;0</span>
+<span class="sd">                  The peak CF in Hz</span>
+<span class="sd">        FM_terminal_-10dB : float&gt;0</span>
+<span class="sd">                        The terminal frequency of the FM. The Cf component of a call </span>
+<span class="sd">                        is notch filtered out, and the FM part/s are left. The</span>
+<span class="sd">                        FM parts are then isolated and their power spectrum is calculated. </span>
+<span class="sd">                        The terminal frequency is the lowest frequency that is -10dB</span>
+<span class="sd">                        from the peak of the power spectrum.</span>
+<span class="sd">        FM_times : nFM x 2 np.array</span>
+<span class="sd">                    Start and end times for the detected FM sweep/s. </span>
+<span class="sd">                    One row is one FM sweep.</span>
+<span class="sd">        CF_times : 1x2 np.array</span>
+<span class="sd">                   1 entry with start and end time. </span>
+
+<span class="sd">    sound_segments : </span>
+<span class="sd">        call : np.array. </span>
+<span class="sd">               A slightly narrower selection of the audio with 99% of the audio&#39;s energy </span>
+<span class="sd">               in it. </span>
+<span class="sd">        nocf_call : np.array. </span>
+<span class="sd">                The call without the CF segment in it. </span>
+<span class="sd">        fm_segments: np.array</span>
+<span class="sd">                One or two extracted FM segments. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># narrow down the audio clip even more to extract exactly the sound</span>
+    <span class="n">call_window</span> <span class="o">=</span> <span class="n">calc_sound_borders</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="mi">95</span><span class="p">)</span> 
+    <span class="n">call</span> <span class="o">=</span> <span class="n">audio</span><span class="p">[</span><span class="n">call_window</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">call_window</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    
+    <span class="c1"># call duration of the entire call</span>
+    <span class="n">call_duration</span> <span class="o">=</span> <span class="n">call</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span>
+    <span class="c1">#energy of the entire call</span>
+    <span class="n">call_energy</span> <span class="o">=</span> <span class="n">calc_energy</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+
+    <span class="c1">#identify peak frequency </span>
+    <span class="n">peak_frequency</span> <span class="o">=</span> <span class="n">get_robust_peak_frequency</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1">#get rid of peak frequency</span>
+    <span class="n">call_no_CF</span> <span class="o">=</span> <span class="n">remove_frequency</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">peak_frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># calculate energy of CF</span>
+    <span class="n">non_cf_energy</span> <span class="o">=</span> <span class="n">calc_energy</span><span class="p">(</span><span class="n">call_no_CF</span><span class="p">)</span>
+    <span class="n">CF_energy</span> <span class="o">=</span> <span class="n">call_energy</span> <span class="o">-</span> <span class="n">non_cf_energy</span>
+    
+    <span class="c1"># extract FM sections and measure things about them</span>
+    <span class="n">fm_segments</span><span class="p">,</span> <span class="n">fm_times</span> <span class="o">=</span> <span class="n">get_FM_parts</span><span class="p">(</span><span class="n">call_no_CF</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fm_terminal_freqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_terminal_frequency</span><span class="p">(</span><span class="n">eachfm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">eachfm</span> <span class="ow">in</span> <span class="n">fm_segments</span><span class="p">]</span>
+        <span class="n">fm_energy</span> <span class="o">=</span> <span class="p">[</span> <span class="n">calc_energy</span><span class="p">(</span><span class="n">eachfm</span><span class="p">)</span> <span class="k">for</span> <span class="n">eachfm</span> <span class="ow">in</span> <span class="n">fm_segments</span><span class="p">]</span>
+        <span class="n">fm_rms</span> <span class="o">=</span> <span class="p">[</span> <span class="n">rms</span><span class="p">(</span><span class="n">eachfm</span><span class="p">)</span> <span class="k">for</span> <span class="n">eachfm</span> <span class="ow">in</span> <span class="n">fm_segments</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">fm_terminal_freqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+        <span class="n">fm_energy</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+        <span class="n">fm_rms</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+
+    <span class="n">measurements</span> <span class="o">=</span> <span class="n">assemble_all_measurements</span><span class="p">(</span><span class="n">call_duration</span><span class="p">,</span> <span class="n">call_energy</span><span class="p">,</span> <span class="n">CF_energy</span><span class="p">,</span><span class="n">peak_frequency</span><span class="p">,</span>
+                                             <span class="n">fm_energy</span><span class="p">,</span> <span class="n">fm_times</span><span class="p">,</span> <span class="n">fm_terminal_freqs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+   
+    <span class="n">sound_segments</span> <span class="o">=</span> <span class="n">assemble_all_sound_segments</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">call_no_CF</span><span class="p">,</span> <span class="n">fm_segments</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sound_segments</span><span class="p">,</span> <span class="n">measurements</span></div>
+
+<div class="viewcode-block" id="assemble_all_measurements"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_measurements">[docs]</a><span class="k">def</span> <span class="nf">assemble_all_measurements</span><span class="p">(</span><span class="n">call_duration</span><span class="p">,</span> <span class="n">call_energy</span><span class="p">,</span> <span class="n">CF_energy</span><span class="p">,</span> 
+                              <span class="n">peak_frequency</span><span class="p">,</span> <span class="n">fm_energy</span><span class="p">,</span> <span class="n">fm_times</span><span class="p">,</span> <span class="n">fm_terminal_freqs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">msmts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;call_duration&#39;</span><span class="p">:[</span><span class="n">call_duration</span><span class="p">],</span>
+            <span class="s1">&#39;call_energy&#39;</span><span class="p">:[</span><span class="n">call_energy</span><span class="p">],</span>
+            <span class="s1">&#39;cf_energy&#39;</span><span class="p">:[</span><span class="n">CF_energy</span><span class="p">],</span>
+            <span class="s1">&#39;peak_frequency&#39;</span><span class="p">:[</span><span class="n">peak_frequency</span><span class="p">],</span>
+            <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">fm_time</span><span class="p">,</span> <span class="n">fm_tf</span><span class="p">,</span> <span class="n">fm_engy</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fm_times</span><span class="p">,</span> <span class="n">fm_terminal_freqs</span><span class="p">,</span> <span class="n">fm_energy</span><span class="p">):</span>
+        <span class="n">start_of_fm</span> <span class="o">=</span> <span class="n">fm_time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span> 
+        <span class="n">end_of_fm</span> <span class="o">=</span> <span class="n">fm_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span> 
+        <span class="c1"># whetehr upfm or downfm</span>
+        <span class="n">fm_type</span> <span class="o">=</span> <span class="n">which_fm_type</span><span class="p">(</span><span class="n">end_of_fm</span><span class="p">,</span> <span class="n">call_duration</span><span class="p">)</span>
+
+        <span class="n">msmts</span><span class="p">[</span><span class="n">fm_type</span><span class="o">+</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm_engy</span><span class="p">]</span>
+        <span class="n">msmts</span><span class="p">[</span><span class="n">fm_type</span><span class="o">+</span><span class="s1">&#39;terminal_frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm_tf</span><span class="p">]</span>
+        <span class="n">msmts</span><span class="p">[</span><span class="n">fm_type</span><span class="o">+</span><span class="s1">&#39;start_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_of_fm</span><span class="p">]</span>
+        <span class="n">msmts</span><span class="p">[</span><span class="n">fm_type</span><span class="o">+</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">end_of_fm</span><span class="p">]</span>
+
+    <span class="n">msmts</span><span class="p">[</span><span class="s1">&#39;cf_duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">infer_cf_duration</span><span class="p">(</span><span class="n">call_duration</span><span class="p">,</span> <span class="n">fm_times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">msmts</span><span class="p">[</span><span class="s1">&#39;cf_rms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">infer_cf_rms</span><span class="p">(</span><span class="n">CF_energy</span><span class="p">,</span> <span class="n">msmts</span><span class="p">[</span><span class="s1">&#39;cf_duration&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">measurements</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">msmts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">measurements</span></div>
+
+<div class="viewcode-block" id="infer_cf_duration"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_duration">[docs]</a><span class="k">def</span> <span class="nf">infer_cf_duration</span><span class="p">(</span><span class="n">call_duration</span><span class="p">,</span> <span class="n">fm_times</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This function works by assuming anythin that is not fm </span>
+<span class="sd">    in the call is cf. </span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">    </span>
+<span class="sd">        Duration_{CF call} = Duration_{whole call} - (Duration_{upFM}+ Duration_{downFM})</span>
+<span class="sd">    </span>
+<span class="sd">    This approach is necessary because it is easier to eliminate the CF part and find the</span>
+<span class="sd">    FM portions, than to eliminate the FM portions and find the CF parts. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    call_duration : float</span>
+<span class="sd">        Duration of whole call</span>
+<span class="sd">    fm_times : list</span>
+<span class="sd">        List with a pair of start and stop indices for each detected FM portion</span>
+<span class="sd">        fm_times can also be an empty list. </span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Frequency of sampling in Hz</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    cf_duration : float</span>
+<span class="sd">        Duration of CF part. See description above for how it is calcualted.     </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fm_durations</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fm_times</span><span class="p">]</span>
+    <span class="n">cf_duration</span> <span class="o">=</span> <span class="n">call_duration</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">fm_durations</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cf_duration</span></div>
+
+<div class="viewcode-block" id="infer_cf_rms"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_rms">[docs]</a><span class="k">def</span> <span class="nf">infer_cf_rms</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Calculates the CF portions rms using information on the amount of energy</span>
+<span class="sd">    and the duration of the CF segment. </span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">        CF_{rms} = \sqrt{\\frac{call_energy}{sampling \;rate \\times CF_{duration}}}</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+    
+
+<div class="viewcode-block" id="which_fm_type"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.which_fm_type">[docs]</a><span class="k">def</span> <span class="nf">which_fm_type</span><span class="p">(</span><span class="n">end_of_fm</span><span class="p">,</span> <span class="n">call_duration</span><span class="p">)</span>        <span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;figures out whether its an up or down fm &#39;&#39;&#39;</span>
+    <span class="k">if</span>  <span class="n">end_of_fm</span> <span class="o">&lt;=</span> <span class="n">call_duration</span><span class="o">*</span><span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">fm_type</span> <span class="o">=</span> <span class="s1">&#39;upfm_&#39;</span>
+    <span class="k">elif</span> <span class="n">end_of_fm</span> <span class="o">&gt;</span> <span class="n">call_duration</span><span class="o">*</span><span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">fm_type</span> <span class="o">=</span> <span class="s1">&#39;downfm_&#39;</span>
+    <span class="k">return</span> <span class="n">fm_type</span></div>
+
+
+<div class="viewcode-block" id="assemble_all_sound_segments"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_sound_segments">[docs]</a><span class="k">def</span> <span class="nf">assemble_all_sound_segments</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">nocf</span><span class="p">,</span> <span class="n">fm_segments</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">all_sounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">call</span><span class="p">,</span> <span class="n">nocf</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">eachfm</span> <span class="ow">in</span> <span class="n">fm_segments</span><span class="p">:</span>
+        <span class="n">all_sounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eachfm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_sounds</span></div>
+
+
+<div class="viewcode-block" id="get_FM_parts"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.get_FM_parts">[docs]</a><span class="k">def</span> <span class="nf">get_FM_parts</span><span class="p">(</span><span class="n">no_cf_call</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function which identifies and segments out FM parts. If there are no FM parts detected, </span>
+<span class="sd">    then an empty list is given out. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    no_cf_call : np.array</span>
+<span class="sd">        Audio segment with no Cf-frequency filtered out of it.     </span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Frequency of sampling in Hertz. </span>
+<span class="sd">    min_fm_duration: float&gt;0, optional</span>
+<span class="sd">        The lowest duration the FM part of a call can have. </span>
+<span class="sd">        Defaults to 0.001 seconds.</span>
+<span class="sd">    min_cf_duration : float&gt;0, optional</span>
+<span class="sd">        The minimum duration of the CF poertion in a call. </span>
+<span class="sd">        This duration is used to set the minimum distance</span>
+<span class="sd">        between two detected FM peaks in the no_cf_call. </span>
+<span class="sd">        Defaults to 0.010 seconds.                 </span>
+<span class="sd">    percentile_threshold: 100&gt;float&gt;0, optional</span>
+<span class="sd">        This sets the baseline rms threshold of the no_cf_call. </span>
+<span class="sd">        By default the 75th percentile value of the no_cf_call&#39;s </span>
+<span class="sd">        moving dB rms is used. </span>
+<span class="sd">        Defaults to 75.        </span>
+<span class="sd">    dB_above_threshold : float, optional </span>
+<span class="sd">        Adds dB_above_threshold dB&#39;s to the percentile threshold dB rms</span>
+<span class="sd">        Defaults to +3dB</span>
+<span class="sd">    fm_max_durn : float&gt;0, optional </span>
+<span class="sd">        Maximum possible duration of an FM part. </span>
+<span class="sd">        Defaults to 0.005 seconds. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    fm_segments : list</span>
+<span class="sd">        The segmented fm part/s as np.arrays. fm_parts can be empty </span>
+<span class="sd">        if no fm parts were detected, have one or two fm segments in ti. </span>
+<span class="sd">    fm_times : list</span>
+<span class="sd">        The start and stop indices of the segmented fm parts. The indices</span>
+<span class="sd">        are given assuming the audio is the same size as no_cf_call.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    -------</span>
+<span class="sd">    FMIdentificationError</span>
+<span class="sd">        When the FM segmentation isn&#39;t as clean as expected.Raised when there </span>
+<span class="sd">        are &gt;2 peaks detected in the no_cf_call. This is known to occur when</span>
+<span class="sd">        the no_cf_call is poorly filtered, thus leaving a lot of energy</span>
+<span class="sd">        in the CF part of the call. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span>
+    <span class="n">min_fm_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_fm_duration&#39;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">percentile_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;percentile_threshold&#39;</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span>
+    <span class="n">dB_above_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dB_above_threshold&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">min_cf_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_cf_duration&#39;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">fm_max_durn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fm_max_durn&#39;</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">)</span>
+    <span class="n">half_fm_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fm_max_durn</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    
+    
+    <span class="c1"># calcualte running rms and a pessimistic threshold to segment FM portions</span>
+    <span class="n">rms_over_call</span> <span class="o">=</span> <span class="n">moving_rms</span><span class="p">(</span><span class="n">no_cf_call</span><span class="p">,</span> <span class="n">windowsize</span><span class="o">=</span><span class="n">min_fm_duration</span><span class="p">)</span>
+    <span class="n">dB_rms_over_call</span> <span class="o">=</span> <span class="n">dB</span><span class="p">(</span><span class="n">rms_over_call</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">dB_rms_over_call</span><span class="p">,</span> <span class="n">percentile_threshold</span><span class="p">)</span>
+    <span class="n">pessimistic_threshold</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">+</span> <span class="n">dB_above_threshold</span>
+    
+    <span class="c1"># get samples aboe the pessimistic threshold</span>
+    <span class="n">samples_above_threshold</span> <span class="o">=</span> <span class="n">dB_rms_over_call</span> <span class="o">&gt;=</span> <span class="n">pessimistic_threshold</span>
+    <span class="n">signal_above_threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dB_rms_over_call</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">signal_above_threshold</span><span class="p">[</span><span class="n">samples_above_threshold</span><span class="p">]</span> <span class="o">=</span> <span class="n">rms_over_call</span><span class="p">[</span><span class="n">samples_above_threshold</span><span class="p">]</span>
+    
+    <span class="c1"># do peak detection on the parts that are above </span>
+    <span class="n">fm_peaks</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">indexes</span><span class="p">(</span><span class="n">signal_above_threshold</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">thres</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">min_cf_duration</span><span class="o">*</span><span class="n">fs</span><span class="p">))</span>
+    <span class="c1"># if &gt;2 peaks raise an error</span>
+    <span class="n">check_number_of_fmpeaks</span><span class="p">(</span><span class="n">fm_peaks</span><span class="p">)</span>
+
+    <span class="c1"># segment and check duration of fm. If it&#39;s too short discard it. </span>
+    <span class="n">fm_segments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fm_times</span> <span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">each_peak</span> <span class="ow">in</span> <span class="n">fm_peaks</span><span class="p">:</span>
+        <span class="n">broad_fm_section</span><span class="p">,</span> <span class="n">audio_startstop</span> <span class="o">=</span> <span class="n">take_segment_around_peak</span><span class="p">(</span><span class="n">no_cf_call</span><span class="p">,</span> <span class="n">each_peak</span><span class="p">,</span> <span class="n">half_fm_samples</span><span class="p">)</span>
+        <span class="n">fm_start</span><span class="p">,</span><span class="n">fm_stop</span> <span class="o">=</span> <span class="n">segment_sound_from_background</span><span class="p">(</span><span class="n">broad_fm_section</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">fm_duration</span> <span class="o">=</span> <span class="n">sound_duration</span><span class="p">(</span><span class="n">fm_start</span><span class="p">,</span><span class="n">fm_stop</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fm_duration</span> <span class="o">&gt;=</span> <span class="n">min_fm_duration</span><span class="p">:</span>
+            <span class="n">well_segmented_fm</span> <span class="o">=</span> <span class="n">broad_fm_section</span><span class="p">[</span><span class="n">fm_start</span><span class="p">:</span><span class="n">fm_stop</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">fm_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">well_segmented_fm</span><span class="p">)</span>
+            <span class="n">start_stop</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm_start</span> <span class="o">+</span> <span class="n">audio_startstop</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fm_start</span> <span class="o">+</span> <span class="n">audio_startstop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">well_segmented_fm</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+            <span class="n">fm_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_stop</span><span class="p">)</span>
+    
+    
+    <span class="k">return</span> <span class="n">fm_segments</span><span class="p">,</span> <span class="n">fm_times</span></div>
+
+<div class="viewcode-block" id="check_number_of_fmpeaks"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.check_number_of_fmpeaks">[docs]</a><span class="k">def</span> <span class="nf">check_number_of_fmpeaks</span><span class="p">(</span><span class="n">fmpeaks</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fmpeaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fmpeaks</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">FMIdentificationError</span><span class="p">(</span><span class="s1">&#39;Too many FM peaks detected, aborting call processing..&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sound_duration"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.sound_duration">[docs]</a><span class="k">def</span> <span class="nf">sound_duration</span><span class="p">(</span><span class="n">start_sample</span><span class="p">,</span> <span class="n">end_sample</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    fs </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">num_samples</span> <span class="o">=</span> <span class="n">end_sample</span><span class="o">-</span><span class="n">start_sample</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">num_samples</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">duration</span></div>
+
+
+
+<div class="viewcode-block" id="take_segment_around_peak"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.take_segment_around_peak">[docs]</a><span class="k">def</span> <span class="nf">take_segment_around_peak</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="n">samples_LR_of_peak</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">peak</span><span class="o">-</span><span class="n">samples_LR_of_peak</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="n">peak</span><span class="o">+</span><span class="n">samples_LR_of_peak</span>
+    
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">if</span> <span class="n">stop</span> <span class="o">&gt;</span> <span class="n">audio</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">audio</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span>
+    
+    <span class="n">segment_around_peak</span> <span class="o">=</span> <span class="n">audio</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">segment_around_peak</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span><span class="n">stop</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="get_terminal_frequency"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.get_terminal_frequency">[docs]</a><span class="k">def</span> <span class="nf">get_terminal_frequency</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Gives the -XdB frequency from the peak. </span>
+
+<span class="sd">    The power spectrum is calculated and smoothened over 3 frequency bands to remove</span>
+<span class="sd">    complex comb-like structures. </span>
+<span class="sd">    </span>
+<span class="sd">    Then the lowest frequency below XdB from the peak is returned. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Sampling rate in Hz</span>
+<span class="sd">    threshold : float, optional</span>
+<span class="sd">        The terminal frequency is calculated based on finding the level of the peak frequency</span>
+<span class="sd">        and choosing the lowest frequency which is -10 dB (20log10) below the peak level. </span>
+<span class="sd">        Defaults to -10 dB</span>
+
+<span class="sd">    Returns </span>
+<span class="sd">    ---------</span>
+<span class="sd">    terminal_frequency       </span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Careful about setting threshold too low - it might lead to output of terminal</span>
+<span class="sd">    frequencies that are actually in the noise, and not part of the signal itself. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">power_spectrum</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span>  <span class="o">=</span> <span class="n">get_power_spectrum</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span>
+    <span class="c1"># smooth the power spectrum over 3 frequency bands to remove &#39;comb&#39;-iness in the spectrum</span>
+    <span class="n">smooth_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">power_spectrum</span><span class="o">/</span><span class="mf">20.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+    <span class="n">smooth_power_spectrum</span> <span class="o">=</span> <span class="n">dB</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">smooth_spectrum</span><span class="p">))</span>
+
+    <span class="n">peak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">smooth_power_spectrum</span><span class="p">)</span>
+    <span class="n">geq_threshold</span> <span class="o">=</span> <span class="n">smooth_power_spectrum</span> <span class="o">&gt;=</span> <span class="n">peak</span> <span class="o">+</span> <span class="n">threshold</span>
+    <span class="n">all_frequencies_above_threshold</span> <span class="o">=</span> <span class="n">freqs</span><span class="p">[</span><span class="n">geq_threshold</span><span class="p">]</span>
+
+    <span class="n">terminal_frequency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">all_frequencies_above_threshold</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terminal_frequency</span></div>
+  
+<div class="viewcode-block" id="make_overview_figure"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.make_overview_figure">[docs]</a><span class="k">def</span> <span class="nf">make_overview_figure</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">sounds</span><span class="p">,</span> <span class="n">msmts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span>
+    <span class="n">fftsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fftsize&#39;</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+    <span class="n">dyn_range</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dyn_range&#39;</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+    
+
+    <span class="n">dyn_vmin</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span> <span class="o">-</span> <span class="n">dyn_range</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">231</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Oscillogram&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;whole call&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;non CF&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">232</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Manual selection&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">NFFT</span><span class="o">=</span><span class="n">fftsize</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">fftsize</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">dyn_vmin</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">233</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Fine selection of call&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">NFFT</span><span class="o">=</span><span class="n">fftsize</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">fftsize</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">dyn_vmin</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">labelright</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">)</span>
+    <span class="c1"># show CF peak frequency</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">msmts</span><span class="p">[</span><span class="s1">&#39;peak_frequency&#39;</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="n">sounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">fs</span><span class="p">),</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> 
+               <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="c1"># show FM sections along with the terminal frequencies</span>
+    <span class="k">for</span> <span class="n">fm_start</span><span class="p">,</span> <span class="n">fm_end</span> <span class="ow">in</span> <span class="p">[</span> <span class="p">(</span><span class="s1">&#39;downfm_start_time&#39;</span><span class="p">,</span> <span class="s1">&#39;downfm_end_time&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;upfm_start_time&#39;</span><span class="p">,</span><span class="s1">&#39;upfm_end_time&#39;</span><span class="p">)]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">([</span><span class="n">msmts</span><span class="p">[</span><span class="n">fm_start</span><span class="p">],</span><span class="n">msmts</span><span class="p">[</span><span class="n">fm_end</span><span class="p">]],</span> <span class="mi">50000</span><span class="p">,</span> <span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span><span class="s1">&#39;r&#39;</span> <span class="p">)</span>
+            <span class="n">terminal_frequency</span> <span class="o">=</span> <span class="n">fm_start</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_terminal_frequency&#39;</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">msmts</span><span class="p">[</span><span class="n">terminal_frequency</span><span class="p">],</span><span class="n">msmts</span><span class="p">[</span><span class="n">fm_start</span><span class="p">],</span><span class="n">msmts</span><span class="p">[</span><span class="n">fm_end</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+           
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">234</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Non-CF call&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">NFFT</span><span class="o">=</span><span class="n">fftsize</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">fftsize</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">dyn_vmin</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">235</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;First FM&#39;</span><span class="p">)</span>
+    <span class="c1"># plot FM with 0.5*fftsize</span>
+    <span class="n">half_winsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fftsize</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">NFFT</span><span class="o">=</span><span class="n">half_winsize</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">half_winsize</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">dyn_vmin</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">236</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Second FM&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">sounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">NFFT</span><span class="o">=</span><span class="n">half_winsize</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="n">half_winsize</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">dyn_vmin</span><span class="p">);</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">labelright</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="FMIdentificationError"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.FMIdentificationError">[docs]</a><span class="k">class</span> <span class="nc">FMIdentificationError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="BackgroundSegmentationError"><a class="viewcode-back" href="../../source/measure_CF_calls.html#measure_CF_calls.measure_single_horseshoe_bat_call.BackgroundSegmentationError">[docs]</a><span class="k">class</span> <span class="nc">BackgroundSegmentationError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+    
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Thejasvi Beleyur.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,616 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>measure_CF_calls package &#8212; measure CF calls 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="measure-cf-calls-package">
+<h1>measure_CF_calls package<a class="headerlink" href="#measure-cf-calls-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-measure_CF_calls.measure_single_horseshoe_bat_call">
+<span id="measure-cf-calls-measure-single-horseshoe-bat-call-module"></span><h2>measure_CF_calls.measure_single_horseshoe_bat_call module<a class="headerlink" href="#module-measure_CF_calls.measure_single_horseshoe_bat_call" title="Permalink to this headline">¶</a></h2>
+<p>Module that segments and measures
+parts of a horseshoebat CF call</p>
+<p>Created on Sun Feb  9 18:11:16 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="exception">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.BackgroundSegmentationError">
+<em class="property">exception </em><code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">BackgroundSegmentationError</code><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#BackgroundSegmentationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.BackgroundSegmentationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.ValueError</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.FMIdentificationError">
+<em class="property">exception </em><code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">FMIdentificationError</code><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#FMIdentificationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.FMIdentificationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions.ValueError</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_measurements">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">assemble_all_measurements</code><span class="sig-paren">(</span><em>call_duration</em>, <em>call_energy</em>, <em>CF_energy</em>, <em>peak_frequency</em>, <em>fm_energy</em>, <em>fm_times</em>, <em>fm_terminal_freqs</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#assemble_all_measurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_measurements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_sound_segments">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">assemble_all_sound_segments</code><span class="sig-paren">(</span><em>call</em>, <em>nocf</em>, <em>fm_segments</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#assemble_all_sound_segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.assemble_all_sound_segments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.calc_energy">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">calc_energy</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#calc_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.calc_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.calc_sound_borders">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">calc_sound_borders</code><span class="sig-paren">(</span><em>audio</em>, <em>percentile=99</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#calc_sound_borders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.calc_sound_borders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the start and stop of a sound based on the percentile
+cumulative energy values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – Value between 100 and 0. The sound border is calcualted
+as the border which encapsulates the percentile of energy
+Defaults to 99.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>start, end</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.check_number_of_fmpeaks">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">check_number_of_fmpeaks</code><span class="sig-paren">(</span><em>fmpeaks</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#check_number_of_fmpeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.check_number_of_fmpeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.dB">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">dB</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#dB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.dB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the 20log of X</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.get_FM_parts">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">get_FM_parts</code><span class="sig-paren">(</span><em>no_cf_call</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#get_FM_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.get_FM_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which identifies and segments out FM parts. If there are no FM parts detected,
+then an empty list is given out.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>no_cf_call</strong> (<em>np.array</em>) – Audio segment with no Cf-frequency filtered out of it.</li>
+<li><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hertz.</li>
+<li><strong>min_fm_duration</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – The lowest duration the FM part of a call can have.
+Defaults to 0.001 seconds.</li>
+<li><strong>min_cf_duration</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – The minimum duration of the CF poertion in a call.
+This duration is used to set the minimum distance
+between two detected FM peaks in the no_cf_call.
+Defaults to 0.010 seconds.</li>
+<li><strong>percentile_threshold</strong> (<em>100&gt;float&gt;0</em><em>, </em><em>optional</em>) – This sets the baseline rms threshold of the no_cf_call.
+By default the 75th percentile value of the no_cf_call’s
+moving dB rms is used.
+Defaults to 75.</li>
+<li><strong>dB_above_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Adds dB_above_threshold dB’s to the percentile threshold dB rms
+Defaults to +3dB</li>
+<li><strong>fm_max_durn</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – Maximum possible duration of an FM part.
+Defaults to 0.005 seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>fm_segments</strong> (<em>list</em>) – The segmented fm part/s as np.arrays. fm_parts can be empty
+if no fm parts were detected, have one or two fm segments in ti.</li>
+<li><strong>fm_times</strong> (<em>list</em>) – The start and stop indices of the segmented fm parts. The indices
+are given assuming the audio is the same size as no_cf_call.</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#measure_CF_calls.measure_single_horseshoe_bat_call.FMIdentificationError" title="measure_CF_calls.measure_single_horseshoe_bat_call.FMIdentificationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FMIdentificationError</span></code></a> – When the FM segmentation isn’t as clean as expected.Raised when there
+are &gt;2 peaks detected in the no_cf_call. This is known to occur when
+the no_cf_call is poorly filtered, thus leaving a lot of energy
+in the CF part of the call.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.get_peak_frequency">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">get_peak_frequency</code><span class="sig-paren">(</span><em>audio</em>, <em>fs=250000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#get_peak_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.get_peak_frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.get_power_spectrum">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">get_power_spectrum</code><span class="sig-paren">(</span><em>audio</em>, <em>fs=250000.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#get_power_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.get_power_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates an RFFT of the audio.
+:param audio:
+:type audio: np.array
+:param fs: Frequency of sampling in Hz
+:type fs: int</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>dB_power_spectrum</strong> (<em>np.array</em>) – dB(power_spectrum)</li>
+<li><strong>freqs</strong> (<em>np.array</em>) – Centre frequencies of the RFFT.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.get_robust_peak_frequency">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">get_robust_peak_frequency</code><span class="sig-paren">(</span><em>audio</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#get_robust_peak_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.get_robust_peak_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a spectrogram from the audio
+and calcualtes the peak frequency by averaging
+each slice of the spectrogram’s FFT’s.</p>
+<p>This ‘smooths’ out the structure of the power
+spectrum and allows a single and clear peak
+detection.</p>
+<p>Thanks to Holger Goerlitz for the suggestion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>fs</strong> (<em>float</em>) – Frequency of sampling in Hz</li>
+<li><strong>seg_length</strong> (<em>int</em><em>, </em><em>optional</em>) – The size of the FFt window used to calculate the moving FFT slices.
+DEfaults to 256</li>
+<li><strong>noverlap</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of samples overlapping between one FFT slice and the next.
+Defaults to seg_length -1</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>peak_frequency</strong> – Frequency with highest power in the audio in Hz.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.get_terminal_frequency">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">get_terminal_frequency</code><span class="sig-paren">(</span><em>audio</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#get_terminal_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.get_terminal_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the -XdB frequency from the peak.</p>
+<p>The power spectrum is calculated and smoothened over 3 frequency bands to remove
+complex comb-like structures.</p>
+<p>Then the lowest frequency below XdB from the peak is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</li>
+<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The terminal frequency is calculated based on finding the level of the peak frequency
+and choosing the lowest frequency which is -10 dB (20log10) below the peak level.
+Defaults to -10 dB</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">terminal_frequency</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Careful about setting threshold too low - it might lead to output of terminal
+frequencies that are actually in the noise, and not part of the signal itself.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_duration">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">infer_cf_duration</code><span class="sig-paren">(</span><em>call_duration</em>, <em>fm_times</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#infer_cf_duration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function works by assuming anythin that is not fm
+in the call is cf.</p>
+<div class="math notranslate nohighlight">
+\[Duration_{CF call} = Duration_{whole call} - (Duration_{upFM}+ Duration_{downFM})\]</div>
+<p>This approach is necessary because it is easier to eliminate the CF part and find the
+FM portions, than to eliminate the FM portions and find the CF parts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>call_duration</strong> (<em>float</em>) – Duration of whole call</li>
+<li><strong>fm_times</strong> (<em>list</em>) – List with a pair of start and stop indices for each detected FM portion
+fm_times can also be an empty list.</li>
+<li><strong>fs</strong> (<em>float</em>) – Frequency of sampling in Hz</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cf_duration</strong> – Duration of CF part. See description above for how it is calcualted.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_rms">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">infer_cf_rms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#infer_cf_rms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.infer_cf_rms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the CF portions rms using information on the amount of energy
+and the duration of the CF segment.</p>
+<div class="math notranslate nohighlight">
+\[CF_{rms} = \sqrt{\frac{call_energy}{sampling \;rate \times CF_{duration}}}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.make_one_CFcall">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">make_one_CFcall</code><span class="sig-paren">(</span><em>call_durn</em>, <em>fm_durn</em>, <em>cf_freq</em>, <em>fs</em>, <em>call_shape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#make_one_CFcall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.make_one_CFcall" title="Permalink to this definition">¶</a></dt>
+<dd><p>A test function used to check how well the segmenting+measurement
+functions in the module work.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>call_durn</strong> (<em>float</em>) – </li>
+<li><strong>fm_durn</strong> (<em>float</em>) – </li>
+<li><strong>cf_freq</strong> (<em>float</em>) – </li>
+<li><strong>fs</strong> (<em>float</em>) – </li>
+<li><strong>call_shape</strong> (<em>str</em>) – One of either ‘staplepin’ OR ‘rightangle’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>cfcall</strong> – The synthesised call.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">np.array</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> – If a call_shape that is not  ‘staplepin’ OR ‘rightangle’ is given</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This is not really the besssst kind of CF call to test the functions on,
+but it works okay. The CF call is made by using the poly spline function
+and this leads to weird jumps in frequency especially around the CF-FM
+junctions. Longish calls with decently long FM parts look fine, but calls
+with very short FM parts lead to rippling of the frequency.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.make_overview_figure">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">make_overview_figure</code><span class="sig-paren">(</span><em>audio</em>, <em>sounds</em>, <em>msmts</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#make_overview_figure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.make_overview_figure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.measure_hbc_call">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">measure_hbc_call</code><span class="sig-paren">(</span><em>audio</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#measure_hbc_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.measure_hbc_call" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>fs</strong> (<em>float&gt;0.</em>) – Frequency of sampling in Hz.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
+<li><p class="first"><strong>measurements</strong> (<em>pd.DataFrame</em>) – With the following columns and entries
+call_duration : float&gt;0</p>
+<blockquote>
+<div><p>The duration of the entire call</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>call_energy <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">Eenrgy in the whole call.</p>
+</dd>
+<dt>FM_energy <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">The energy of the FM portion/s. This is the energy in the call
+post CF removal.</p>
+</dd>
+<dt>CF_energy <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">Energy in the CF component. This is calculated by subtracting the
+whole calls energy from the energy remaining post CF removal.</p>
+</dd>
+<dt>CF_duration <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">Duration of whole call in seconds.</p>
+</dd>
+<dt>FM_duration <span class="classifier-delimiter">:</span> <span class="classifier">array, list-like</span></dt>
+<dd><p class="first last">Duration of the FM portions. if there are up and down FM sweeps, then
+two values are returned.</p>
+</dd>
+<dt>peak_CF <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">The peak CF in Hz</p>
+</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">FM_terminal_</span></a>-10dB <span class="classifier-delimiter">:</span> <span class="classifier">float&gt;0</span></dt>
+<dd><p class="first last">The terminal frequency of the FM. The Cf component of a call
+is notch filtered out, and the FM part/s are left. The
+FM parts are then isolated and their power spectrum is calculated.
+The terminal frequency is the lowest frequency that is -10dB
+from the peak of the power spectrum.</p>
+</dd>
+<dt>FM_times <span class="classifier-delimiter">:</span> <span class="classifier">nFM x 2 np.array</span></dt>
+<dd><p class="first last">Start and end times for the detected FM sweep/s.
+One row is one FM sweep.</p>
+</dd>
+<dt>CF_times <span class="classifier-delimiter">:</span> <span class="classifier">1x2 np.array</span></dt>
+<dd><p class="first last">1 entry with start and end time.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><em>sound_segments</em> –</p>
+<dl class="docutils">
+<dt>call <span class="classifier-delimiter">:</span> <span class="classifier">np.array.</span></dt>
+<dd><p class="first last">A slightly narrower selection of the audio with 99% of the audio’s energy
+in it.</p>
+</dd>
+<dt>nocf_call <span class="classifier-delimiter">:</span> <span class="classifier">np.array.</span></dt>
+<dd><p class="first last">The call without the CF segment in it.</p>
+</dd>
+<dt>fm_segments: np.array</dt>
+<dd><p class="first last">One or two extracted FM segments.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.moving_rms">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">moving_rms</code><span class="sig-paren">(</span><em>X</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#moving_rms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.moving_rms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates moving rms of a signal with given window size.
+Outputs np.array of <em>same</em> size as X. The rms of the
+last few samples &lt;= window_size away from the end are assigned
+to last full-window rms calculated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>np.array</em>) – Signal of interest.</li>
+<li><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Defaults to 125 samples.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>all_rms</strong> – Moving rms of the signal.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.remove_frequency">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">remove_frequency</code><span class="sig-paren">(</span><em>audio</em>, <em>target_frequency</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#remove_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.remove_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>target_frequency</strong> (<em>float</em>) – Frequency component to be filtered out from audio in Hz.</li>
+<li><strong>fs</strong> (<em>float</em>) – Sampling frequency in Hz.</li>
+<li><strong>q_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – q_factor of the notch filter. See signal.iirnotch for more details.
+Defaults to 1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>filtered_audio</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>It may seem like setting a higher q_factor is better to remove the Cf. This is not true in
+my experience. A higher q-factor leads to a very narrow filtering, which can leave a lot of
+energy remaining in the CF part - even though the target_frequency per se is filtered out.</p>
+<p>The CF part of a horseshoe bat call is not like a synthetised pure tone - it might have
+a broader bandwidth. To effectively remove the CF part of a call lower may be better!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.rms">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">rms</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#rms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.rms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.segment_sound_from_background">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">segment_sound_from_background</code><span class="sig-paren">(</span><em>audio</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#segment_sound_from_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.segment_sound_from_background" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects the sound from an audio clip when the majority of the
+clip is background, and the sound of interest only ocuppies a small
+region of it.</p>
+<p>Here a 95% energy window (as used in calc_sound_borders) will fail as it will lead
+to extremely generous start-stop windows - and include a lot of the background.</p>
+<p>The moving dB rms of the audio clip is calcualted and portions of the audio clip
+3dB above threshold dB rms are considered the signal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>audio</strong> (<em>np.array</em>) – </li>
+<li><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Window size for moving rms calcualtions.
+Defaults to 125 samples.</li>
+<li><strong>background_percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – A value between 0 and 100 indicating what percentile of the
+audio is generally expected to be background.
+Defaults to 50.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>start, stop</strong> – Start and stop indices of the sound in the audio clip.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">int</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#measure_CF_calls.measure_single_horseshoe_bat_call.BackgroundSegmentationError" title="measure_CF_calls.measure_single_horseshoe_bat_call.BackgroundSegmentationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">BackgroundSegmentationError</span></code></a> – If there are no samples +3dB above the background_percentile
+dB rms in the signal. This means the input signal is very uniform
+in dB rms, and there is either no signal, or very
+little background in the audio. This issue can be solved by
+choosing a more generous selection of the input audio clip.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>At this point, a +3dB threshold is implemented to keep things
+simple. Future releases should look into making this a variable</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.sound_duration">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">sound_duration</code><span class="sig-paren">(</span><em>start_sample</em>, <em>end_sample</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#sound_duration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.sound_duration" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>fs</strong> – </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.take_segment_around_peak">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">take_segment_around_peak</code><span class="sig-paren">(</span><em>audio</em>, <em>peak</em>, <em>samples_LR_of_peak</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#take_segment_around_peak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.take_segment_around_peak" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_CF_calls.measure_single_horseshoe_bat_call.which_fm_type">
+<code class="descclassname">measure_CF_calls.measure_single_horseshoe_bat_call.</code><code class="descname">which_fm_type</code><span class="sig-paren">(</span><em>end_of_fm</em>, <em>call_duration</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/measure_CF_calls/measure_single_horseshoe_bat_call.html#which_fm_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_CF_calls.measure_single_horseshoe_bat_call.which_fm_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>figures out whether its an up or down fm</p>
+</dd></dl>
+
+</div>
+<div class="section" id="measure-cf-calls-tests-module">
+<h2>measure_CF_calls.tests module<a class="headerlink" href="#measure-cf-calls-tests-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-measure_CF_calls">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-measure_CF_calls" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">measure_CF_calls package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-measure_CF_calls.measure_single_horseshoe_bat_call">measure_CF_calls.measure_single_horseshoe_bat_call module</a></li>
+<li><a class="reference internal" href="#measure-cf-calls-tests-module">measure_CF_calls.tests module</a></li>
+<li><a class="reference internal" href="#module-measure_CF_calls">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/measure_CF_calls.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Thejasvi Beleyur.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/source/measure_CF_calls.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
