@@ -1,5 +1,5 @@
 
-![](measure_CF_calls_logo.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/master/measure_CF_calls_logo.png)
 
 # measure horseshoe bat calls
 A package to automate measurements of Horseshoe bat calls - (or any similar sound!). The package is still under development - I would greatly appreciate any kind of feedback on how/whether it works on your data!
@@ -92,7 +92,7 @@ plt.specgram(one_call_bandpassed, Fs=fs, NFFT=256);
 ```
 
 
-![png](output_5_0.png)
+![png](https://github.com/thejasvibr/measure_horseshoe_bat_calls/master/output_5_0.png)
 
 
 Now, let's pass this audio snippet into the ```measure_hbc_call``` function:
@@ -114,7 +114,7 @@ make_overview_figure(one_call_bandpassed, sounds, measurements, fs=250000, dyn_r
 
 
 
-![png](output_8_1.png)
+![png](https://github.com/thejasvibr/measure_horseshoe_bat_calls/master/output_8_1.png)
 
 
 ### The overview figure and its subplots:
@@ -174,7 +174,7 @@ plt.plot(fm_descending)
 
 
 
-![png](output_13_1.png)
+![png](https://github.com/thejasvibr/measure_horseshoe_bat_calls/master/output_13_1.png)
 
 
 
