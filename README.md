@@ -2,7 +2,7 @@
 
 
 # measure_horseshoe_bat_calls
-A package to automate measurements of Horseshoe bat calls - (or any similar sound!).
+A package to automate measurements of Horseshoe bat calls - (or any similar sound!). The package is still under development - I would greatly appreciate any kind of feedback on how/whether it works on your data!
 
 ### What is a horseshoe bat call?
 Horseshoe bats are a group of echolocating bat that emit calls that look like full or half staple pins. The logo above is a schematic spectrogram of a staplepin type call with the associated measures this package provides. 
