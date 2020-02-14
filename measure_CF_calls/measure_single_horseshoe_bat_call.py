@@ -364,6 +364,7 @@ def measure_hbc_call(audio, **kwargs):
     # narrow down the audio clip even more to extract exactly the sound
     call_window = calc_sound_borders(audio, 95) 
     call = audio[call_window[0]:call_window[1]]
+    call_rms = rms(call)
     
     # call duration of the entire call
     call_duration = call.size/float(kwargs['fs'])
@@ -391,7 +392,8 @@ def measure_hbc_call(audio, **kwargs):
         fm_energy = [np.nan, np.nan]
         fm_rms = [np.nan, np.nan]
 
-    measurements = assemble_all_measurements(call_duration, call_energy, CF_energy,peak_frequency,
+    measurements = assemble_all_measurements(call_duration, call_energy, call_rms, 
+                                             CF_energy,peak_frequency,
                                              fm_energy, fm_times, fm_terminal_freqs,
                                              fm_rms, **kwargs)
    
@@ -399,13 +401,14 @@ def measure_hbc_call(audio, **kwargs):
 
     return sound_segments, measurements
 
-def assemble_all_measurements(call_duration, call_energy, CF_energy, 
+def assemble_all_measurements(call_duration, call_energy, call_rms, CF_energy, 
                               peak_frequency, fm_energy, fm_times, fm_terminal_freqs,
                               fm_rms, **kwargs):
     '''
     '''
     msmts = {'call_duration':[call_duration],
             'call_energy':[call_energy],
+            'call_rms':[call_rms],
             'cf_energy':[CF_energy],
             'peak_frequency':[peak_frequency],
             }
