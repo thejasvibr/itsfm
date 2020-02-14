@@ -1,4 +1,4 @@
-![](measure_CF_calls_logo.png
+![](measure_CF_calls_logo.png)
 
 
 # measure_horseshoe_bat_calls
