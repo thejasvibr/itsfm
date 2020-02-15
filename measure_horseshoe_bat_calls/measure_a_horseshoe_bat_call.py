@@ -21,9 +21,11 @@ def dB(X):
     return 20*np.log10(X)
 
 def rms(X):
+    '''Root mean square of a signal '''
     return np.sqrt(np.mean(X**2.0))
 
 def calc_energy(X):
+    '''Sum of all squared samples '''
     return np.sum(X**2.0)
 
 def get_power_spectrum(audio, fs=250000.0):
@@ -107,7 +109,11 @@ def get_robust_peak_frequency(audio, **kwargs):
     return peak_frequency
     
 def remove_frequency(audio, target_frequency, **kwargs):
-    '''
+    '''Implements an IIR Notch filter to get rid of the target frequency. 
+    TODO:
+    1) convert from IIR notch filter to an FIR filter.
+    The IIR filter causes wird boundary effects. 
+
     Parameters
     -----------
     audio : np.array
@@ -149,7 +155,7 @@ def get_peak_frequency(audio, fs=250000):
 
 
 ## from the make_CF_training_data module
-def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape):
+def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
     '''A test function used to check how well the segmenting+measurement
     functions in the module work. 
     
@@ -161,6 +167,8 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape):
     fs : float
     call_shape : str
         One of either 'staplepin' OR 'rightangle'
+    fm_bandwidth : float, optional
+        FM bandwidth in Hz.
 
     Returns
     --------
@@ -181,8 +189,8 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape):
     with very short FM parts lead to rippling of the frequency. 
     '''
     # choose an Fm start/end fr equency :
-    FM_bandwidth= xrange(5,25)
-    fm_bw = np.random.choice(FM_bandwidth, 1)*10.0**3
+    FM_bandwidth = np.arange(2,20)
+    fm_bw = kwargs.get('fm_bandwidth', np.random.choice(FM_bandwidth, 1)*10.0**3)
     start_f = cf_freq - fm_bw
     # 
     polynomial_num = 25
@@ -212,7 +220,7 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape):
     #windowing = np.random.choice(['hann', 'nuttall', 'bartlett','boxcar'], 1)[0]
     windowing= 'boxcar'
     cfcall *= signal.get_window(windowing, cfcall.size)
-    return(cfcall)
+    return cfcall
 
 
 def moving_rms(X, **kwargs):
@@ -311,13 +319,45 @@ def segment_sound_from_background(audio, **kwargs):
 
 
 def measure_hbc_call(audio, **kwargs):
-    '''
+    '''Segments and measures a horseshoe bat call 
     
     Parameters
     ----------
     audio : np.array
     fs : float>0.
          Frequency of sampling in Hz.
+    seg_length : int, optional
+        See get_robus_peak_frequency. 
+        DEfaults to 256
+    noverlap : int, optional 
+        See get_robust_peak_frequency
+        The number of samples overlapping between one FFT slice and the next. 
+        Defaults to seg_length -1
+    q_factor : float, optional. 
+        The width of the IIR notch filtering. 
+        See remove_frequency.
+        Defaults to 1.0.
+    min_fm_duration: float>0, optional
+        The lowest duration the FM part of a call can have. 
+        Defaults to 0.001 seconds.
+    min_cf_duration : float>0, optional
+        The minimum duration of the CF poertion in a call. 
+        This duration is used to set the minimum distance
+        between two detected FM peaks in the no_cf_call. 
+        Defaults to 0.010 seconds.                 
+    percentile_threshold: 100>float>0, optional
+        This sets the baseline rms threshold of the no_cf_call. 
+        By default the 75th percentile value of the no_cf_call's 
+        moving dB rms is used. 
+        Defaults to 75.        
+    dB_above_threshold : float, optional 
+        Adds dB_above_threshold dB's to the percentile threshold dB rms
+        Defaults to +3dB
+    fm_max_durn : float>0, optional 
+        Maximum possible duration of an FM part. 
+        Defaults to 0.005 seconds. 
+    
+    
 
     Returns
     --------   
@@ -471,7 +511,7 @@ def infer_cf_rms(cf_energy, cf_duration, **kwargs):
     
     Parameters
     -----------
-    cf_energy:
+    wcf_energy:
         CF energy, which is the sum of all squared values of the CF
     cf_duration : float
         CF duration in seconds
@@ -532,6 +572,10 @@ def get_FM_parts(no_cf_call,**kwargs):
     fm_max_durn : float>0, optional 
         Maximum possible duration of an FM part. 
         Defaults to 0.005 seconds. 
+    threshold : float, optional
+        The terminal frequency is calculated based on finding the level of the peak frequency
+        and choosing the lowest frequency which is -10 dB (20log10) below the peak level. 
+        Defaults to -10 dB
 
     Returns
     --------
