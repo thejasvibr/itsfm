@@ -220,6 +220,7 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
     #windowing = np.random.choice(['hann', 'nuttall', 'bartlett','boxcar'], 1)[0]
     windowing= 'boxcar'
     cfcall *= signal.get_window(windowing, cfcall.size)
+    cfcall *= signal.tukey(cfcall.size, 0.05)
     return cfcall
 
 
@@ -465,6 +466,7 @@ def assemble_all_measurements(call_duration, call_energy, call_rms, CF_energy,
         msmts[fm_type+'start_time'] = [start_of_fm]
         msmts[fm_type+'end_time'] = [end_of_fm]
         msmts[fm_type+'rms'] = [eachfm_rms]
+        msmts[fm_type+'duration'] = [end_of_fm-start_of_fm]
 
     msmts['cf_duration'] = infer_cf_duration(call_duration, fm_times, **kwargs)
     msmts['cf_rms'] = infer_cf_rms(CF_energy, msmts['cf_duration'], **kwargs)
