@@ -249,16 +249,65 @@ def moving_rms(X, **kwargs):
     valid = stops<X.size
     valid_starts = np.int32(starts[valid])
     valid_stops = np.int32(stops[valid])
-    all_rms = np.ones(X.size).reshape(-1,1)
+    all_rms = np.ones(X.size).reshape(-1,1)*999
 
     for i, (start, stop) in enumerate(zip(valid_starts, valid_stops)):
         rms_value = rms(X[start:stop])
         all_rms[i] = rms_value
     
     # replace all un-assigned samples with the last rms value
-    all_rms[all_rms==1] = rms_value
+    all_rms[all_rms==999] = np.nan
 
     return all_rms
+
+
+def moving_rms_edge_robust(X, **kwargs):
+    '''Calculates moving rms of a signal with given window size. 
+    Outputs np.array of *same* size as X. This version is robust 
+    and doesn't suffer from edge effects as it calculates the 
+    moving rms in both forward and backward directions
+    and calculates a consensus moving rms profile.
+    
+    The consensus rms profile is basically achieved by 
+    taking the left half of the forward rms profile 
+    and concatenating it with the right hald of the
+    backward passed rms profile. 
+    
+    Parameters
+    ----------
+    X :  np.array
+        Signal of interest. 
+
+    window_size : int, optional
+                 Defaults to 125 samples. 
+
+    Returns
+    -------
+    all_rms : np.array
+        Moving rms of the signal.
+
+    Notes
+    -----
+    moving_rms_edge_robust may not be too accurate when the rms
+    is expected to vary over short time scales in the centre of 
+    the signal!! 
+    '''
+
+    forward_run = moving_rms(X, **kwargs)
+    backward_run = np.flip(moving_rms(np.flip(X), **kwargs))
+    consensus = form_consensus_moving_rms(forward_run, backward_run)
+    return consensus
+
+
+def form_consensus_moving_rms(forward, backward):
+    '''
+    '''
+    half_samples = int(forward.size/2.0)
+    
+    consensus_rms = np.concatenate((forward[:half_samples], 
+                                    backward[half_samples:]))
+
+    return consensus_rms
 
 def segment_sound_from_background(audio, **kwargs):
     '''Selects the sound from an audio clip when the majority of the 
