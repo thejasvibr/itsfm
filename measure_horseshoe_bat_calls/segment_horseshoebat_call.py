@@ -31,6 +31,11 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
         max normalised dB rms profile of the highpassed filtered
         call (cf dominant). The second array has the max normalised
         dB rms profile of the  lowpassed filtered call (fm dominant).
+    
+    Notes
+    ------
+    For more information on how to handle/improve the segmentation see
+    documentation for pre_process_for_segmentation
     '''
     cf_dbrms, fm_dbrms = pre_process_for_segmentation(call, fs, **kwargs)
     cf_samples, fm_samples, info = segment_cf_and_fm(cf_dbrms, fm_dbrms)
@@ -113,8 +118,6 @@ def identify_valid_regions(condition_satisfied, num_expected_regions=1):
     valid_regions[valid_samples] = True
     
     return valid_regions
-        
-
 
 def identify_maximum_contiguous_regions(condition_satisfied, number_regions_of_interest=1):
     '''Given a Boolean array - this function identifies regions of contiguous samples that

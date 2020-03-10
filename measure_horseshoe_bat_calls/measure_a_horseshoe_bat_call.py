@@ -220,7 +220,7 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
     #windowing = np.random.choice(['hann', 'nuttall', 'bartlett','boxcar'], 1)[0]
     windowing= 'boxcar'
     cfcall *= signal.get_window(windowing, cfcall.size)
-    cfcall *= signal.tukey(cfcall.size, 0.05)
+    cfcall *= signal.tukey(cfcall.size, 0.01)
     return cfcall
 
 

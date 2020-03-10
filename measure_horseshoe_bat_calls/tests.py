@@ -127,8 +127,11 @@ class TestIdentifyContiguousRegions(unittest.TestCase):
         self.assertTrue(np.array_equal(obtained_regions_and_counts, expected))
 
 
-class check_accuracy_of_cffm(unittest.TestCase):
+class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
+    '''Make sure that the accuracy of 
+    FM and CF segmentation is within +/- 2.5 dB (1.33-0.75 times accuracy)
 
+    '''
     def setUp(self):
         self.permitted_error_range = (1/0.75, 0.75)
         self.whole_call = 0.05
