@@ -9,7 +9,7 @@ import warnings
 import numpy as np 
 import pywt
 import scipy.signal as signal 
-from measure_a_horseshoe_bat_call import moving_rms_edge_robust, dB, get_peak_frequency
+from measure_horseshoe_bat_calls.signal_processing import *
 
 __version_segment_hbc = '0.0.1'
 
@@ -269,8 +269,6 @@ def identify_maximum_contiguous_regions(condition_satisfied, number_regions_of_i
         return region_numbers, region_id_and_samples
     except:
         raise ValueError('No regions satisfying the condition found: all entries are False') 
-    
-
 
 
 def pre_process_for_segmentation(call, fs, **kwargs):
@@ -302,7 +300,7 @@ def pre_process_for_segmentation(call, fs, **kwargs):
     cf_dbrms, fm_dbrms : np.arrays
         The dB rms profile of the high + low passed versions of the input audio.
     '''
-    peak_percentage = kwargs.get('peak_percentage', 0.98)
+    peak_percentage = kwargs.get('peak_percentage', 0.99)
     if peak_percentage >= 1.0:
         raise ValueError('Peak percentage is %f. It cannot be >=1 '%np.round(peak_percentage,2))
     

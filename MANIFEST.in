@@ -1,2 +1,3 @@
 include output*
+include figuring_out/real_data/*.WAV
 

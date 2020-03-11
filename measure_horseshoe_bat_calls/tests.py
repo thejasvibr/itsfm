@@ -5,8 +5,9 @@ Created on Wed Feb 12 17:53:58 2020
 
 @author: tbeleyur
 """
-from measure_a_horseshoe_bat_call import *
-from segment_horseshoebat_call import *
+from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import *
+from measure_horseshoe_bat_calls.segment_horseshoebat_call import *
+from measure_horseshoe_bat_calls.signal_processing import *
 import unittest     
 
 class TestMovingRMS(unittest.TestCase):
@@ -228,6 +229,56 @@ class call_background_segmentation(unittest.TestCase):
                                             background_threshold=-10)
         
         
+class TestGetFMSnippets(unittest.TestCase):
+    
+    def setUp(self):
+        self.wholecall = np.arange(1,11)
+        self.fm_2segment = np.array([1,1,1,0,0,0,0,1,1,1])
+        self.fm_1segment_down = np.array([0,0,0,0,0,0,0,1,1,1])
+        self.fm_1segment_up = np.flip(self.fm_1segment_down)
+    
+    def check_type_and_index_match(self,expected_types, expected_snippets,
+                                    fm_types, fm_snippets):
+        
+        types_match = fm_types == expected_types
+        indices_match = np.array_equal( np.concatenate((fm_snippets)),
+                                       np.concatenate(expected_snippets))
+        type_and_index_match = np.all([types_match, indices_match])
+        self.assertTrue(type_and_index_match)
+        
+    
+    def test_simple_get2fms(self):
+        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_2segment)
+        
+        expected_types = ['upfm_', 'downfm_']
+        expected_snippets= [ np.arange(1,4), np.arange(8,11)]
+        
+        self.check_type_and_index_match(expected_types, expected_snippets,
+                                        fm_types, fm_snippets)
+    
+    def test_simple_1fmdown(self):
+        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_1segment_down)
+        
+        expected_types = ['downfm_']
+        expected_snippets= [ np.arange(8,11)]
+        
+        self.check_type_and_index_match(expected_types, expected_snippets,
+                                        fm_types, fm_snippets)
+    def test_simple_1fmup(self):
+        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_1segment_up)
+        
+        expected_types = ['upfm_']
+        expected_snippets= [ np.arange(1,4)]
+        
+        self.check_type_and_index_match(expected_types, expected_snippets,
+                                        fm_types, fm_snippets)
+    
+    
+    
+            
+    
+    
+
         
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
