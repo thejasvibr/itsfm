@@ -7,6 +7,7 @@ Created on Mon Mar  9 19:40:27 2020
 """
 import warnings
 import numpy as np 
+import pywt
 import scipy.signal as signal 
 from measure_a_horseshoe_bat_call import moving_rms_edge_robust, dB, get_peak_frequency
 
@@ -38,10 +39,11 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     documentation for pre_process_for_segmentation
     '''
     cf_dbrms, fm_dbrms = pre_process_for_segmentation(call, fs, **kwargs)
-    cf_samples, fm_samples, info = segment_cf_and_fm(cf_dbrms, fm_dbrms)
+    cf_samples, fm_samples, info = segment_cf_and_fm(cf_dbrms, fm_dbrms, 
+                                                     fs,**kwargs)
     return cf_samples, fm_samples, info
 
-def segment_cf_and_fm(cf_dbrms, fm_dbrms, **kwargs):
+def segment_cf_and_fm(cf_dbrms, fm_dbrms, fs, **kwargs):
     '''Calculates the relative increase in signal levels 
     between the CF and FM dominant versions of the audio. 
     
@@ -53,39 +55,129 @@ def segment_cf_and_fm(cf_dbrms, fm_dbrms, **kwargs):
     
     fm_samples = fm_re_cf > 0 
     cf_samples = cf_re_fm > 0
+
+    main_cf = identify_valid_regions(cf_samples, 1)
+    main_fm = get_fm_regions(fm_samples, fs, **kwargs)
     
-    return cf_samples, fm_samples, [cf_re_fm, fm_re_cf]
+    return main_cf, main_fm, [cf_re_fm, fm_re_cf]
 
-
-
-def identify_call_from_background(audio, fs, **kwargs):
+def get_fm_regions(fm_samples, fs, **kwargs):
     '''
+    Parameters
+    ----------
+    fm_samples : np.array
+        Boolean numpy array with candidate FM samples. 
+    fs : float>0
+    min_fm_duration : float, optional
+        minimum fm duration expected in seconds. Any fm segment lower than this
+        duration  is considered to be a bad read and discarded.
+        Defaults to 0.5 milliseconds.
+    Returns
+    -------
+    valid_fm : np.array
+        Boolean numpy array with the corrected fm samples.
+    
     '''
-    background_freq = kwargs.get('background_frequency',10000)/fs*0.5
-    background_threshold = kwargs.get('background_threshold', -6)
+    min_fm_duration = kwargs.get('min_fm_duration', 0.5*10**-3)
+    min_fm_samples = int(fs*min_fm_duration)
 
-    background_lp = kwargs.get('background_lp', 
-                               signal.ellip(2,3,10, background_freq, 'lowpass'))
-    background_hp = kwargs.get('background_hp', 
-                               signal.ellip(2,3,10, background_freq, 'highpass'))
+    valid_fm = np.zeros(fm_samples.size, dtype='bool')
+    try:
+        main_fm = identify_valid_regions(fm_samples, 2)
+        regions, region_id_and_samples = identify_maximum_contiguous_regions(main_fm, 2)
+        regions, region_lengths = np.unique(region_id_and_samples[:,0],
+                                            return_counts=True)
+        regions_above_min_length = regions[region_lengths >= min_fm_samples]
 
-    lp_call, hp_call = low_and_highpass_around_threshold(audio,
-                                                         fs, 
-                                                         background_freq,
-                                                         lowpass=background_lp,
-                                                         highpass=background_hp)
+        if len(regions_above_min_length) >0:
+            valid_rows = []
+            for each in regions_above_min_length:
+                valid_rows.append(np.argwhere(region_id_and_samples[:,0]==each))
+            valid_rows = np.concatenate(valid_rows).flatten()
+            valid_samples = region_id_and_samples[valid_rows,1].flatten()
+            
+            valid_fm[valid_samples] = True
 
-    dbrms_lpcall = dB(moving_rms_edge_robust(lp_call, **kwargs))
-    dbrms_hpcall = dB(moving_rms_edge_robust(hp_call, **kwargs))
+    except:
+        candidate_fm = identify_valid_regions(fm_samples, 1)
+        if np.sum(candidate_fm) >= min_fm_samples:
+            valid_fm = candidate_fm.copy()
+             
+    return valid_fm
+        
 
-    rms_diff = dbrms_hpcall-dbrms_lpcall
-    rms_diff_re_max = rms_diff - np.max(rms_diff)
-    main_call_estimate = rms_diff_re_max >= background_threshold
+def segment_call_from_background(audio, fs,**kwargs):
+    '''Performs a wavelet transform to track the signal within the relevant portion of the bandwidth. 
     
-    main_call = identify_valid_regions(main_call_estimate, num_expected_regions=1)
-    
-    return main_call, rms_diff_re_max
+    Parameters
+    ----------
+    audio : np.array
+    fs : float>0
+        Frequency of sampling in Hertz. 
+    lowest_relevant_freq : float>0, optional
+        The lowest frequency band in Hz whose coefficients will be tracked.
+        The coefficients of all frequencies in the signal >= the lowest relevant
+        frequency are tracked. This is the lowest possible frequency the signal can take.
+        It is best to give ~10-20 kHz of berth.
+        Defaults to 35kHz.
+    wavelet_type : str, optional
+        The type of wavelet which will be used for the continuous wavelet transform. 
+        See  pywt.wavelist(kind='continuous') for all possible types in case the default
+        doesn't seem to work. 
+        Defaults to mexican hat, 'mexh'
+    scales : array-like, optional
 
+    Returns
+    -------
+    potential_region : np.array
+        A boolean numpy array where True corresponds to the regions which
+        are call samples, and False are the background samples. The single 
+        longest continuous region is output.
+    
+    Raises
+    ------
+    ValueError
+        When lowest_relevant_frequency is too high or not included in 
+        the centre frequencies of the default/input scales for 
+        wavelet transforms. 
+    IncorrectThreshold
+        When the dynamic range of the relevant part of the signal is smaller
+        or equal to the background_threshold.
+    
+    
+    '''
+    lowest_relevant_freq = kwargs.get('lowest_relevant_freq', 35000.0)
+    wavelet_type = kwargs.get('wavelet_type', 'mexh')
+    background_threshold = kwargs.get('background_threshold', -20)
+    scales = kwargs.get('scales',np.arange(1,10))
+
+    coefs, freqs = pywt.cwt(audio,
+                            scales,
+                            wavelet_type,
+                            sampling_period=1.0/(fs))
+    relevant_freqs = freqs[freqs>=lowest_relevant_freq]
+    if np.sum(relevant_freqs) == 0:
+        raise ValueError('The lowest relevant frequency is too high. Please re-check the value')
+    
+    within_centre_freqs = np.logical_and(np.min(freqs)<=lowest_relevant_freq,
+                                         np.max(freqs)>=lowest_relevant_freq)
+    if not within_centre_freqs:
+        raise ValueError('The lowest relevant frequency %.2f is not included in the centre frequencies of the wavelet scales.\
+                          Increase the scale range.'%np.round(lowest_relevant_freq,2))
+
+    relevant_rows  =  int(np.argwhere(np.min(relevant_freqs)==freqs))
+    summed_profile = np.sum(abs(coefs[:relevant_rows]), 0)
+    
+    dbrms_profile = dB(moving_rms_edge_robust(summed_profile, **kwargs))
+    dbrms_profile -= np.max(dbrms_profile)
+
+    if np.min(dbrms_profile) >= background_threshold:
+        raise IncorrectThreshold('The dynamic range of the signal is lower than the background threshold.\
+        Please decrease the background threshold')
+
+    potential_region = identify_valid_regions(dbrms_profile>=background_threshold, 1)
+
+    return potential_region
 
 def identify_valid_regions(condition_satisfied, num_expected_regions=1):
     '''
@@ -98,13 +190,16 @@ def identify_valid_regions(condition_satisfied, num_expected_regions=1):
         separated by smaller regions which don't (False).
     num_expected_regions : int > 0 
         The number of expected regions which satisfy a condition. 
-        If >1, then the first two longest continuous regions will be returned, and the 
-        smaller regions will be suppressed/eliminated.
+        If >1, then the first two longest continuous regions will be returned,
+        and the smaller regions will be suppressed/eliminated.
         Defaults to 1. 
+
     Returns
     -------
     valid_regions : np.array
-        Boolean array which identifies the regions with the longest contiguous lengths.
+        Boolean array which identifies the regions with the longest
+        contiguous lengths.
+    ADDDDD HERE !! 
     '''
     regions_of_interest, all_region_data = identify_maximum_contiguous_regions(condition_satisfied, num_expected_regions)
     valid_samples = []
@@ -298,3 +393,6 @@ def get_thresholds_re_max(cf_dbrms, fm_dbrms):
     
     return num_shared_fm_cf_samples, optimisation_metric, best_threshold
 
+
+class IncorrectThreshold(ValueError):
+    pass

@@ -8,31 +8,6 @@ Created on Wed Feb 12 17:53:58 2020
 from measure_a_horseshoe_bat_call import *
 from segment_horseshoebat_call import *
 import unittest     
-#
-#
-#class CheckIfMeasurementsCorrect(unittest.TestCase):
-#
-#    def setUp(self):
-#        self.fm_durn = 0.01
-#        self.cf_durn = 0.2
-#        self.fs =250000
-#        self.test_call = make_one_CFcall(self.cf_durn+self.fm_durn,
-#                                         self.fm_durn, 90000,
-#                                    self.fs, call_shape='staplepin',
-#                                    fm_bandwidth=10*10**3.0)
-#        self.test_call *= 0.9
-#        self.test_call *= signal.tukey(self.test_call.size, 0.1)
-#        self.backg_noise = np.random.normal(0,10**-80.0/20, self.test_call.size+500)
-#        self.backg_noise[250:-250] += self.test_call
-#        
-#    def test_duration(self):
-#        '''checks if the duration output is ~correct '''
-#        
-#        sounds, msmts = measure_hbc_call(self.backg_noise, fs=self.fs)
-#        print(msmts, msmts.columns)
-#        print(msmts['call_duration'])
-#        print(msmts['upfm_end_time']-msmts['upfm_start_time'])
-#        
 
 class TestMovingRMS(unittest.TestCase):
     
@@ -55,43 +30,6 @@ class TestMovingRMS(unittest.TestCase):
         values_match = np.array_equal(rms_start_end, 
                         expected_values)
         self.assertTrue(values_match)
-        
-class TestIdentifyMainCall(unittest.TestCase):
-    def setUp(self):
-        self.fs = 250000
-        self.call_durn = 0.050
-        call = make_one_CFcall(0.050, 0.010, 100000,
-                                   self.fs, call_shape='staplepin',
-                                   fm_bandwidth=20000)
-        call *= 10**(-20/20.0)
-        noise = np.random.normal(0,10**-(40/20.0),int(self.call_durn*self.fs*3))
-        lp = signal.butter(4, 12000/self.fs*0.5, 'lowpass')
-        noise_lp = signal.filtfilt(lp[0],lp[1], noise)
-        
-        
-        self.call_w_noise = noise_lp.copy()
-        self.call_w_noise[int(self.call_durn*self.fs):int(2*self.call_durn*self.fs)] += call
-
-    def test_clear_main_call_duration(self):
-        '''a 150ms snippet with a 50ms call. 
-        The call has 6dB SNR overall.
-        '''
-        main_call, difference_profile = identify_call_from_background(self.call_w_noise,
-                                                                      self.fs)
-        approximate_duration = np.round(np.sum(main_call)/float(self.fs),3)
-        self.assertEqual(self.call_durn, approximate_duration)
-    
-    def test_one_single_main_call(self):
-        '''
-        '''
-        main_call, difference_profile = identify_call_from_background(self.call_w_noise,
-                                                                  self.fs)
-        try:
-            main_call_regions = identify_valid_regions(main_call, 2)
-            self.fail('Main call has 2 segments - something weird going on')
-        except:
-            main_call_regions = identify_valid_regions(main_call, 1)
-            pass
 
 class TestIdentifyContiguousRegions(unittest.TestCase):
     def setUp(self):
@@ -127,6 +65,34 @@ class TestIdentifyContiguousRegions(unittest.TestCase):
         self.assertTrue(np.array_equal(obtained_regions_and_counts, expected))
 
 
+class TestGetFMRegions(unittest.TestCase):
+    def setUp(self):
+        self.good = np.array([1,1,1,0,0,0,0,1,1,1], dtype='bool')
+        self.short_and_longfm = np.array([1,0,0,0,0,1,1,1], dtype='bool')
+        self.short_and_shortfm = np.array([1,0,0,0,0,1], dtype='bool')
+        self.only_1_fm = np.array([1,0,0,0,0,1], dtype='bool')
+   
+    def test_2fms(self):
+        valid_fm = get_fm_regions(self.good, fs=1.0, min_fm_duration=3.0)
+        input_and_output_same = np.array_equal(valid_fm, self.good)
+        self.assertTrue(input_and_output_same)
+    
+    def test_invalid_and_onefms(self):
+        valid_fm = get_fm_regions(self.short_and_longfm, 
+                                  fs=1.0, min_fm_duration=3.0)
+        expected = np.bool8(np.concatenate((np.zeros(5),np.ones(3))))
+        input_and_output_same = np.array_equal(valid_fm, expected)
+        self.assertTrue(input_and_output_same)
+    
+    def test_nofm(self):
+        valid_fm = get_fm_regions(self.short_and_shortfm, 
+                                  fs=1.0, min_fm_duration=3.0)
+        expected = np.zeros(self.short_and_shortfm.size, dtype='bool')
+        input_and_output_same = np.array_equal(valid_fm, expected)
+        self.assertTrue(input_and_output_same)
+        
+
+
 class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
     '''Make sure that the accuracy of 
     FM and CF segmentation is within +/- 2.5 dB (1.33-0.75 times accuracy)
@@ -149,7 +115,8 @@ class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
         
         
         cf, fm, info = segment_call_into_cf_fm(eg_call, self.fs,
-                                               peak_percentage=0.99)
+                                               peak_percentage=0.99,
+                                               min_fm_duration=0.0001)
         
         halfway =int(fm.size/2.0)
         
@@ -165,7 +132,6 @@ class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
                             self.fm_durn,
                             self.fm_durn])
         accuracy = obtained/expected
-        print('Éasy:', accuracy)
         within_error_range =  np.logical_and(accuracy<self.permitted_error_range[0],
                                        accuracy>self.permitted_error_range[1])
         self.assertTrue(np.all(within_error_range))
@@ -197,31 +163,71 @@ class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
                             self.fm_durn,
                             self.fm_durn])
         accuracy = obtained/expected
-        print('Tricky:', accuracy)
         within_error_range =  np.logical_and(accuracy<self.permitted_error_range[0],
                                        accuracy>self.permitted_error_range[1])
         self.assertTrue(np.all(within_error_range))
     
         
+
+class call_background_segmentation(unittest.TestCase):
+    '''Check that the wavelet method of call-background 
+    segmentation is working as expected.
     
-           
+    '''
+    def setUp(self):
+        self.whole_call = 0.05
+        self.fm_durn = 0.005
+        self.fs = 500000
+        self.permitted_range = np.array([1.05, 0.95])
+
+    def check_if_call_duration_matches(self,call, call_w_noise, **kwargs):
+        
+        actual_call_duration = call.size/float(self.fs)
+        main_call = segment_call_from_background(call_w_noise, self.fs,
+                                                 window_size=50,
+                                                 background_frequency=50000,
+                                                 **kwargs)
+
+        obtained_call_duration = np.sum(main_call)/float(self.fs)
+        relative_error = obtained_call_duration/actual_call_duration
+        self.assertTrue(np.logical_and(relative_error<=self.permitted_range[0],
+                                       relative_error>=self.permitted_range[1])
+                        )
+
+    def test_basic_call_segmentation(self):
+        '''
+        '''
+        call = make_one_CFcall(self.whole_call, self.fm_durn,
+                               fs=self.fs,
+                               cf_freq=100000,
+                               call_shape='staplepin',
+                               fm_bandwidth=15000)
+        
+        one_ms = int(0.001*self.fs)
+        call_w_noise = np.random.normal(0,10**-60/20.0,
+                                 call.size + 10*one_ms )
+        call_w_noise[5*one_ms:-one_ms*5] += call
+        self.check_if_call_duration_matches(call, call_w_noise)
+    
+    def test_noisy_call_segmentation(self):
+        '''Make the call-background SNR just 10dB 
+        and see if it can recover the correct duration
+        '''
+        call = make_one_CFcall(self.whole_call, self.fm_durn,
+                               fs=self.fs,
+                               cf_freq=100000,
+                               call_shape='staplepin',
+                               fm_bandwidth=15000)
+        
+        call_dbrms = dB(rms(call))
+        one_ms = int(0.001*self.fs)
+        call_w_noise = np.random.normal(0,10**(call_dbrms-10)/20,
+                                 call.size + 2*one_ms )
+        call_w_noise[one_ms:-one_ms] += call
+        self.check_if_call_duration_matches(call, call_w_noise,
+                                            background_threshold=-10)
         
         
         
 if __name__ == '__main__':
     unittest.main()
-#    fs = 250000
-#    call_durn = 0.050
-#    call = make_one_CFcall(0.050, 0.0025, 100000,
-#                               fs, call_shape='staplepin',
-#                               fm_bandwidth=20000)
-#    call *= 10**(-0/20.0)
-#    noise = np.random.normal(0,10**-(20/20.0),int(call_durn*fs*3))
-#    
-#    call_w_noise = noise.copy()
-#    call_w_noise[int(call_durn*fs):int(2*call_durn*fs)] += call
-#
-#    main_call, difference_profile = identify_call_from_background(call_w_noise,
-#                                                                  fs,
-#                                                                  background_frequency=20000)
-#    print('MIAAAOW', np.sum(main_call)/fs)

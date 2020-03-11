@@ -11,7 +11,7 @@ setup(name='measure_horseshoe_bat_calls',
       license='MIT',
       packages=find_packages(),
      install_requires=['numpy','pandas','soundfile','peakutils',
-        'scipy','matplotlib'],
+        'scipy','matplotlib', 'pywt'],
       zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
