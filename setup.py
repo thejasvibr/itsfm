@@ -14,6 +14,7 @@ setup(name='measure_horseshoe_bat_calls',
         'scipy','matplotlib', 'PyWavelets '],
      zip_safe=False,
 	 include_package_data=True,
+	 package_data={'':['data/*.WAV']},
      classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',

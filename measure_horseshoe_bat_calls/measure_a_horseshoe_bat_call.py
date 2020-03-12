@@ -51,6 +51,8 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
     # CF measurements
     cf = call[cf_segment]
     sound_segments['cf'] = cf
+    measurements['cf_start'] = np.min(np.argwhere(cf_segment))/float(fs)
+    measurements['cf_end'] = np.max(np.argwhere(cf_segment))/float(fs)
 
     measurements['cf_duration'] = cf.size/float(fs)
     measurements['cf_energy'] = calc_energy(cf)
@@ -58,22 +60,26 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
     measurements['cf_peak_frequency'] = get_peak_frequency(cf, fs)
 
     # FM measurements
-    fm_types, fm_sweeps = get_fm_snippets(call, fm_segment)
+    fm_types, fm_sweeps, fm_startstop = get_fm_snippets(call, fm_segment, fs)
     sound_segments['fm'] = fm_sweeps
 
-    for each_type, sweep in zip(fm_types, fm_sweeps):
+    for each_type, sweep, fm_boundaries in zip(fm_types, fm_sweeps, fm_startstop):
         measurements[each_type+'duration'] = sweep.size/float(fs)
         measurements[each_type+'energy'] = calc_energy(sweep)
         measurements[each_type+'rms'] = rms(sweep)
         measurements[each_type+'terminal_frequency'], threshold = get_terminal_frequency(sweep, 
                                                                     fs=fs,
                                                                     **kwargs)
+        start_time, stop_time = fm_boundaries
+        measurements[each_type+'start'] = start_time
+        measurements[each_type+'end'] = stop_time
+        
     measurements['terminal_frequency_threshold'] = threshold
     
     
     return sound_segments, measurements
 
-def get_fm_snippets(whole_call, fm_segments):
+def get_fm_snippets(whole_call, fm_segments, fs):
     '''Creates separate audio clips for each FM sweep and labels them as
     either 'upfm' or 'downfm' 
 
@@ -95,6 +101,8 @@ def get_fm_snippets(whole_call, fm_segments):
         results. 
     fm_audio : list
         List with audio snippets
+    fs : float>0
+        Frequency of sampling in Hz
     '''
     try:
         fms, fm_and_samples = identify_maximum_contiguous_regions(fm_segments, 2)
@@ -106,14 +114,18 @@ def get_fm_snippets(whole_call, fm_segments):
 
     fm_types = []
     fm_audio = []
+    fm_boundaries = []
     for each_fm in fms:        
         this_fm_samples = fm_samples[fm_id==each_fm]
+        fm_startand_stop = np.array([np.min(this_fm_samples),
+                                     np.max(this_fm_samples)])/float(fs)
         this_fm_audio = whole_call[this_fm_samples]
         this_fm_type = which_fm_type(np.max(this_fm_samples), whole_call)
         fm_audio.append(this_fm_audio)
         fm_types.append(this_fm_type)
+        fm_boundaries.append(fm_startand_stop)
     
-    return fm_types, fm_audio
+    return fm_types, fm_audio, fm_boundaries
         
 
 

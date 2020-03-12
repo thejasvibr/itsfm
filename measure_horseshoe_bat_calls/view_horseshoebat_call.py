@@ -8,7 +8,61 @@ Created on Tue Mar 10 19:55:41 2020
 import matplotlib.pyplot as plt
 import numpy as np 
 
+from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import get_fm_snippets
+
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
+
+def check_call_background_segmentation(whole_segment, fs, fine_selection, 
+                                                   **kwargs):
+    '''
+    '''
+    waveform, spec = visualise_call(whole_segment, fs)
+    waveform.plot(make_x_time(fine_selection, fs),fine_selection*np.max(whole_segment),'k')
+    waveform.plot(make_x_time(fine_selection, fs),fine_selection*np.min(whole_segment),'k')
+    spec.plot(make_x_time(fine_selection, fs),fine_selection*120000,'w')
+    return waveform, spec
+
+def check_call_parts_segmentation(only_call, fs, cf, fm,
+                                      **kwargs):
+    '''
+    '''
+
+    wavef, specg = visualise_call(only_call, fs)
+    
+    cf_time = np.argwhere(cf).flatten()/float(fs)
+    wavef.vlines(np.array([np.min(cf_time), np.max(cf_time)]),
+                         np.min(only_call), np.max(only_call), zorder=3)
+    
+    fm_types, fm_sweeps, fm_startstop = get_fm_snippets(only_call, fm, fs)
+    
+    for each in fm_startstop:
+        wavef.vlines([each[0], each[1]],
+                     np.max(only_call)*-0.5, np.max(only_call)*0.5, 
+                     'r',zorder=3)
+
+    specg.plot(make_x_time(cf, fs),cf*120000,'k',label='CF')
+    specg.plot(make_x_time(fm, fs),fm*70000,'r',label='FM')
+    plt.legend()
+    
+    return wavef, specg
+
+def show_all_call_parts(only_call, call_parts, fs, **kwargs):
+    plt.figure(figsize=(6,8))
+    plt.subplot(421)
+    make_specgram(only_call, fs, **kwargs);
+    plt.subplot(423)
+    make_specgram(call_parts['cf'], fs, **kwargs);
+    
+    plt.subplot(422);make_waveform(only_call, fs)
+    plt.subplot(424);make_waveform(call_parts['cf'], fs)
+    
+    for i,each in enumerate(call_parts['fm']):
+        try:
+            plt.subplot(420+i*2+6);make_waveform(each, fs)
+            plt.subplot(420+i*2+5);make_specgram(each, fs, **kwargs);
+        except:
+            pass
+
 
 def visualise_call(audio, fs, **kwargs):
     '''
@@ -22,75 +76,89 @@ def visualise_call(audio, fs, **kwargs):
     -------
     a0, a1 : subplots
     '''
-    fft_size = kwargs.get('fft_size', 128)
-    n_overlap = fft_size-1
+    
 
     plt.figure()
     a0 = plt.subplot(211)
-    plt.plot(make_x_time(audio,fs), audio)
+    make_waveform(audio, fs)
     
     a1 = plt.subplot(212, sharex=a0)
-    plt.specgram(audio, Fs=fs, 
-                 NFFT=fft_size,
-                 noverlap=n_overlap,
-                 vmin=-100)
+    make_specgram(audio, fs, **kwargs)
+    
     return a0, a1
 
+def make_specgram(audio, fs, **kwargs):
 
+    fft_size = get_fftsize(fs, **kwargs)
+    n_overlap = fft_size-1
+    cmap = kwargs.get('cmap', 'viridis')
+    vmin = kwargs.get('vmin', -100)
 
-def make_overview_figure(audio, sounds, msmts, **kwargs):
-    '''
-    '''
-    fs = kwargs['fs']
-    fftsize = kwargs.get('fft_size', 128)
-    dyn_range = kwargs.get('dyn_range', 80)
+    specgram = plt.specgram(audio, Fs=fs, 
+                               NFFT=fft_size,
+                               noverlap=n_overlap,
+                               vmin=vmin, 
+                               cmap=cmap)
+    return specgram
+
+def make_waveform(audio, fs):
+     plt.plot(make_x_time(audio,fs), audio)
     
 
-    dyn_vmin = 20*np.log10(np.max(abs(sounds[0]))) - dyn_range
+def get_fftsize(fs, **kwargs):
+    '''
+    '''
+    fft_size_given = not(kwargs.get('fft_size') is None)
+    freq_resolution_given = not(kwargs.get('freq_resolution') is None)
+    both_not_given = [False, False] == [fft_size_given, freq_resolution_given]
+
+    if freq_resolution_given:
+        window_size = calculate_window_size(kwargs.get('freq_resolution'), fs)
+        return window_size
+    elif fft_size_given:
+        return kwargs['fft_size']
+    elif both_not_given:
+        default_freq_resoln = 1000.0 # Hz
+        window_size = calculate_window_size(default_freq_resoln, fs)
+        return window_size
+
+def calculate_window_size(freq_resoln, fs):
+    return int(fs/freq_resoln)        
+        
+
+
+
+def make_overview_figure(call, fs,
+                         measurements,
+                         **kwargs):
+    '''
+    '''
+    plt.figure()
+    a0 = plt.subplot(111)
+    specgram = make_specgram(call, fs, **kwargs);
+
+    plot_fm_measurements(call, fs, measurements, a0, **kwargs)
+    plot_cf_measurements(call, fs, measurements, a0, **kwargs)
     
-    plt.figure(figsize=(8,7))
-    plt.subplot(231)
-    plt.title('Oscillogram')
-    plt.plot(sounds[0], label='whole call')
-    plt.plot(sounds[1], label='non CF')
-    plt.legend()
-    plt.subplot(232)
-    plt.title('Manual selection')
-    plt.specgram(audio, Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
-    plt.yticks([])
-    plt.subplot(233)
-    plt.title('Fine selection of call')
-    plt.specgram(sounds[0], Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
-    plt.tick_params(axis='y', which='both', labelleft='off', labelright='on')
-    # show CF peak frequency
-    plt.hlines(msmts['peak_frequency'],0,sounds[0].size/float(fs), 'k', 
-               linewidth=2.0)
-    # show FM sections along with the terminal frequencies
-    for fm_start, fm_end in [ ('downfm_start_time', 'downfm_end_time'), ('upfm_start_time','upfm_end_time')]:
+    return a0
+
+def plot_fm_measurements(call, fs, measures, subplot, **kwargs):
+    # check if there's upfm 
+    for fm in ['upfm_','downfm_']:
         try:
-            plt.vlines([msmts[fm_start],msmts[fm_end]], 50000, fs*0.5,'r' )
-            terminal_frequency = fm_start.split('_')[0]+'_terminal_frequency'
-            plt.hlines(msmts[terminal_frequency],msmts[fm_start],msmts[fm_end],'r')
-           
+            fm_start, fm_stop =  measures[fm+'start'],  measures[fm+'end']
+            subplot.vlines((fm_start, fm_stop),
+                                    0,fs*0.5, 'r')
+            subplot.hlines(measures[fm+'terminal_frequency'],
+                           fm_start, fm_stop, 'b')
+            
         except:
             pass
+    return subplot
 
-    plt.subplot(234)
-    plt.title('Non-CF call')
-    plt.specgram(sounds[1], Fs=fs, NFFT=fftsize, noverlap=fftsize-1, vmin=dyn_vmin);
-    plt.subplot(235)
-    plt.title('First FM')
-    # plot FM with 0.5*fftsize
-    half_winsize = int(fftsize*0.5)
-    plt.specgram(sounds[2], Fs=fs, NFFT=half_winsize, noverlap=half_winsize-1, vmin=dyn_vmin);
-    plt.yticks([])
-
-    try:
-        plt.subplot(236)
-        plt.title('Second FM')
-        plt.specgram(sounds[3], Fs=fs, NFFT=half_winsize, noverlap=half_winsize-1, vmin=dyn_vmin);
-        plt.tick_params(axis='y', which='both', labelleft='off', labelright='on')
-
-    except:
-        pass
+def plot_cf_measurements(call, fs, measures, subplot, **kwargs):
+    peak_frequency = measures['peak_frequency']
+    subplot.hlines(peak_frequency,measures['cf_start'],
+                               measures['cf_end'], 'b')
+    return subplot 
     

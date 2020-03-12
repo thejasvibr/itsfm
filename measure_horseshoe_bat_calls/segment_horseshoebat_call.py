@@ -58,7 +58,7 @@ def segment_cf_and_fm(cf_dbrms, fm_dbrms, fs, **kwargs):
 
     main_cf = identify_valid_regions(cf_samples, 1)
     main_fm = get_fm_regions(fm_samples, fs, **kwargs)
-    
+
     return main_cf, main_fm, [cf_re_fm, fm_re_cf]
 
 def get_fm_regions(fm_samples, fs, **kwargs):
