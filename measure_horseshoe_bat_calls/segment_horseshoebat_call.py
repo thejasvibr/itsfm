@@ -177,7 +177,7 @@ def segment_call_from_background(audio, fs,**kwargs):
 
     potential_region = identify_valid_regions(dbrms_profile>=background_threshold, 1)
 
-    return potential_region
+    return potential_region, dbrms_profile
 
 def identify_valid_regions(condition_satisfied, num_expected_regions=1):
     '''

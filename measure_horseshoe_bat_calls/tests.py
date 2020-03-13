@@ -184,7 +184,7 @@ class call_background_segmentation(unittest.TestCase):
     def check_if_call_duration_matches(self,call, call_w_noise, **kwargs):
         
         actual_call_duration = call.size/float(self.fs)
-        main_call = segment_call_from_background(call_w_noise, self.fs,
+        main_call, _ = segment_call_from_background(call_w_noise, self.fs,
                                                  window_size=50,
                                                  background_frequency=50000,
                                                  **kwargs)
