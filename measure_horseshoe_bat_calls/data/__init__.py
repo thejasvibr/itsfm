@@ -1,7 +1,10 @@
 import glob
 import os 
 import scipy.signal as signal 
-import soundfile as sf
+try:
+	import soundfile as sf
+except:
+	import scipy.io.wavfile as wav
 
 all_wav_files = glob.glob('measure_horseshoe_bat_calls/data/'+'*.WAV')
 example_calls = []
@@ -11,7 +14,10 @@ example_calls = []
 # To overcome this in the example dataset - resample all audio to 
 # 500 kHz
 for each in all_wav_files:
-	audio, fs_original = sf.read(each)
+	try:
+		audio, fs_original = sf.read(each)
+	except:
+		fs_original, audio = wav.read(each)
 	# resample on the spot
 	audio_ups = signal.resample(audio, audio.size*2)
 	file_name = os.path.split(each)[-1]
