@@ -1,4 +1,4 @@
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/measure_CF_calls_logo_v1.0.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/measure_CF_calls_logo_v1.0.png)
 
 
 # measure horseshoe bat calls : v1.0.0 (user-friendly and ready for you!)
@@ -9,8 +9,8 @@ Don't know - no worries! Haven't heard one before? No surprise - they're literal
 
 However, if you really want to imagine what it'd be like if you could hear them, this is what a horseshoe bat call would sound like. You can do this by slowing down the horseshoe bat calls by a *lot* (10X)!
 
-*If you want to run this Jupyter Notebook online without having to install anything on your computer - head to the Binder link [here]()!*
-
+#### Just curious? Run this notebook online - without installing anything yet:
+If you want to run this Jupyter Notebook online without having to install anything on your computer - head to the Binder link here and click on the *README.ipynb* file :[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/thejasvibr/measure_horseshoe_bat_calls/v1.0.0)
 
 
 ```python
@@ -91,8 +91,7 @@ fs = data.fs
 # view the waveform + spectrogram
 visualise_call(chosen_audio, fs)
 ```
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot1.png)
-
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot1.png)
 
 ### Segmenting the call from the silent background. 
 Measuring temporal features such as call, CF and FM durations relies on an accurate and tight window selection that includes the call without too much of the background. Having more 'background' in the analyses will lead to inaccurate measurements of all parameters eg. duration and rms. Selecting a tight window can be simply done by hand, but also yields inconsistent results each time. Automating this process allows reproducibility across time. 
@@ -110,7 +109,7 @@ waveform, specgram = check_call_background_segmentation(chosen_audio, fs, main_c
 # choose a tighter ylim to see the call better
 specgram.set_ylim(50000, 125000)
 ```
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot2.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot2.png)
 
 
 
@@ -134,7 +133,7 @@ wave, spec = check_call_parts_segmentation(only_call, fs, cf, fm)
 spec.set_ylim(50000, 120000)
 ```
 
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot3.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot3.png)
 
 ### Segmenting the call into CF and FM parts
 
@@ -149,7 +148,7 @@ call_parts, measurements = measure.measure_hbc_call(only_call, fs, cf, fm)
 spec = make_overview_figure(only_call, fs, measurements)
 spec.set_ylim(70000, 125000)
 ```
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot4.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot4.png)
 
 
 
@@ -199,7 +198,7 @@ show_all_call_parts(only_call, call_parts, fs)
 
 ```
 
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot5.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot5.png)
 ### Choosing the right parameter settings for *your* bat calls!
 The segmentation is of course affected by the parameter settings given to ```measure_hbc_call ```. The current default set may be good for many situations - but you may want better! 
 
@@ -222,7 +221,7 @@ plt.subplot(212, sharex=a0)
 plt.specgram(chosen_audio, Fs=fs);
 ```
 
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot6.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot6.png)
 
 ```python
 # remove background
@@ -252,7 +251,7 @@ plt.subplot(212, sharex=b0)
 plt.specgram(narrow_call_selection, Fs=fs);
 ```
 
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot7.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot7.png)
 
 
 ```python
@@ -273,7 +272,7 @@ plt.legend()
 plt.subplot(212, sharex=c0)
 plt.specgram(narrow_call_selection, Fs=fs);
 ```
-![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/blob/v1.0.0/plot8.png)
+![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot8.png)
 
 To Add in README (Coming Soon...):
 1) Run through different example calls, and what parameters can be altered to improve:

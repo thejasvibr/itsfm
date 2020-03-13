@@ -16,7 +16,9 @@ setup(name='measure_horseshoe_bat_calls',
 	 include_package_data=True,
 	 package_data={'':['data/*.WAV']},
      classifiers=[
-        'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Sound/Audio :: Analysis',
-        'Topic :: Multimedia :: Sound/Audio'])
+        'Topic :: Multimedia :: Sound/Audio',
+		'Programming Language :: Python :: 2.7',
+		'Programming Language :: Python :: 3'
+		])
