@@ -4,6 +4,7 @@ import scipy.signal as signal
 try:
 	import soundfile as sf
 except:
+	print('There was an issue importing the soundfile library - please resolve this! Using alternate package (scipy)..')
 	import scipy.io.wavfile as wav
 
 all_wav_files = glob.glob('measure_horseshoe_bat_calls/data/'+'*.WAV')

@@ -1,3 +1,6 @@
-include output*
+include *.png
 include figuring_out/real_data/*.WAV
-
+include *.wav
+include *.rst
+include *.md
+include *.ipynb
