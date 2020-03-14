@@ -27,7 +27,7 @@ def check_call_parts_segmentation(only_call, fs, cf, fm,
     '''
     '''
 
-    wavef, specg = visualise_call(only_call, fs)
+    wavef, specg = visualise_call(only_call, fs, **kwargs)
     
     cf_time = np.argwhere(cf).flatten()/float(fs)
     wavef.vlines(np.array([np.min(cf_time), np.max(cf_time)]),

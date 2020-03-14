@@ -12,6 +12,7 @@ import scipy.signal as signal
 from measure_horseshoe_bat_calls.signal_processing import *
 
 __version_segment_hbc = '0.0.1'
+__version__ = 'post_v1.0.0'
 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''
@@ -120,6 +121,11 @@ def segment_call_from_background(audio, fs,**kwargs):
         frequency are tracked. This is the lowest possible frequency the signal can take.
         It is best to give ~10-20 kHz of berth.
         Defaults to 35kHz.
+	background_threshold : float < 0
+		The relative threshold which is used to define the background. The segmentation is 
+		performed by selecting the region that is above background_threshold dB relative
+		to 	the max dB rms value in the audio. 
+		Defaults to -20 dB
     wavelet_type : str, optional
         The type of wavelet which will be used for the continuous wavelet transform. 
         See  pywt.wavelist(kind='continuous') for all possible types in case the default
@@ -165,8 +171,8 @@ def segment_call_from_background(audio, fs,**kwargs):
         raise ValueError('The lowest relevant frequency %.2f is not included in the centre frequencies of the wavelet scales.\
                           Increase the scale range.'%np.round(lowest_relevant_freq,2))
 
-    relevant_rows  =  int(np.argwhere(np.min(relevant_freqs)==freqs))
-    summed_profile = np.sum(abs(coefs[:relevant_rows]), 0)
+    lowest_frequency_row  =  int(np.argwhere(np.min(relevant_freqs)==freqs))
+    summed_profile = np.sum(abs(coefs[:lowest_frequency_row+1,:]), 0)
     
     dbrms_profile = dB(moving_rms_edge_robust(summed_profile, **kwargs))
     dbrms_profile -= np.max(dbrms_profile)
