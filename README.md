@@ -1,16 +1,12 @@
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/measure_CF_calls_logo_v1.0.png)
 
-
 # measure horseshoe bat calls : v1.0.0 (user-friendly and ready for you!)
 Automate measurements of horseshoe bat calls - (or any similar sound!). 
 
 ### What is a horseshoe bat call - why have I never heard one before?
-Don't know - no worries! Haven't heard one before? No surprise - they're literally in the ultrasonic range ($\geq$80kHz frequency).
+Don't know - no worries! Haven't heard one before? No surprise - they're literally in the ultrasonic range ($\geq$ 20kHz frequency).
 
 However, if you really want to imagine what it'd be like if you could hear them, this is what a horseshoe bat call would sound like. You can do this by slowing down the horseshoe bat calls by a *lot* (10X)!
-
-#### Just curious? Run this notebook online - without installing anything yet:
-If you want to run this Jupyter Notebook online without having to install anything on your computer - head to the Binder link here and click on the *README.ipynb* file :[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/thejasvibr/measure_horseshoe_bat_calls/v1.0.0)
 
 
 ```python
@@ -28,10 +24,8 @@ As you may have heard in the playback - the horseshoe bat call sounds like a whi
 Horseshoe bats are a type of nocturnal bat that have strange looking noses (and thus the name) and emit the characteristic 'table-top'/'staple-pin' type echolocation calls. They emit these calls and listen for the returning echoes from these calls to detect obstacles and prey around them. 
 
 
-### What does this package do and does it only work with horseshoe (Rhinolophidae) bat calls?
-It's all in the name. It measures various properties of a horseshoe bat call. The package is *not* specific to only Rhinolophid bat calls! The packages is so named only because it was developed originally for two Rhinolophid species. If you have leaf-nosed(Hipposiderid) bat calls - this package should work too. 
-
-Essentially any sound with a constant frequency flanked on either side by frequency modulations will be handled correctly! 
+### What does this package do?
+It's all in the name : measure horseshoe bat calls. It measures various properties of a horseshoe bat call . The package is *not* specific to only Rhinolophid bat calls! 
 
 Given a call, the package segments out CF and FM components and calculates various measures. The FM and CF parts are separated in the waveform and various measurements are made on them including:
 
@@ -40,8 +34,14 @@ Given a call, the package segments out CF and FM components and calculates vario
 * CF and FM durations
 * CF and FM rms and energy
 
+
+### ...and does it only work with *horseshoe* bat calls?
+The 'horseshoe' in the package name is there only because it was developed originally keeping two two horseshoe (Rhinolophid) bat species in mind. The package has been tested with the calls of multiple Hipposiderid bats and it works there too! 
+
+Essentially any sound with a constant frequency flanked on either side by frequency modulations will be handled correctly! 
+
 ### Who is this package useful for?
-Mainly those studying bat calls, and in specific those analysing horseshoe/leaf-nosed bat calls. However, there may perhaps be a whole host of sounds which looks similar -- and so it might also be useful for the analysis of any sound that looks like a bat CF call!
+Mainly those studying bat calls, and in specific those analysing horseshoe/leaf-nosed bat calls. However, there may perhaps be a whole host of sounds (animal/non-animal) which looks similar -- and so it might also be useful for the analysis of any sound that looks like a bat CF call!
 
 ### Why did you develop this package?
 Measuring the sub-structure of horseshoe bat calls can be tiresome and error-prone when done manually. While the human eye can recognise the CF and FM parts of the call very well, segmenting it consistently is hard to do. This is because we rely on a spectrographic representation - the settings of which again influences how a call is segmented into FM and CF. Even existing automated methods in the field rely on spectrographic representations.  Moreover, to my knowledge, there aren't any  open-source tools developed specifically to measre call parameters for horseshoe bat calls. 
@@ -54,6 +54,16 @@ I thank Neetash MR, Diana Schoeppler & Holger R Goerlitz for their inputs in the
 
 ### How do I use this package?
 
+
+### Requirements
+* Python 2/3 
+* Matplotlib 
+* Numpy $\geq$ 1.15
+* Pandas
+* PyWavelets
+* Scipy 
+* SoundFile
+
 ### Installation: 
 This package works with both Python 2 and 3. 
 Download the package using pip with:
@@ -62,7 +72,15 @@ Download the package using pip with:
 
 or
 
-download this repo from Github,open up a terminal window, navigate to the folder,  and type:
+1) Download this repo from Github using the webpage
+
+OR 
+
+open up your favourite Git client/Bash window and type:
+
+```git clone https://github.com/thejasvibr/measure_horseshoe_bat_calls```
+
+2) Open up a terminal window, navigate to the measure_horseshoe_bat_calls folder,  and type:
 
 ```python setup.py install ```
 
@@ -133,7 +151,10 @@ wave, spec = check_call_parts_segmentation(only_call, fs, cf, fm)
 spec.set_ylim(50000, 120000)
 ```
 
+
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot3.png)
+
+
 
 ### Segmenting the call into CF and FM parts
 
@@ -149,8 +170,6 @@ spec = make_overview_figure(only_call, fs, measurements)
 spec.set_ylim(70000, 125000)
 ```
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot4.png)
-
-
 
 ### Understanding the measurements and overview figure:
 The plot above shows start and stop times of the FMs in red. The blue lines along the FM indicate the lowest frequency (at -X dB threshold) and are drawn over the duration of the entire FM segment. The blue line in the CF is drawn at the call peak frequency and is drawn over the duration of the CF portion. 
@@ -197,8 +216,8 @@ The output sounds are the audio corresponding to the CF segmentation and FM segm
 show_all_call_parts(only_call, call_parts, fs)
 
 ```
-
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot5.png)
+
 ### Choosing the right parameter settings for *your* bat calls!
 The segmentation is of course affected by the parameter settings given to ```measure_hbc_call ```. The current default set may be good for many situations - but you may want better! 
 
@@ -220,7 +239,6 @@ plt.ylabel('In band profile \n dBrms re max')
 plt.subplot(212, sharex=a0)
 plt.specgram(chosen_audio, Fs=fs);
 ```
-
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot6.png)
 
 ```python
@@ -250,9 +268,7 @@ plt.legend()
 plt.subplot(212, sharex=b0)
 plt.specgram(narrow_call_selection, Fs=fs);
 ```
-
 ![](https://github.com/thejasvibr/measure_horseshoe_bat_calls/raw/v1.0.0/plot7.png)
-
 
 ```python
 # subtract the two from each other and see which regions they are relatively higher than the other.
@@ -282,10 +298,26 @@ To Add in README (Coming Soon...):
 2) Viewing/plotting options
 
 
+### License 
+measure_horseshoe_bat_calls is released under an [MIT License](https://choosealicense.com/licenses/mit/):
+
+Copyright 2020 Thejasvi Beleyur
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 ### Feedback and Contributions Welcome!! 
+If you've found bugs or are not quite convinced about the accuracy of some aspect of the code please do get in touch via email (tbeleyur@orn.mpg.de, thejasvib@gmail.com) with 'measure horseshoe bat calls' in the topic/title.
+
+
 If you think you have some vocalisations/sounds that look like a horseshoe bat call on a spectrogram, and you think it's not being analysed quite right yet - do write to me with example data, I'd be happy to look into it. 
+
+If you'd like to contribute to this package please do get in touch or implement the change and send a pull request. 
 
 
 ### Author: Thejasvi Beleyur,   Acoustic and Functional Ecology Group, Max Planck Institute for Ornithology, Seewiesen
 
--- Last updated 2020-03-13
+-- Last updated 2020-03-17
