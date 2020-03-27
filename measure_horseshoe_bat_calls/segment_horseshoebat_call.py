@@ -310,7 +310,7 @@ def pre_process_for_segmentation(call, fs, **kwargs):
     if peak_percentage >= 1.0:
         raise ValueError('Peak percentage is %f. It cannot be >=1 '%np.round(peak_percentage,2))
     
-    peak_frequency = get_peak_frequency(call, fs)
+    peak_frequency, _ = get_peak_frequency(call, fs)
     
     fraction_of_nyquist = peak_frequency/(fs*0.5)
     if  fraction_of_nyquist >= 0.75*(fs*0.5):
