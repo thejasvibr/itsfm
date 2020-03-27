@@ -12,14 +12,36 @@ from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import get_fm_snip
 
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
-def check_call_background_segmentation(whole_segment, fs, fine_selection, 
+def check_call_background_segmentation(whole_call, fs, main_call_mask, 
                                                    **kwargs):
+    '''Visualises the main call selection
+
+    Parameters
+    ----------
+    whole_call : np.array
+        Call audio
+    fs : float>0
+        Sampling rate in Hz
+    main_call_mask : np.array
+        Boolean array where True indicates the sample
+        is part of the main call, and False that it is not. 
+    
+    Returns
+    -------
+    waveform, spec : pyplot.subplots
+    
+    Notes
+    -----
+    The appearance of the two subplots can be further changes by varying the 
+    keyword arguments. For available keyword arguments see the visualise_call
+    function. 
     '''
-    '''
-    waveform, spec = visualise_call(whole_segment, fs)
-    waveform.plot(make_x_time(fine_selection, fs),fine_selection*np.max(whole_segment),'k')
-    waveform.plot(make_x_time(fine_selection, fs),fine_selection*np.min(whole_segment),'k')
-    spec.plot(make_x_time(fine_selection, fs),fine_selection*120000,'w')
+    waveform, spec = visualise_call(whole_call, fs, **kwargs)
+    waveform.plot(make_x_time(main_call_mask, fs),
+                  main_call_mask*np.max(whole_call),'k')
+    waveform.plot(make_x_time(main_call_mask, fs),
+                  main_call_mask*np.min(whole_call),'k')
+    spec.plot(make_x_time(main_call_mask, fs),main_call_mask*120000,'k')
     return waveform, spec
 
 def check_call_parts_segmentation(only_call, fs, cf, fm,
@@ -27,7 +49,7 @@ def check_call_parts_segmentation(only_call, fs, cf, fm,
     '''
     '''
 
-    wavef, specg = visualise_call(only_call, fs)
+    wavef, specg = visualise_call(only_call, fs, **kwargs)
     
     cf_time = np.argwhere(cf).flatten()/float(fs)
     wavef.vlines(np.array([np.min(cf_time), np.max(cf_time)]),
@@ -47,6 +69,29 @@ def check_call_parts_segmentation(only_call, fs, cf, fm,
     return wavef, specg
 
 def show_all_call_parts(only_call, call_parts, fs, **kwargs):
+    '''
+    Parameters
+    ----------
+    only_call : np.array
+    call_parts : dictionary
+        Dictionary with keys 'cf' and 'fm'
+        The entry for 'cf' should only have one audio segment.
+        The entry for 'fm' can have multiple audio segments. 
+    fs : float>0
+        Sampling rate in Hz. 
+    
+   
+    Returns
+    -------
+    None
+    
+    Notes
+    -----
+    For further keyword arguments to customise the spectrograms 
+    see documentation for make_specgram
+    This function does not return any output, it only produces a 
+    figure with subplots.   
+    '''
     plt.figure(figsize=(6,8))
     plt.subplot(421)
     make_specgram(only_call, fs, **kwargs);

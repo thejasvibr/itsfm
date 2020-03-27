@@ -101,12 +101,42 @@ def get_robust_peak_frequency(audio, **kwargs):
     return peak_frequency
     
 def get_peak_frequency(audio, fs=250000):
-    '''
+    '''Gives peak frequency and frequency resolution
+    with which the measurement is made
+
+    Parameters
+    ----------
+    audio : np.array
+    fs : float>0
+        sampling rate in Hz
+
+    Returns
+    -------
+    peak_freq, freq_resolution : float
+        The peak frequency and frequency resolution of this
+        peak frequency in Hz.
     '''
     spectrum = np.fft.rfft(audio)
     freqs = np.fft.rfftfreq(audio.size, 1.0/fs)
+    freq_resolution = get_frequency_resolution(freqs)
     peak_freq = freqs[np.argmax(spectrum)]
-    return peak_freq
+    return peak_freq, freq_resolution
+
+def get_frequency_resolution(audio, fs=250000):
+    '''
+    Parameters
+    ----------
+    audio : np.array
+    fs : float>0
+        sampling rate in Hz
+
+    Returns
+    -------
+    resolution : float
+        The frequency resolution in Hz. 
+    '''
+    resolution = float(fs/audio.size)
+    return resolution
 
 
 def moving_rms(X, **kwargs):

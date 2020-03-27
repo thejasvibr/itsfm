@@ -33,12 +33,15 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
         Boolean array with True indicating samples that define the CF
     fm_segment : np.array
         Boolean array with True indicating samples that define the FM
-    
-    
 
     Returns
-    --------   
-    
+    --------
+    sound_segments : dictionary
+        Dictionary with keys 'cf' and 'fm'. 
+        There is only one entry for 'cf'
+        and upto two entries for 'fm'.
+    measurements : pd.DataFrame
+        A single row of all the measurements. 
     '''
     sound_segments = {}
     measurements = {}
@@ -46,7 +49,9 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
     measurements['call_duration'] = call.size/float(fs)
     measurements['call_energy'] = calc_energy(call)
     measurements['call_rms'] = rms(call)
-    measurements['peak_frequency'] = get_peak_frequency(call, fs)
+    peak_f, peak_f_resolution = get_peak_frequency(call, fs)
+    measurements['peak_frequency'] = peak_f
+    measurements['peak_frequency_resolution'] = peak_f_resolution
 
     # CF measurements
     cf = call[cf_segment]
@@ -57,7 +62,7 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
     measurements['cf_duration'] = cf.size/float(fs)
     measurements['cf_energy'] = calc_energy(cf)
     measurements['cf_rms'] = rms(cf)
-    measurements['cf_peak_frequency'] = get_peak_frequency(cf, fs)
+    measurements['cf_peak_frequency'], measurements['cf_peakfreq_resolution']  = get_peak_frequency(cf, fs)
 
     # FM measurements
     fm_types, fm_sweeps, fm_startstop = get_fm_snippets(call, fm_segment, fs)
@@ -70,13 +75,14 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
         measurements[each_type+'terminal_frequency'], threshold = get_terminal_frequency(sweep, 
                                                                     fs=fs,
                                                                     **kwargs)
+        measurements[each_type+'terminalfreq_resolution'] = get_frequency_resolution(sweep, fs)
+
         start_time, stop_time = fm_boundaries
         measurements[each_type+'start'] = start_time
         measurements[each_type+'end'] = stop_time
         
     measurements['terminal_frequency_threshold'] = threshold
-    
-    
+
     return sound_segments, measurements
 
 def get_fm_snippets(whole_call, fm_segments, fs):
@@ -90,6 +96,8 @@ def get_fm_snippets(whole_call, fm_segments, fs):
     fm_segments : np.array
         Boolean numpy array with True indicating samples in the whole_call 
         that are FM sweeps. 
+    fs : float>0
+        Sampling rate in Hz
 
     Returns
     --------
@@ -101,8 +109,8 @@ def get_fm_snippets(whole_call, fm_segments, fs):
         results. 
     fm_audio : list
         List with audio snippets
-    fs : float>0
-        Frequency of sampling in Hz
+    fm_boundaries : list
+        list with start and stop time of fm sweep in seconds.
     '''
     try:
         fms, fm_and_samples = identify_maximum_contiguous_regions(fm_segments, 2)
@@ -144,6 +152,7 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
         One of either 'staplepin' OR 'rightangle'
     fm_bandwidth : float, optional
         FM bandwidth in Hz.
+
 
     Returns
     --------

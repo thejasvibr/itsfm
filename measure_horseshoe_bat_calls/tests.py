@@ -236,7 +236,8 @@ class TestGetFMSnippets(unittest.TestCase):
         self.fm_2segment = np.array([1,1,1,0,0,0,0,1,1,1])
         self.fm_1segment_down = np.array([0,0,0,0,0,0,0,1,1,1])
         self.fm_1segment_up = np.flip(self.fm_1segment_down)
-    
+        self.fs = 1.0
+
     def check_type_and_index_match(self,expected_types, expected_snippets,
                                     fm_types, fm_snippets):
         
@@ -248,7 +249,9 @@ class TestGetFMSnippets(unittest.TestCase):
         
     
     def test_simple_get2fms(self):
-        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_2segment)
+        fm_types, fm_snippets, fmstartstop = get_fm_snippets(self.wholecall,
+                                                self.fm_2segment,
+                                                self.fs)
         
         expected_types = ['upfm_', 'downfm_']
         expected_snippets= [ np.arange(1,4), np.arange(8,11)]
@@ -257,7 +260,9 @@ class TestGetFMSnippets(unittest.TestCase):
                                         fm_types, fm_snippets)
     
     def test_simple_1fmdown(self):
-        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_1segment_down)
+        fm_types, fm_snippets, fmstartstop = get_fm_snippets(self.wholecall, 
+                                                self.fm_1segment_down,
+                                                self.fs)
         
         expected_types = ['downfm_']
         expected_snippets= [ np.arange(8,11)]
@@ -265,18 +270,16 @@ class TestGetFMSnippets(unittest.TestCase):
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
     def test_simple_1fmup(self):
-        fm_types, fm_snippets = get_fm_snippets(self.wholecall, self.fm_1segment_up)
+        fm_types, fm_snippets, fmstartstop = get_fm_snippets(self.wholecall, 
+                                                self.fm_1segment_up,
+                                                self.fs)
         
         expected_types = ['upfm_']
         expected_snippets= [ np.arange(1,4)]
         
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
-    
-    
-    
-            
-    
+ 
     
 
         
