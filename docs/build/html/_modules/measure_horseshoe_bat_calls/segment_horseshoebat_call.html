@@ -25,6 +25,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -154,6 +155,7 @@
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span> 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
 
+<span class="n">__version_segment_hbc</span> <span class="o">=</span> <span class="s1">&#39;0.0.1&#39;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;post_v1.0.0&#39;</span>
 
 <div class="viewcode-block" id="segment_call_into_cf_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_call_into_cf_fm</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -164,10 +166,6 @@
 <span class="sd">        Audio with horseshoe bat call</span>
 <span class="sd">    fs : float&gt;0</span>
 <span class="sd">        Frequency of sampling in Hz. </span>
-<span class="sd">    </span>
-<span class="sd">    Keyword Arguments</span>
-<span class="sd">    ------------------</span>
-<span class="sd">    see pre_process_for_segmentation, segment_cf_and_fm</span>
 <span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
@@ -324,9 +322,8 @@
     <span class="n">dbrms_profile</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">background_threshold</span><span class="p">:</span>
-        <span class="n">error1</span> <span class="o">=</span> <span class="s1">&#39;The dynamic range of the signal in dB(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">background_threshold</span><span class="p">)</span>
-        <span class="n">error2</span> <span class="o">=</span> <span class="s1">&#39;) is lower than the background threshold. Please increase the background threshold&#39;</span>
-        <span class="k">raise</span> <span class="n">IncorrectThreshold</span><span class="p">(</span><span class="n">error1</span><span class="o">+</span><span class="n">error2</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">IncorrectThreshold</span><span class="p">(</span><span class="s1">&#39;The dynamic range of the signal is lower than the background threshold.</span><span class="se">\</span>
+<span class="s1">        Please decrease the background threshold&#39;</span><span class="p">)</span>
 
     <span class="n">potential_region</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="o">&gt;=</span><span class="n">background_threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 

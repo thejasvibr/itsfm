@@ -1,7 +1,7 @@
 |image0|
 
 measure horseshoe bat calls : v1.0.0 (user-friendly and ready for you!)
-=======================================================================
+#######################################################################
 
 Automate measurements of horseshoe bat calls - (or any similar sound!).
 

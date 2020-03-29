@@ -25,6 +25,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -180,8 +181,6 @@
 <span class="sd">    function. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">waveform</span><span class="p">,</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">visualise_call</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">waveform</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Call-background segmentation </span><span class="se">\n</span><span class="s1"> Diagnostic plots&#39;</span><span class="p">)</span>
-
     <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
                   <span class="n">main_call_mask</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">whole_call</span><span class="p">),</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
     <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
@@ -239,7 +238,6 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">421</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Call part segmentation </span><span class="se">\n</span><span class="s1"> Diagnostic plots&#39;</span><span class="p">)</span>
     <span class="n">make_specgram</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">423</span><span class="p">)</span>
     <span class="n">make_specgram</span><span class="p">(</span><span class="n">call_parts</span><span class="p">[</span><span class="s1">&#39;cf&#39;</span><span class="p">],</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
@@ -326,7 +324,6 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
     <span class="n">a0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
-    <span class="n">a0</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Call measurements </span><span class="se">\n</span><span class="s1"> Diagnostic plot&#39;</span><span class="p">)</span>
     <span class="n">specgram</span> <span class="o">=</span> <span class="n">make_specgram</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
 
     <span class="n">plot_fm_measurements</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">measurements</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
