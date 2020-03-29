@@ -1,0 +1,591 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measure_horseshoe_bat_calls.segment_horseshoebat_call &mdash; measure horseshoe bat calls 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> measure horseshoe bat calls
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">measure horseshoe bat calls</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measure_horseshoe_bat_calls.segment_horseshoebat_call</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measure_horseshoe_bat_calls.segment_horseshoebat_call</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Module that segments the horseshoebat call into FM and CF parts</span>
+<span class="sd">The primary logic of this </span>
+<span class="sd">Created on Mon Mar  9 19:40:27 2020</span>
+
+<span class="sd">@author: tbeleyur</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">pywt</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span> 
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;post_v1.0.0&#39;</span>
+
+<div class="viewcode-block" id="segment_call_into_cf_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_call_into_cf_fm</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    call : np.array</span>
+<span class="sd">        Audio with horseshoe bat call</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Frequency of sampling in Hz. </span>
+<span class="sd">    </span>
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    ------------------</span>
+<span class="sd">    see pre_process_for_segmentation, segment_cf_and_fm</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    cf_samples, fm_samples : np.array</span>
+<span class="sd">        Boolean numpy array showing which of the samples belong </span>
+<span class="sd">        to the cf and the fm respectively. </span>
+<span class="sd">    info : list</span>
+<span class="sd">        List with two np.array. The first array has the </span>
+<span class="sd">        max normalised dB rms profile of the highpassed filtered</span>
+<span class="sd">        call (cf dominant). The second array has the max normalised</span>
+<span class="sd">        dB rms profile of the  lowpassed filtered call (fm dominant).</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    ------</span>
+<span class="sd">    For more information on how to handle/improve the segmentation see</span>
+<span class="sd">    documentation for pre_process_for_segmentation</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span> <span class="o">=</span> <span class="n">pre_process_for_segmentation</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">segment_cf_and_fm</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span><span class="p">,</span> 
+                                                     <span class="n">fs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span></div>
+
+<div class="viewcode-block" id="segment_cf_and_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_cf_and_fm</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculates the relative increase in signal levels </span>
+<span class="sd">    between the CF and FM dominant versions of the audio. </span>
+<span class="sd">    </span>
+<span class="sd">    Regions which have not been amplified will show &lt;= 0 dB change, </span>
+<span class="sd">    and this is used to identify the CF and FM portions reliably.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fm_re_cf</span> <span class="o">=</span> <span class="n">fm_dbrms</span> <span class="o">-</span> <span class="n">cf_dbrms</span>
+    <span class="n">cf_re_fm</span> <span class="o">=</span> <span class="n">cf_dbrms</span> <span class="o">-</span> <span class="n">fm_dbrms</span>
+    
+    <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">fm_re_cf</span> <span class="o">&gt;</span> <span class="mi">0</span> 
+    <span class="n">cf_samples</span> <span class="o">=</span> <span class="n">cf_re_fm</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="n">main_cf</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">main_fm</span> <span class="o">=</span> <span class="n">get_fm_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">main_cf</span><span class="p">,</span> <span class="n">main_fm</span><span class="p">,</span> <span class="p">[</span><span class="n">cf_re_fm</span><span class="p">,</span> <span class="n">fm_re_cf</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="get_fm_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions">[docs]</a><span class="k">def</span> <span class="nf">get_fm_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fm_samples : np.array</span>
+<span class="sd">        Boolean numpy array with candidate FM samples. </span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">    min_fm_duration : float, optional</span>
+<span class="sd">        minimum fm duration expected in seconds. Any fm segment lower than this</span>
+<span class="sd">        duration  is considered to be a bad read and discarded.</span>
+<span class="sd">        Defaults to 0.5 milliseconds.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    valid_fm : np.array</span>
+<span class="sd">        Boolean numpy array with the corrected fm samples.</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">min_fm_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_fm_duration&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">min_fm_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">min_fm_duration</span><span class="p">)</span>
+
+    <span class="n">valid_fm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">fm_samples</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">main_fm</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">regions</span><span class="p">,</span> <span class="n">region_id_and_samples</span> <span class="o">=</span> <span class="n">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">main_fm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">regions</span><span class="p">,</span> <span class="n">region_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">region_id_and_samples</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span>
+                                            <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">regions_above_min_length</span> <span class="o">=</span> <span class="n">regions</span><span class="p">[</span><span class="n">region_lengths</span> <span class="o">&gt;=</span> <span class="n">min_fm_samples</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions_above_min_length</span><span class="p">)</span> <span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">valid_rows</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">regions_above_min_length</span><span class="p">:</span>
+                <span class="n">valid_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">region_id_and_samples</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">each</span><span class="p">))</span>
+            <span class="n">valid_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">valid_rows</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">valid_samples</span> <span class="o">=</span> <span class="n">region_id_and_samples</span><span class="p">[</span><span class="n">valid_rows</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            
+            <span class="n">valid_fm</span><span class="p">[</span><span class="n">valid_samples</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">candidate_fm</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">candidate_fm</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_fm_samples</span><span class="p">:</span>
+            <span class="n">valid_fm</span> <span class="o">=</span> <span class="n">candidate_fm</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+             
+    <span class="k">return</span> <span class="n">valid_fm</span></div>
+        
+
+<div class="viewcode-block" id="segment_call_from_background"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background">[docs]</a><span class="k">def</span> <span class="nf">segment_call_from_background</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Performs a wavelet transform to track the signal within the relevant portion of the bandwidth. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Frequency of sampling in Hertz. </span>
+<span class="sd">    lowest_relevant_freq : float&gt;0, optional</span>
+<span class="sd">        The lowest frequency band in Hz whose coefficients will be tracked.</span>
+<span class="sd">        The coefficients of all frequencies in the signal &gt;= the lowest relevant</span>
+<span class="sd">        frequency are tracked. This is the lowest possible frequency the signal can take.</span>
+<span class="sd">        It is best to give ~10-20 kHz of berth.</span>
+<span class="sd">        Defaults to 35kHz.</span>
+<span class="sd">	background_threshold : float &lt; 0</span>
+<span class="sd">		The relative threshold which is used to define the background. The segmentation is </span>
+<span class="sd">		performed by selecting the region that is above background_threshold dB relative</span>
+<span class="sd">		to 	the max dB rms value in the audio. </span>
+<span class="sd">		Defaults to -20 dB</span>
+<span class="sd">    wavelet_type : str, optional</span>
+<span class="sd">        The type of wavelet which will be used for the continuous wavelet transform. </span>
+<span class="sd">        See  pywt.wavelist(kind=&#39;continuous&#39;) for all possible types in case the default</span>
+<span class="sd">        doesn&#39;t seem to work. </span>
+<span class="sd">        Defaults to mexican hat, &#39;mexh&#39;</span>
+<span class="sd">    scales : array-like, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    potential_region : np.array</span>
+<span class="sd">        A boolean numpy array where True corresponds to the regions which</span>
+<span class="sd">        are call samples, and False are the background samples. The single </span>
+<span class="sd">        longest continuous region is output.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        When lowest_relevant_frequency is too high or not included in </span>
+<span class="sd">        the centre frequencies of the default/input scales for </span>
+<span class="sd">        wavelet transforms. </span>
+<span class="sd">    IncorrectThreshold</span>
+<span class="sd">        When the dynamic range of the relevant part of the signal is smaller</span>
+<span class="sd">        or equal to the background_threshold.</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lowest_relevant_freq</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lowest_relevant_freq&#39;</span><span class="p">,</span> <span class="mf">35000.0</span><span class="p">)</span>
+    <span class="n">wavelet_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;wavelet_type&#39;</span><span class="p">,</span> <span class="s1">&#39;mexh&#39;</span><span class="p">)</span>
+    <span class="n">background_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;background_threshold&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scales&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="n">coefs</span><span class="p">,</span> <span class="n">freqs</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">cwt</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span>
+                            <span class="n">scales</span><span class="p">,</span>
+                            <span class="n">wavelet_type</span><span class="p">,</span>
+                            <span class="n">sampling_period</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">fs</span><span class="p">))</span>
+    <span class="n">relevant_freqs</span> <span class="o">=</span> <span class="n">freqs</span><span class="p">[</span><span class="n">freqs</span><span class="o">&gt;=</span><span class="n">lowest_relevant_freq</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">relevant_freqs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The lowest relevant frequency is too high. Please re-check the value&#39;</span><span class="p">)</span>
+    
+    <span class="n">within_centre_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span><span class="o">&lt;=</span><span class="n">lowest_relevant_freq</span><span class="p">,</span>
+                                         <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">lowest_relevant_freq</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">within_centre_freqs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The lowest relevant frequency </span><span class="si">%.2f</span><span class="s1"> is not included in the centre frequencies of the wavelet scales.</span><span class="se">\</span>
+<span class="s1">                          Increase the scale range.&#39;</span><span class="o">%</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">lowest_relevant_freq</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">lowest_frequency_row</span>  <span class="o">=</span>  <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">relevant_freqs</span><span class="p">)</span><span class="o">==</span><span class="n">freqs</span><span class="p">))</span>
+    <span class="n">summed_profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">coefs</span><span class="p">[:</span><span class="n">lowest_frequency_row</span><span class="o">+</span><span class="mi">1</span><span class="p">,:]),</span> <span class="mi">0</span><span class="p">)</span>
+    
+    <span class="n">dbrms_profile</span> <span class="o">=</span> <span class="n">dB</span><span class="p">(</span><span class="n">moving_rms_edge_robust</span><span class="p">(</span><span class="n">summed_profile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+    <span class="n">dbrms_profile</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">background_threshold</span><span class="p">:</span>
+        <span class="n">error1</span> <span class="o">=</span> <span class="s1">&#39;The dynamic range of the signal in dB(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">background_threshold</span><span class="p">)</span>
+        <span class="n">error2</span> <span class="o">=</span> <span class="s1">&#39;) is lower than the background threshold. Please increase the background threshold&#39;</span>
+        <span class="k">raise</span> <span class="n">IncorrectThreshold</span><span class="p">(</span><span class="n">error1</span><span class="o">+</span><span class="n">error2</span><span class="p">)</span>
+
+    <span class="n">potential_region</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">dbrms_profile</span><span class="o">&gt;=</span><span class="n">background_threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">potential_region</span><span class="p">,</span> <span class="n">dbrms_profile</span></div>
+
+<div class="viewcode-block" id="identify_valid_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_valid_regions">[docs]</a><span class="k">def</span> <span class="nf">identify_valid_regions</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="p">,</span> <span class="n">num_expected_regions</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    condition_satisfied : np.array</span>
+<span class="sd">        Boolean numpy array with samples either being True or False. </span>
+<span class="sd">        The array may have multiple regions which satisfy a conditions (True)</span>
+<span class="sd">        separated by smaller regions which don&#39;t (False).</span>
+<span class="sd">    num_expected_regions : int &gt; 0 </span>
+<span class="sd">        The number of expected regions which satisfy a condition. </span>
+<span class="sd">        If &gt;1, then the first two longest continuous regions will be returned,</span>
+<span class="sd">        and the smaller regions will be suppressed/eliminated.</span>
+<span class="sd">        Defaults to 1. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    valid_regions : np.array</span>
+<span class="sd">        Boolean array which identifies the regions with the longest</span>
+<span class="sd">        contiguous lengths.</span>
+<span class="sd">    ADDDDD HERE !! </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">regions_of_interest</span><span class="p">,</span> <span class="n">all_region_data</span> <span class="o">=</span> <span class="n">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="p">,</span> <span class="n">num_expected_regions</span><span class="p">)</span>
+    <span class="n">valid_samples</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">all_region_ids</span> <span class="o">=</span> <span class="n">all_region_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">regions_of_interest</span><span class="p">:</span>
+        <span class="n">valid_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_region_data</span><span class="p">[</span><span class="n">all_region_ids</span><span class="o">==</span><span class="n">each</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">valid_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">valid_samples</span><span class="p">)</span>
+    
+    <span class="n">valid_regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+    <span class="n">valid_regions</span><span class="p">[</span><span class="n">valid_samples</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="n">valid_regions</span></div>
+
+<div class="viewcode-block" id="identify_maximum_contiguous_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_maximum_contiguous_regions">[docs]</a><span class="k">def</span> <span class="nf">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="p">,</span> <span class="n">number_regions_of_interest</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given a Boolean array - this function identifies regions of contiguous samples that</span>
+<span class="sd">    are true and labels each with its own region_number. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    condition_satisfied : np.array</span>
+<span class="sd">        Numpy array with Boolean (True/False) entries for each sample. </span>
+<span class="sd">    number_regions_of_interest : integer &gt; 1</span>
+<span class="sd">        Number of contiguous regions which are to be detected. The region ids </span>
+<span class="sd">        are output in descending order (longest--&gt;shortest).</span>
+<span class="sd">        Defaults to 1. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    region_numbers : list</span>
+<span class="sd">        List with numeric IDs given to each contiguous region which is True.</span>
+<span class="sd">    region_id_and_samples : np.array</span>
+<span class="sd">        Two columns numpy array. Column 0 has the region_number, and Column 1 has </span>
+<span class="sd">        the individual samples that belong to each region_number. </span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    -------</span>
+<span class="sd">    ValueError : This happens if the condition_satisfied array has no entries that are True. </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">region_number</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">region_and_samples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># identify the Trues, and assign the sample index to a region number</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">each</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">each</span><span class="p">:</span>
+            <span class="n">region_and_samples</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">region_number</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">region_number</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># count number of samples in each region and output the top 1/2/... regions </span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">region_id_and_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">region_and_samples</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">regions</span><span class="p">,</span> <span class="n">region_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">region_id_and_samples</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">region_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_regions_of_interest</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">region_length</span><span class="p">)</span>
+                <span class="n">region_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">regions</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                <span class="n">remaining_region_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">region_length</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+                <span class="n">remaining_regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">remaining_region_lengths</span><span class="p">)</span>
+                <span class="n">region_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">remaining_regions</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                <span class="n">remaining_region_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">remaining_region_lengths</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+                <span class="n">remaining_regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">remaining_regions</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">region_numbers</span><span class="p">,</span> <span class="n">region_id_and_samples</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No regions satisfying the condition found: all entries are False&#39;</span><span class="p">)</span> </div>
+
+
+<div class="viewcode-block" id="pre_process_for_segmentation"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation">[docs]</a><span class="k">def</span> <span class="nf">pre_process_for_segmentation</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Performs a series of steps on a raw cf call before passing it for temporal segmentation </span>
+<span class="sd">    into cf and fm. </span>
+<span class="sd">    Step 1: find peak frequency</span>
+<span class="sd">    Step 2: lowpass (fm_audio) and highpass (cf_audio) below</span>
+<span class="sd">            a fixed percentage of the peak frequency</span>
+<span class="sd">    Step 3: calculate the moving dB  of the fm and cf audio</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    call : np.array</span>
+<span class="sd">    fs : int.</span>
+<span class="sd">        Frequency of sampling in Hertz</span>
+<span class="sd">    peak_percentage : 0&lt;float&lt;1, optional</span>
+<span class="sd">        This is the fraction of the peak at which low and high-pass filtering happens.</span>
+<span class="sd">        Defaults to 0.98.</span>
+<span class="sd">    lowpass : optional</span>
+<span class="sd">        Custom lowpass filtering coefficients. See low_and_highpass_around_threshold</span>
+<span class="sd">    highpass : </span>
+<span class="sd">        Custom highpass filtering coefficients. See low_and_highpass_around_threshold</span>
+<span class="sd">    window_size : integer, optional</span>
+<span class="sd">        The window size in samples over which the moving rms of the low+high passed signals will be calculated.</span>
+<span class="sd">        For default value see documentation of moving_rms</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cf_dbrms, fm_dbrms : np.arrays</span>
+<span class="sd">        The dB rms profile of the high + low passed versions of the input audio.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">peak_percentage</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;peak_percentage&#39;</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">peak_percentage</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Peak percentage is </span><span class="si">%f</span><span class="s1">. It cannot be &gt;=1 &#39;</span><span class="o">%</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">peak_percentage</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="n">peak_frequency</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_peak_frequency</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    
+    <span class="n">fraction_of_nyquist</span> <span class="o">=</span> <span class="n">peak_frequency</span><span class="o">/</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">if</span>  <span class="n">fraction_of_nyquist</span> <span class="o">&gt;=</span> <span class="mf">0.75</span><span class="o">*</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;The peak frequency in the call is </span><span class="si">%f</span><span class="s1"> ... this might lead to erroneous output!&#39;</span><span class="o">%</span><span class="n">fraction_of_nyquist</span><span class="p">))</span>
+
+    <span class="n">threshold_frequency</span> <span class="o">=</span> <span class="n">peak_frequency</span><span class="o">*</span><span class="n">peak_percentage</span>
+    <span class="n">fm_dominant_audio</span><span class="p">,</span> <span class="n">cf_dominant_audio</span> <span class="o">=</span> <span class="n">low_and_highpass_around_threshold</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">fm_rms</span> <span class="o">=</span> <span class="n">moving_rms_edge_robust</span><span class="p">(</span><span class="n">fm_dominant_audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">cf_rms</span> <span class="o">=</span> <span class="n">moving_rms_edge_robust</span><span class="p">(</span><span class="n">cf_dominant_audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">fm_dbrms</span><span class="p">,</span> <span class="n">cf_dbrms</span> <span class="o">=</span> <span class="n">dB</span><span class="p">(</span><span class="n">fm_rms</span><span class="p">),</span> <span class="n">dB</span><span class="p">(</span><span class="n">cf_rms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span></div>
+
+<div class="viewcode-block" id="low_and_highpass_around_threshold"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.low_and_highpass_around_threshold">[docs]</a><span class="k">def</span> <span class="nf">low_and_highpass_around_threshold</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Make two version of an audio clip: the low pass and high pass versions.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio : np.array</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Frequency of sampling in Hz</span>
+<span class="sd">    threshold_frequency : float&gt;0</span>
+<span class="sd">        The frequency at which the lowpass and highpass operations are </span>
+<span class="sd">        be done. </span>
+<span class="sd">    lowpass,highpass : ndarrays, optional</span>
+<span class="sd">        The b &amp; a polynomials of an IIR filter which define the</span>
+<span class="sd">        lowpass and highpass filters.</span>
+<span class="sd">        Defaults to a second order elliptical filter with rp of 3dB</span>
+<span class="sd">        and rs of 10 dB. See signal.ellip for more details of rp and</span>
+<span class="sd">        rs.</span>
+<span class="sd">    pad_duration : float&gt;0, optional</span>
+<span class="sd">        Zero-padding duration in seconds before low+high pass filtering. </span>
+<span class="sd">        Defaults to 0.1 seconds.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lp_audio, hp_audio : np.arrays</span>
+<span class="sd">        The low and high pass filtered versions of the input audio. </span>
+<span class="sd">        </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lowpass</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">ellip</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">fs</span><span class="p">),</span> <span class="s1">&#39;lowpass&#39;</span><span class="p">))</span>
+    <span class="n">highpass</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">ellip</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">fs</span><span class="p">),</span> <span class="s1">&#39;highpass&#39;</span><span class="p">))</span>
+    <span class="n">pad_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pad_duration&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    
+    <span class="n">audio_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="p">[</span><span class="n">pad_length</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">lp_audio_raw</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="n">lowpass</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lowpass</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_padded</span><span class="p">)</span>
+    <span class="n">lp_audio</span> <span class="o">=</span> <span class="n">lp_audio_raw</span><span class="p">[</span><span class="n">pad_length</span><span class="p">:</span><span class="o">-</span><span class="n">pad_length</span><span class="p">]</span>
+    
+    <span class="n">hp_audio_raw</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="n">highpass</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">highpass</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_padded</span><span class="p">)</span>
+    <span class="n">hp_audio</span> <span class="o">=</span> <span class="n">hp_audio_raw</span><span class="p">[</span><span class="n">pad_length</span><span class="p">:</span><span class="o">-</span><span class="n">pad_length</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">lp_audio</span><span class="p">,</span> <span class="n">hp_audio</span></div>
+
+<div class="viewcode-block" id="get_thresholds_re_max"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max">[docs]</a><span class="k">def</span> <span class="nf">get_thresholds_re_max</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fm_threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cf_threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fm_db_re_max</span> <span class="o">=</span> <span class="n">fm_dbrms</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">fm_dbrms</span><span class="p">)</span>
+    <span class="n">cf_db_re_max</span> <span class="o">=</span> <span class="n">cf_dbrms</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">)</span>
+
+    <span class="n">fm_cf_duration</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fm_and_cf_thresholds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_shared_fm_cf_samples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">each_fm</span> <span class="ow">in</span> <span class="n">fm_threshold</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">each_cf</span> <span class="ow">in</span> <span class="n">cf_threshold</span><span class="p">:</span>
+            <span class="n">fm_and_cf_thresholds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">each_fm</span><span class="p">,</span> <span class="n">each_cf</span><span class="p">))</span>
+            <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">fm_db_re_max</span> <span class="o">&gt;=</span> <span class="n">each_fm</span>
+            <span class="n">cf_samples</span> <span class="o">=</span> <span class="n">cf_db_re_max</span> <span class="o">&gt;=</span> <span class="n">each_cf</span>
+
+            <span class="n">common_fmcf_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">))</span>
+            <span class="n">num_shared_fm_cf_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">common_fmcf_samples</span><span class="p">)</span>
+
+            <span class="n">cf_and_fm_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">)</span>
+            <span class="n">fm_cf_duration</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cf_and_fm_samples</span><span class="p">)</span>
+
+    <span class="c1"># choose the parameter region that will allow the best compromise between number of common fm_cf samples </span>
+    <span class="c1"># and the longest fm_cf durations. </span>
+    <span class="n">optimisation_metric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">num_shared_fm_cf_samples</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cf_and_fm_samples</span><span class="p">)</span>
+    <span class="n">best_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">optimisation_metric</span><span class="p">)</span>
+    <span class="n">best_threshold</span> <span class="o">=</span> <span class="n">fm_and_cf_thresholds</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">num_shared_fm_cf_samples</span><span class="p">,</span> <span class="n">optimisation_metric</span><span class="p">,</span> <span class="n">best_threshold</span></div>
+
+
+<div class="viewcode-block" id="IncorrectThreshold"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold">[docs]</a><span class="k">class</span> <span class="nc">IncorrectThreshold</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Thejasvi Beleyur
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

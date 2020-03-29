@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measure_horseshoe_bat_calls.view_horseshoebat_call &mdash; measure horseshoe bat calls 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> measure horseshoe bat calls
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">measure horseshoe bat calls</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>measure_horseshoe_bat_calls.view_horseshoebat_call</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for measure_horseshoe_bat_calls.view_horseshoebat_call</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Bunch of functions which help in visualising data </span>
+<span class="sd">and results</span>
+<span class="sd">Created on Tue Mar 10 19:55:41 2020</span>
+
+<span class="sd">@author: tbeleyur</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call</span> <span class="kn">import</span> <span class="n">get_fm_snippets</span>
+
+<span class="n">make_x_time</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">X</span><span class="p">,</span> <span class="n">fs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">fs</span><span class="p">),</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+<div class="viewcode-block" id="check_call_background_segmentation"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_background_segmentation">[docs]</a><span class="k">def</span> <span class="nf">check_call_background_segmentation</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">main_call_mask</span><span class="p">,</span> 
+                                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Visualises the main call selection</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    whole_call : np.array</span>
+<span class="sd">        Call audio</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Sampling rate in Hz</span>
+<span class="sd">    main_call_mask : np.array</span>
+<span class="sd">        Boolean array where True indicates the sample</span>
+<span class="sd">        is part of the main call, and False that it is not. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    waveform, spec : pyplot.subplots</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The appearance of the two subplots can be further changes by varying the </span>
+<span class="sd">    keyword arguments. For available keyword arguments see the visualise_call</span>
+<span class="sd">    function. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">waveform</span><span class="p">,</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">visualise_call</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">waveform</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Call-background segmentation </span><span class="se">\n</span><span class="s1"> Diagnostic plots&#39;</span><span class="p">)</span>
+
+    <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
+                  <span class="n">main_call_mask</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">whole_call</span><span class="p">),</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
+                  <span class="n">main_call_mask</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">whole_call</span><span class="p">),</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">spec</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span><span class="n">main_call_mask</span><span class="o">*</span><span class="mi">120000</span><span class="p">,</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">waveform</span><span class="p">,</span> <span class="n">spec</span></div>
+
+<div class="viewcode-block" id="check_call_parts_segmentation"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_parts_segmentation">[docs]</a><span class="k">def</span> <span class="nf">check_call_parts_segmentation</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span>
+                                      <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">wavef</span><span class="p">,</span> <span class="n">specg</span> <span class="o">=</span> <span class="n">visualise_call</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="n">cf_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">wavef</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">cf_time</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">cf_time</span><span class="p">)]),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">only_call</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">only_call</span><span class="p">),</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    
+    <span class="n">fm_types</span><span class="p">,</span> <span class="n">fm_sweeps</span><span class="p">,</span> <span class="n">fm_startstop</span> <span class="o">=</span> <span class="n">get_fm_snippets</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">fm_startstop</span><span class="p">:</span>
+        <span class="n">wavef</span><span class="o">.</span><span class="n">vlines</span><span class="p">([</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">each</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">only_call</span><span class="p">)</span><span class="o">*-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">only_call</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> 
+                     <span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">specg</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span><span class="n">cf</span><span class="o">*</span><span class="mi">120000</span><span class="p">,</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;CF&#39;</span><span class="p">)</span>
+    <span class="n">specg</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">fm</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span><span class="n">fm</span><span class="o">*</span><span class="mi">70000</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;FM&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">wavef</span><span class="p">,</span> <span class="n">specg</span></div>
+
+<div class="viewcode-block" id="show_all_call_parts"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.show_all_call_parts">[docs]</a><span class="k">def</span> <span class="nf">show_all_call_parts</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">call_parts</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    only_call : np.array</span>
+<span class="sd">    call_parts : dictionary</span>
+<span class="sd">        Dictionary with keys &#39;cf&#39; and &#39;fm&#39;</span>
+<span class="sd">        The entry for &#39;cf&#39; should only have one audio segment.</span>
+<span class="sd">        The entry for &#39;fm&#39; can have multiple audio segments. </span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">        Sampling rate in Hz. </span>
+<span class="sd">    </span>
+<span class="sd">   </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    For further keyword arguments to customise the spectrograms </span>
+<span class="sd">    see documentation for make_specgram</span>
+<span class="sd">    This function does not return any output, it only produces a </span>
+<span class="sd">    figure with subplots.   </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">421</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Call part segmentation </span><span class="se">\n</span><span class="s1"> Diagnostic plots&#39;</span><span class="p">)</span>
+    <span class="n">make_specgram</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">423</span><span class="p">)</span>
+    <span class="n">make_specgram</span><span class="p">(</span><span class="n">call_parts</span><span class="p">[</span><span class="s1">&#39;cf&#39;</span><span class="p">],</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">422</span><span class="p">);</span><span class="n">make_waveform</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">424</span><span class="p">);</span><span class="n">make_waveform</span><span class="p">(</span><span class="n">call_parts</span><span class="p">[</span><span class="s1">&#39;cf&#39;</span><span class="p">],</span> <span class="n">fs</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">each</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">call_parts</span><span class="p">[</span><span class="s1">&#39;fm&#39;</span><span class="p">]):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">420</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="p">);</span><span class="n">make_waveform</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">420</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="mi">5</span><span class="p">);</span><span class="n">make_specgram</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="visualise_call"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.visualise_call">[docs]</a><span class="k">def</span> <span class="nf">visualise_call</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    audio </span>
+<span class="sd">    fs </span>
+<span class="sd">    fft_size : integer&gt;0, optional</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    a0, a1 : subplots</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">make_waveform</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">a0</span><span class="p">)</span>
+    <span class="n">make_specgram</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span></div>
+
+<span class="k">def</span> <span class="nf">make_specgram</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="n">fft_size</span> <span class="o">=</span> <span class="n">get_fftsize</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">n_overlap</span> <span class="o">=</span> <span class="n">fft_size</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cmap&#39;</span><span class="p">,</span> <span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+    <span class="n">vmin</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vmin&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">specgram</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> 
+                               <span class="n">NFFT</span><span class="o">=</span><span class="n">fft_size</span><span class="p">,</span>
+                               <span class="n">noverlap</span><span class="o">=</span><span class="n">n_overlap</span><span class="p">,</span>
+                               <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> 
+                               <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">specgram</span>
+
+<span class="k">def</span> <span class="nf">make_waveform</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span><span class="n">fs</span><span class="p">),</span> <span class="n">audio</span><span class="p">)</span>
+    
+
+<div class="viewcode-block" id="get_fftsize"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.get_fftsize">[docs]</a><span class="k">def</span> <span class="nf">get_fftsize</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fft_size_given</span> <span class="o">=</span> <span class="ow">not</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fft_size&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">freq_resolution_given</span> <span class="o">=</span> <span class="ow">not</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;freq_resolution&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">both_not_given</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">fft_size_given</span><span class="p">,</span> <span class="n">freq_resolution_given</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">freq_resolution_given</span><span class="p">:</span>
+        <span class="n">window_size</span> <span class="o">=</span> <span class="n">calculate_window_size</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;freq_resolution&#39;</span><span class="p">),</span> <span class="n">fs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">window_size</span>
+    <span class="k">elif</span> <span class="n">fft_size_given</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fft_size&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">both_not_given</span><span class="p">:</span>
+        <span class="n">default_freq_resoln</span> <span class="o">=</span> <span class="mf">1000.0</span> <span class="c1"># Hz</span>
+        <span class="n">window_size</span> <span class="o">=</span> <span class="n">calculate_window_size</span><span class="p">(</span><span class="n">default_freq_resoln</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">window_size</span></div>
+
+<span class="k">def</span> <span class="nf">calculate_window_size</span><span class="p">(</span><span class="n">freq_resoln</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">/</span><span class="n">freq_resoln</span><span class="p">)</span>        
+        
+
+
+
+<div class="viewcode-block" id="make_overview_figure"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.make_overview_figure">[docs]</a><span class="k">def</span> <span class="nf">make_overview_figure</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span>
+                         <span class="n">measurements</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="n">a0</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Call measurements </span><span class="se">\n</span><span class="s1"> Diagnostic plot&#39;</span><span class="p">)</span>
+    <span class="n">specgram</span> <span class="o">=</span> <span class="n">make_specgram</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+
+    <span class="n">plot_fm_measurements</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">measurements</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plot_cf_measurements</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">measurements</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">a0</span></div>
+
+<span class="k">def</span> <span class="nf">plot_fm_measurements</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">measures</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># check if there&#39;s upfm </span>
+    <span class="k">for</span> <span class="n">fm</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;upfm_&#39;</span><span class="p">,</span><span class="s1">&#39;downfm_&#39;</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fm_start</span><span class="p">,</span> <span class="n">fm_stop</span> <span class="o">=</span>  <span class="n">measures</span><span class="p">[</span><span class="n">fm</span><span class="o">+</span><span class="s1">&#39;start&#39;</span><span class="p">],</span>  <span class="n">measures</span><span class="p">[</span><span class="n">fm</span><span class="o">+</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+            <span class="n">subplot</span><span class="o">.</span><span class="n">vlines</span><span class="p">((</span><span class="n">fm_start</span><span class="p">,</span> <span class="n">fm_stop</span><span class="p">),</span>
+                                    <span class="mi">0</span><span class="p">,</span><span class="n">fs</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">subplot</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">measures</span><span class="p">[</span><span class="n">fm</span><span class="o">+</span><span class="s1">&#39;terminal_frequency&#39;</span><span class="p">],</span>
+                           <span class="n">fm_start</span><span class="p">,</span> <span class="n">fm_stop</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+            
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">subplot</span>
+
+<span class="k">def</span> <span class="nf">plot_cf_measurements</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">measures</span><span class="p">,</span> <span class="n">subplot</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">peak_frequency</span> <span class="o">=</span> <span class="n">measures</span><span class="p">[</span><span class="s1">&#39;peak_frequency&#39;</span><span class="p">]</span>
+    <span class="n">subplot</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">peak_frequency</span><span class="p">,</span><span class="n">measures</span><span class="p">[</span><span class="s1">&#39;cf_start&#39;</span><span class="p">],</span>
+                               <span class="n">measures</span><span class="p">[</span><span class="s1">&#39;cf_end&#39;</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">subplot</span> 
+    
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Thejasvi Beleyur
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

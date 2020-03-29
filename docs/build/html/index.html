@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>measure horseshoe bat calls: automate, measure, repeat &mdash; measure horseshoe bat calls 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> measure horseshoe bat calls
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">measure horseshoe bat calls: automate, measure, repeat</a><ul>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.user_interface">High-level User Interface</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.batch_processing">Batch Processing from batchfiles</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call">Call segmentation</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">Call measurements</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.view_horseshoebat_call">Output visualisation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">measure horseshoe bat calls</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>measure horseshoe bat calls: automate, measure, repeat</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="measure-horseshoe-bat-calls-automate-measure-repeat">
+<h1>measure horseshoe bat calls: automate, measure, repeat<a class="headerlink" href="#measure-horseshoe-bat-calls-automate-measure-repeat" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.user_interface">
+<span id="high-level-user-interface"></span><h2>High-level User Interface<a class="headerlink" href="#module-measure_horseshoe_bat_calls.user_interface" title="Permalink to this headline">¶</a></h2>
+<p>User-friendly higher level functions
+Created on Sat Mar 28 10:40:46 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.user_interface.save_overview_graphs">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.user_interface.</code><code class="sig-name descname">save_overview_graphs</code><span class="sig-paren">(</span><em class="sig-param">all_subplots</em>, <em class="sig-param">analysis_name</em>, <em class="sig-param">file_name</em>, <em class="sig-param">index</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/user_interface.html#save_overview_graphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.user_interface.save_overview_graphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves overview graphs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_subplots</strong> (<em>list</em>) – List with plt.subplot objects in them.
+For each figure to be saved, one subplot object is enough.</p></li>
+<li><p><strong>analysis_name</strong> (<em>str</em>) – The name of the analysis. If this funciton is called
+through a batchfile, then it becomes the name of the
+batchfile</p></li>
+<li><p><strong>file_name</strong> (<em>str.</em>) – </p></li>
+<li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – A numeric identifier for each graph. This is especially relevant
+for analyses driven by batch files as there may be cases where the
+calls are selected from the same audio file but in different parts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function has the main side effect of saving all the input figures
+into a pdf file with &gt;1 pages (one page per plot) for the user to inspect
+the results.</p>
+<p class="rubric">Example</p>
+<p>import numpy as np</p>
+<p># 1st plot
+plt.figure()
+a = plt.subplot(211)
+plt.plot([1,2,3])
+b = plt.subplot(212)
+plt.plot([5,4,3])</p>
+<p>#2nd plot
+plt.figure()
+c = plt.subplot(121)
+plt.plot(np.random.normal(0,1,100))
+d = plt.subplot(122)
+plt.plot(np.random.normal(0,1,10))</p>
+<p>save_overview_graphs([a,c], ‘example_plots’, ‘example_file’,0)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.user_interface.segment_and_measure_call">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.user_interface.</code><code class="sig-name descname">segment_and_measure_call</code><span class="sig-paren">(</span><em class="sig-param">main_call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/user_interface.html#segment_and_measure_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.user_interface.segment_and_measure_call" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main_call</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – sampling rate in Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>segment_call_into_cf_fm and measure_hbc_call</strong> (<em>see</em>) – </p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>segmentation_outputs</strong> (<em>tuple</em>) – The outputs of segment_call_into_cf_fm in a tuple</p></li>
+<li><p><strong>call_parts</strong> (<em>dictionary</em>) – Dictionary with ‘cf’ and ‘fm’ entries and corresponding
+audio.</p></li>
+<li><p><strong>measurements</strong> (<em>pd.DataFrame</em>) – A single row with all the measurements.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.batch_processing">
+<span id="batch-processing-from-batchfiles"></span><h2>Batch Processing from batchfiles<a class="headerlink" href="#module-measure_horseshoe_bat_calls.batch_processing" title="Permalink to this headline">¶</a></h2>
+<p>Runs the batch processing option.
+The main outputs are the call measurements and the visualisations.</p>
+<p>If you’d like to access the raw audio - then it’s better writing a custom
+script yourself.</p>
+<p>Created on Fri Mar 27 15:46:00 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.get_file_name">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">get_file_name</code><span class="sig-paren">(</span><em class="sig-param">kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#get_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.get_file_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.get_only_file_name">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">get_only_file_name</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#get_only_file_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.get_only_file_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.join_and_save">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">join_and_save</code><span class="sig-paren">(</span><em class="sig-param">sourcefile_path</em>, <em class="sig-param">previous_measurements</em>, <em class="sig-param">measurement</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#join_and_save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.join_and_save" title="Permalink to this definition">¶</a></dt>
+<dd><p>appends measurements to previous measurements and saves them to disk.</p>
+<dl class="simple">
+<dt>TODO</dt><dd><ol class="arabic simple">
+<li><p>try not to write and re-write again and again – it’s messy but             not high priority rightnow..</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sourcefile_path</strong> (<em>str/path</em>) – </p></li>
+<li><p><strong>previous_measurements</strong> (<em>pd.DataFrame OR empty list</em>) – </p></li>
+<li><p><strong>measurements</strong> (<em>dictionary</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>previous_measurements</strong> – A new object with the same name as the input object.
+The difference is that the input measurements have been added.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function has an important side effect : it saves the
+previous_measurements object to a .csv file before returning the object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.load_raw_audio">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">load_raw_audio</code><span class="sig-paren">(</span><em class="sig-param">kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#load_raw_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.load_raw_audio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks to see
+:param audio_path: Path to audio file
+:type audio_path: str/path
+:param channel: Channel number to be loaded - starting from 1!</p>
+<blockquote>
+<div><p>Defaults to 1.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>raw_audio</strong> – The audio corresponding to the start and stop times
+and the required channel.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.parse_batchfile_row">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">parse_batchfile_row</code><span class="sig-paren">(</span><em class="sig-param">one_row</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#parse_batchfile_row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.parse_batchfile_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>checks for all user-given arguments
+and removes any columns with DEFAULT in them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>one_row</strong> (<em>pd.DataFrame</em>) – A single row with multiple column names, corresponding to
+compulsory required arguments and the optional
+ones</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>arguments</strong> – Simple dictioanry with one entry for each key.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.run_from_batchfile">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">run_from_batchfile</code><span class="sig-paren">(</span><em class="sig-param">batchfile_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#run_from_batchfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.run_from_batchfile" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batchfile_path</strong> (<em>str/path</em>) – Path to a batchfile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.to_separate_from_background">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">to_separate_from_background</code><span class="sig-paren">(</span><em class="sig-param">arguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#to_separate_from_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.to_separate_from_background" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.segment_horseshoebat_call">
+<span id="call-segmentation"></span><h2>Call segmentation<a class="headerlink" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call" title="Permalink to this headline">¶</a></h2>
+<p>Module that segments the horseshoebat call into FM and CF parts
+The primary logic of this
+Created on Mon Mar  9 19:40:27 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="exception">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold">
+<em class="property">exception </em><code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">IncorrectThreshold</code><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#IncorrectThreshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">get_fm_regions</code><span class="sig-paren">(</span><em class="sig-param">fm_samples</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#get_fm_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fm_samples</strong> (<em>np.array</em>) – Boolean numpy array with candidate FM samples.</p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – </p></li>
+<li><p><strong>min_fm_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum fm duration expected in seconds. Any fm segment lower than this
+duration  is considered to be a bad read and discarded.
+Defaults to 0.5 milliseconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>valid_fm</strong> – Boolean numpy array with the corrected fm samples.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">get_thresholds_re_max</code><span class="sig-paren">(</span><em class="sig-param">cf_dbrms</em>, <em class="sig-param">fm_dbrms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#get_thresholds_re_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_maximum_contiguous_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">identify_maximum_contiguous_regions</code><span class="sig-paren">(</span><em class="sig-param">condition_satisfied</em>, <em class="sig-param">number_regions_of_interest=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#identify_maximum_contiguous_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_maximum_contiguous_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a Boolean array - this function identifies regions of contiguous samples that
+are true and labels each with its own region_number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>condition_satisfied</strong> (<em>np.array</em>) – Numpy array with Boolean (True/False) entries for each sample.</p></li>
+<li><p><strong>number_regions_of_interest</strong> (<em>integer &gt; 1</em>) – Number of contiguous regions which are to be detected. The region ids
+are output in descending order (longest–&gt;shortest).
+Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>region_numbers</strong> (<em>list</em>) – List with numeric IDs given to each contiguous region which is True.</p></li>
+<li><p><strong>region_id_and_samples</strong> (<em>np.array</em>) – Two columns numpy array. Column 0 has the region_number, and Column 1 has
+the individual samples that belong to each region_number.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>:raises ValueError : This happens if the condition_satisfied array has no entries that are True.:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_valid_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">identify_valid_regions</code><span class="sig-paren">(</span><em class="sig-param">condition_satisfied</em>, <em class="sig-param">num_expected_regions=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#identify_valid_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_valid_regions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>condition_satisfied</strong> (<em>np.array</em>) – Boolean numpy array with samples either being True or False.
+The array may have multiple regions which satisfy a conditions (True)
+separated by smaller regions which don’t (False).</p></li>
+<li><p><strong>num_expected_regions</strong> (<em>int &gt; 0</em>) – The number of expected regions which satisfy a condition.
+If &gt;1, then the first two longest continuous regions will be returned,
+and the smaller regions will be suppressed/eliminated.
+Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>valid_regions</strong> (<em>np.array</em>) – Boolean array which identifies the regions with the longest
+contiguous lengths.</p></li>
+<li><p><em>ADDDDD HERE !!</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.low_and_highpass_around_threshold">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">low_and_highpass_around_threshold</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">fs</em>, <em class="sig-param">threshold_frequency</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#low_and_highpass_around_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.low_and_highpass_around_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make two version of an audio clip: the low pass and high pass versions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hz</p></li>
+<li><p><strong>threshold_frequency</strong> (<em>float&gt;0</em>) – The frequency at which the lowpass and highpass operations are
+be done.</p></li>
+<li><p><strong>lowpass</strong><strong>,</strong><strong>highpass</strong> (<em>ndarrays</em><em>, </em><em>optional</em>) – The b &amp; a polynomials of an IIR filter which define the
+lowpass and highpass filters.
+Defaults to a second order elliptical filter with rp of 3dB
+and rs of 10 dB. See signal.ellip for more details of rp and
+rs.</p></li>
+<li><p><strong>pad_duration</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – Zero-padding duration in seconds before low+high pass filtering.
+Defaults to 0.1 seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>lp_audio, hp_audio</strong> – The low and high pass filtered versions of the input audio.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">pre_process_for_segmentation</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#pre_process_for_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a series of steps on a raw cf call before passing it for temporal segmentation
+into cf and fm.
+Step 1: find peak frequency
+Step 2: lowpass (fm_audio) and highpass (cf_audio) below</p>
+<blockquote>
+<div><p>a fixed percentage of the peak frequency</p>
+</div></blockquote>
+<p>Step 3: calculate the moving dB  of the fm and cf audio</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>call</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>int.</em>) – Frequency of sampling in Hertz</p></li>
+<li><p><strong>peak_percentage</strong> (<em>0&lt;float&lt;1</em><em>, </em><em>optional</em>) – This is the fraction of the peak at which low and high-pass filtering happens.
+Defaults to 0.98.</p></li>
+<li><p><strong>lowpass</strong> (<em>optional</em>) – Custom lowpass filtering coefficients. See low_and_highpass_around_threshold</p></li>
+<li><p><strong>highpass</strong> – Custom highpass filtering coefficients. See low_and_highpass_around_threshold</p></li>
+<li><p><strong>window_size</strong> (<em>integer</em><em>, </em><em>optional</em>) – The window size in samples over which the moving rms of the low+high passed signals will be calculated.
+For default value see documentation of moving_rms</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cf_dbrms, fm_dbrms</strong> – The dB rms profile of the high + low passed versions of the input audio.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_call_from_background</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_call_from_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a wavelet transform to track the signal within the relevant portion of the bandwidth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hertz.</p></li>
+<li><p><strong>lowest_relevant_freq</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – <p>The lowest frequency band in Hz whose coefficients will be tracked.
+The coefficients of all frequencies in the signal &gt;= the lowest relevant
+frequency are tracked. This is the lowest possible frequency the signal can take.
+It is best to give ~10-20 kHz of berth.
+Defaults to 35kHz.
+background_threshold : float &lt; 0</p>
+<blockquote>
+<div><p>The relative threshold which is used to define the background. The segmentation is
+performed by selecting the region that is above background_threshold dB relative
+to      the max dB rms value in the audio.
+Defaults to -20 dB</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>wavelet_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The type of wavelet which will be used for the continuous wavelet transform.
+See  pywt.wavelist(kind=’continuous’) for all possible types in case the default
+doesn’t seem to work.
+Defaults to mexican hat, ‘mexh’</p></li>
+<li><p><strong>scales</strong> (<em>array-like</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>potential_region</strong> – A boolean numpy array where True corresponds to the regions which
+are call samples, and False are the background samples. The single
+longest continuous region is output.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – When lowest_relevant_frequency is too high or not included in
+    the centre frequencies of the default/input scales for
+    wavelet transforms.</p></li>
+<li><p><a class="reference internal" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold" title="measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold"><strong>IncorrectThreshold</strong></a> – When the dynamic range of the relevant part of the signal is smaller
+    or equal to the background_threshold.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_call_into_cf_fm</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_call_into_cf_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>call</strong> (<em>np.array</em>) – Audio with horseshoe bat call</p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>pre_process_for_segmentation</strong><strong>, </strong><strong>segment_cf_and_fm</strong> (<em>see</em>) – </p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>cf_samples, fm_samples</strong> (<em>np.array</em>) – Boolean numpy array showing which of the samples belong
+to the cf and the fm respectively.</p></li>
+<li><p><strong>info</strong> (<em>list</em>) – List with two np.array. The first array has the
+max normalised dB rms profile of the highpassed filtered
+call (cf dominant). The second array has the max normalised
+dB rms profile of the  lowpassed filtered call (fm dominant).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For more information on how to handle/improve the segmentation see
+documentation for pre_process_for_segmentation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_cf_and_fm</code><span class="sig-paren">(</span><em class="sig-param">cf_dbrms</em>, <em class="sig-param">fm_dbrms</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_cf_and_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the relative increase in signal levels
+between the CF and FM dominant versions of the audio.</p>
+<p>Regions which have not been amplified will show &lt;= 0 dB change,
+and this is used to identify the CF and FM portions reliably.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">
+<span id="call-measurements"></span><h2>Call measurements<a class="headerlink" href="#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call" title="Permalink to this headline">¶</a></h2>
+<p>Module that segments and measures
+parts of a horseshoebat CF call</p>
+<p>Created on Sun Feb  9 18:11:16 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="exception">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.BackgroundSegmentationError">
+<em class="property">exception </em><code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">BackgroundSegmentationError</code><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#BackgroundSegmentationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.BackgroundSegmentationError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.FMIdentificationError">
+<em class="property">exception </em><code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">FMIdentificationError</code><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#FMIdentificationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.FMIdentificationError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">get_fm_snippets</code><span class="sig-paren">(</span><em class="sig-param">whole_call</em>, <em class="sig-param">fm_segments</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#get_fm_snippets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates separate audio clips for each FM sweep and labels them as
+either ‘upfm’ or ‘downfm’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>whole_call</strong> (<em>np.array</em>) – Whole call audio</p></li>
+<li><p><strong>fm_segments</strong> (<em>np.array</em>) – Boolean numpy array with True indicating samples in the whole_call
+that are FM sweeps.</p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fm_types</strong> (<em>list</em>) – List with strings labelling the type of FM sweep.
+All sweeps ending in the first half of the call are labelled ‘upfm’
+and those ending in the second half are labelled ‘downfm’.
+There can be 1 OR 2 entries in fm_types depending on the call segmentation
+results.</p></li>
+<li><p><strong>fm_audio</strong> (<em>list</em>) – List with audio snippets</p></li>
+<li><p><strong>fm_boundaries</strong> (<em>list</em>) – list with start and stop time of fm sweep in seconds.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_terminal_frequency">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">get_terminal_frequency</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#get_terminal_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_terminal_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the -XdB frequency from the peak.</p>
+<p>The power spectrum is calculated and smoothened over 3 frequency bands to remove
+complex comb-like structures.</p>
+<p>Then the lowest frequency below XdB from the peak is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</p></li>
+<li><p><strong>terminal_frequency_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The terminal frequency is calculated based on finding the level of the peak frequency
+and choosing the lowest frequency which is -10 dB (20log10) below the peak level.
+Defaults to -10 dB</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>terminal_frequency</em></p></li>
+<li><p><em>threshold</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Careful about setting threshold too low - it might lead to output of terminal
+frequencies that are actually in the noise, and not part of the signal itself.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.make_one_CFcall">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">make_one_CFcall</code><span class="sig-paren">(</span><em class="sig-param">call_durn</em>, <em class="sig-param">fm_durn</em>, <em class="sig-param">cf_freq</em>, <em class="sig-param">fs</em>, <em class="sig-param">call_shape</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#make_one_CFcall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.make_one_CFcall" title="Permalink to this definition">¶</a></dt>
+<dd><p>A test function used to check how well the segmenting+measurement
+functions in the module work.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>call_durn</strong> (<em>float</em>) – </p></li>
+<li><p><strong>fm_durn</strong> (<em>float</em>) – </p></li>
+<li><p><strong>cf_freq</strong> (<em>float</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – </p></li>
+<li><p><strong>call_shape</strong> (<em>str</em>) – One of either ‘staplepin’ OR ‘rightangle’</p></li>
+<li><p><strong>fm_bandwidth</strong> (<em>float</em><em>, </em><em>optional</em>) – FM bandwidth in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cfcall</strong> – The synthesised call.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If a call_shape that is not  ‘staplepin’ OR ‘rightangle’ is given</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This is not really the besssst kind of CF call to test the functions on,
+but it works okay. The CF call is made by using the poly spline function
+and this leads to weird jumps in frequency especially around the CF-FM
+junctions. Longish calls with decently long FM parts look fine, but calls
+with very short FM parts lead to rippling of the frequency.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.measure_hbc_call">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">measure_hbc_call</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">cf_segment</em>, <em class="sig-param">fm_segment</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#measure_hbc_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.measure_hbc_call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Segments and measures a horseshoe bat call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0.</em>) – Frequency of sampling in Hz.</p></li>
+<li><p><strong>cf_segment</strong> (<em>np.array</em>) – Boolean array with True indicating samples that define the CF</p></li>
+<li><p><strong>fm_segment</strong> (<em>np.array</em>) – Boolean array with True indicating samples that define the FM</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>sound_segments</strong> (<em>dictionary</em>) – Dictionary with keys ‘cf’ and ‘fm’.
+There is only one entry for ‘cf’
+and upto two entries for ‘fm’.</p></li>
+<li><p><strong>measurements</strong> (<em>dictionary</em>) – Dictioanry with all the measurements.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">which_fm_type</code><span class="sig-paren">(</span><em class="sig-param">end_of_fm</em>, <em class="sig-param">whole_call</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#which_fm_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>figures out whether its an up or down fm</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.view_horseshoebat_call">
+<span id="output-visualisation"></span><h2>Output visualisation<a class="headerlink" href="#module-measure_horseshoe_bat_calls.view_horseshoebat_call" title="Permalink to this headline">¶</a></h2>
+<p>Bunch of functions which help in visualising data
+and results
+Created on Tue Mar 10 19:55:41 2020</p>
+<p>&#64;author: tbeleyur</p>
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_background_segmentation">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">check_call_background_segmentation</code><span class="sig-paren">(</span><em class="sig-param">whole_call</em>, <em class="sig-param">fs</em>, <em class="sig-param">main_call_mask</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#check_call_background_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_background_segmentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualises the main call selection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>whole_call</strong> (<em>np.array</em>) – Call audio</p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</p></li>
+<li><p><strong>main_call_mask</strong> (<em>np.array</em>) – Boolean array where True indicates the sample
+is part of the main call, and False that it is not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>waveform, spec</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pyplot.subplots</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The appearance of the two subplots can be further changes by varying the
+keyword arguments. For available keyword arguments see the visualise_call
+function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_parts_segmentation">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">check_call_parts_segmentation</code><span class="sig-paren">(</span><em class="sig-param">only_call</em>, <em class="sig-param">fs</em>, <em class="sig-param">cf</em>, <em class="sig-param">fm</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#check_call_parts_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_parts_segmentation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.get_fftsize">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">get_fftsize</code><span class="sig-paren">(</span><em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#get_fftsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.get_fftsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.make_overview_figure">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">make_overview_figure</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">measurements</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#make_overview_figure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.make_overview_figure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.show_all_call_parts">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">show_all_call_parts</code><span class="sig-paren">(</span><em class="sig-param">only_call</em>, <em class="sig-param">call_parts</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#show_all_call_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.show_all_call_parts" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>only_call</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>call_parts</strong> (<em>dictionary</em>) – Dictionary with keys ‘cf’ and ‘fm’
+The entry for ‘cf’ should only have one audio segment.
+The entry for ‘fm’ can have multiple audio segments.</p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For further keyword arguments to customise the spectrograms
+see documentation for make_specgram
+This function does not return any output, it only produces a
+figure with subplots.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.view_horseshoebat_call.visualise_call">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.view_horseshoebat_call.</code><code class="sig-name descname">visualise_call</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/view_horseshoebat_call.html#visualise_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.view_horseshoebat_call.visualise_call" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio</strong> – </p></li>
+<li><p><strong>fs</strong> – </p></li>
+<li><p><strong>fft_size</strong> (<em>integer&gt;0</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>a0, a1</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>subplots</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Thejasvi Beleyur
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

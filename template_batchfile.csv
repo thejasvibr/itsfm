@@ -1,0 +1,3 @@
+audio_path,start,stop,channel,peak_percentage,window_size,min_fm_duration,lowest_relevant_freq,background_threshold,terminal_frequency_threshold,fft_size
+C:\Users\tbeleyur\Desktop\matching_annotaudio_Aditya_2018-08-17_23_56.WAV,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,-14,-10,DEFAULT
+C:\Users\tbeleyur\Desktop\matching_annotaudio_Aditya_2018-08-17_23_14.WAV,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,-14,-10,DEFAULT
