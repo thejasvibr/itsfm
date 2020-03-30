@@ -154,7 +154,7 @@
 <span class="kn">import</span> <span class="nn">pywt</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span> 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
-
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.sanity_checks</span> <span class="kn">import</span> <span class="n">make_sure_its_positive</span>
 <span class="n">__version_segment_hbc</span> <span class="o">=</span> <span class="s1">&#39;0.0.1&#39;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;post_v1.0.0&#39;</span>
 
@@ -224,6 +224,7 @@
 <span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">min_fm_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_fm_duration&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">min_fm_duration</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;min_fm_duration&#39;</span><span class="p">)</span>
     <span class="n">min_fm_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">min_fm_duration</span><span class="p">)</span>
 
     <span class="n">valid_fm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">fm_samples</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
@@ -297,6 +298,8 @@
 <span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">lowest_relevant_freq</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lowest_relevant_freq&#39;</span><span class="p">,</span> <span class="mf">35000.0</span><span class="p">)</span>
+    <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">lowest_relevant_freq</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;lowest_relevant_freq&#39;</span><span class="p">)</span>
+    
     <span class="n">wavelet_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;wavelet_type&#39;</span><span class="p">,</span> <span class="s1">&#39;mexh&#39;</span><span class="p">)</span>
     <span class="n">background_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;background_threshold&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
     <span class="n">scales</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scales&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
@@ -453,6 +456,7 @@
     <span class="n">peak_percentage</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;peak_percentage&#39;</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">peak_percentage</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Peak percentage is </span><span class="si">%f</span><span class="s1">. It cannot be &gt;=1 &#39;</span><span class="o">%</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">peak_percentage</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">peak_percentage</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;peak percentage&#39;</span><span class="p">)</span>
     
     <span class="n">peak_frequency</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_peak_frequency</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
     
@@ -498,7 +502,10 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">lowpass</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">ellip</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">fs</span><span class="p">),</span> <span class="s1">&#39;lowpass&#39;</span><span class="p">))</span>
     <span class="n">highpass</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">ellip</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">threshold_frequency</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">fs</span><span class="p">),</span> <span class="s1">&#39;highpass&#39;</span><span class="p">))</span>
-    <span class="n">pad_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pad_duration&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    <span class="n">pad_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pad_duration&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">pad_duration</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;pad_duration&#39;</span><span class="p">)</span>
+    <span class="n">pad_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad_duration</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    
     
     <span class="n">audio_padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="p">[</span><span class="n">pad_length</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 

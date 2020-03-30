@@ -105,7 +105,7 @@
 <li><a class="reference internal" href="#feedback-and-contributions-welcome">Feedback and Contributions Welcome!!</a></li>
 <li><a class="reference internal" href="#author-thejasvi-beleyur-acoustic-and-functional-ecology-group-max-planck-institute-for-ornithology-seewiesen">Author: Thejasvi Beleyur, Acoustic and Functional Ecology Group, Max Planck Institute for Ornithology, Seewiesen</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.user_interface">High-level User Interface</a></li>
-<li><a class="reference internal" href="#batch-processing-from-batchfiles">Batch Processing from batchfiles</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.batch_processing">Batch Processing from batchfiles</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call">Call segmentation</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">Call measurements</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.view_horseshoebat_call">Output visualisation</a></li>
@@ -617,9 +617,9 @@ audio.</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="batch-processing-from-batchfiles">
-<h2>Batch Processing from batchfiles<a class="headerlink" href="#batch-processing-from-batchfiles" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-measure_horseshoe_bat_calls.batch_processing"></span><p>Runs the batch processing option.
+<div class="section" id="module-measure_horseshoe_bat_calls.batch_processing">
+<span id="batch-processing-from-batchfiles"></span><h2>Batch Processing from batchfiles<a class="headerlink" href="#module-measure_horseshoe_bat_calls.batch_processing" title="Permalink to this headline">¶</a></h2>
+<p>Runs the batch processing option.
 The main outputs are the call measurements and the visualisations.</p>
 <p>If you’d like to access the raw audio - then it’s better writing a custom
 script yourself.</p>
@@ -674,6 +674,32 @@ ones</p>
 <dd class="field-odd"><p><strong>batchfile_path</strong> (<em>str/path</em>) – Path to a batchfile</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.batch_processing.save_measurements_to_file">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">save_measurements_to_file</code><span class="sig-paren">(</span><em class="sig-param">output_filepath</em>, <em class="sig-param">audio_file_name</em>, <em class="sig-param">previous_rows</em>, <em class="sig-param">measurements</em>, <em class="sig-param">row_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#save_measurements_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.save_measurements_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thanks to tmss &#64; <a class="reference external" href="https://stackoverflow.com/a/46775108">https://stackoverflow.com/a/46775108</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_filepath</strong> (<em>str/path</em>) – </p></li>
+<li><p><strong>previous_rows</strong> (<em>pd.DataFrame</em>) – All the previous measurements.
+Can also just have a single row.</p></li>
+<li><p><strong>row_data</strong> (<em>dictionary</em>) – </p></li>
+<li><p><strong>row_number</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Main side effect is to write an updated version of the
+output file.</p>
 </dd></dl>
 
 <dl class="function">
@@ -977,7 +1003,7 @@ complex comb-like structures.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
 <li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</p></li>
-<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The terminal frequency is calculated based on finding the level of the peak frequency
+<li><p><strong>terminal_frequency_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The terminal frequency is calculated based on finding the level of the peak frequency
 and choosing the lowest frequency which is -10 dB (20log10) below the peak level.
 Defaults to -10 dB</p></li>
 </ul>

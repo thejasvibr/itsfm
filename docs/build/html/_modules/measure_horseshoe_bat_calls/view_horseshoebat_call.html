@@ -153,6 +153,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call</span> <span class="kn">import</span> <span class="n">get_fm_snippets</span>
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="n">get_peak_frequency</span>
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.sanity_checks</span> <span class="kn">import</span> <span class="n">make_sure_its_positive</span>
 
 <span class="n">make_x_time</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">X</span><span class="p">,</span> <span class="n">fs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">fs</span><span class="p">),</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
@@ -180,12 +182,15 @@
 <span class="sd">    keyword arguments. For available keyword arguments see the visualise_call</span>
 <span class="sd">    function. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">peak_freq</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_peak_frequency</span><span class="p">(</span><span class="n">whole_call</span><span class="p">)</span>
+    <span class="n">horizontal_line</span> <span class="o">=</span> <span class="n">peak_freq</span><span class="o">*</span><span class="mf">1.1</span>
+
     <span class="n">waveform</span><span class="p">,</span> <span class="n">spec</span> <span class="o">=</span> <span class="n">visualise_call</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
                   <span class="n">main_call_mask</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">whole_call</span><span class="p">),</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
     <span class="n">waveform</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span>
                   <span class="n">main_call_mask</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">whole_call</span><span class="p">),</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
-    <span class="n">spec</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span><span class="n">main_call_mask</span><span class="o">*</span><span class="mi">120000</span><span class="p">,</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">spec</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">make_x_time</span><span class="p">(</span><span class="n">main_call_mask</span><span class="p">,</span> <span class="n">fs</span><span class="p">),</span><span class="n">main_call_mask</span><span class="o">*</span><span class="n">horizontal_line</span><span class="p">,</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">waveform</span><span class="p">,</span> <span class="n">spec</span></div>
 
 <div class="viewcode-block" id="check_call_parts_segmentation"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_parts_segmentation">[docs]</a><span class="k">def</span> <span class="nf">check_call_parts_segmentation</span><span class="p">(</span><span class="n">only_call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span>
@@ -313,9 +318,6 @@
 
 <span class="k">def</span> <span class="nf">calculate_window_size</span><span class="p">(</span><span class="n">freq_resoln</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">/</span><span class="n">freq_resoln</span><span class="p">)</span>        
-        
-
-
 
 <div class="viewcode-block" id="make_overview_figure"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.make_overview_figure">[docs]</a><span class="k">def</span> <span class="nf">make_overview_figure</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span>
                          <span class="n">measurements</span><span class="p">,</span>

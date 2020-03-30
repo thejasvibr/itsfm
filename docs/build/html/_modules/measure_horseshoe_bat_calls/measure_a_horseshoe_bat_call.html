@@ -155,7 +155,7 @@
 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.segment_horseshoebat_call</span> <span class="kn">import</span> <span class="n">identify_maximum_contiguous_regions</span>
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
-
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.sanity_checks</span> <span class="kn">import</span> <span class="n">make_sure_its_negative</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;agg.path.chunksize&#39;</span><span class="p">]</span>
@@ -375,7 +375,7 @@
 <span class="sd">    audio : np.array</span>
 <span class="sd">    fs : float&gt;0</span>
 <span class="sd">        Sampling rate in Hz</span>
-<span class="sd">    threshold : float, optional</span>
+<span class="sd">    terminal_frequency_threshold : float, optional</span>
 <span class="sd">        The terminal frequency is calculated based on finding the level of the peak frequency</span>
 <span class="sd">        and choosing the lowest frequency which is -10 dB (20log10) below the peak level. </span>
 <span class="sd">        Defaults to -10 dB</span>
@@ -390,7 +390,9 @@
 <span class="sd">    Careful about setting threshold too low - it might lead to output of terminal</span>
 <span class="sd">    frequencies that are actually in the noise, and not part of the signal itself. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;terminal_frequency_threshold&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">make_sure_its_negative</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;terminal frequency threshold&#39;</span><span class="p">)</span>
+    
     <span class="n">power_spectrum</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span>  <span class="o">=</span> <span class="n">get_power_spectrum</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span>
     <span class="c1"># smooth the power spectrum over 3 frequency bands to remove &#39;comb&#39;-iness in the spectrum</span>
     <span class="n">smooth_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">power_spectrum</span><span class="o">/</span><span class="mf">20.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
