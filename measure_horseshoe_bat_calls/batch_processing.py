@@ -9,11 +9,16 @@ Created on Fri Mar 27 15:46:00 2020
 
 @author: tbeleyur
 """
+import os
 import pandas as pd
 import soundfile as sf
-import measure_horseshoe_bat_calls.segment_horseshoebat_call 
+from tqdm import tqdm
 from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm
-
+from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_from_background
+from measure_horseshoe_bat_calls.view_horseshoebat_call import check_call_background_segmentation
+from measure_horseshoe_bat_calls.view_horseshoebat_call import make_overview_figure
+from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
+from measure_horseshoe_bat_calls.user_interface import save_overview_graphs
 #keyword arguments for call-background segmentation
 call_background_keywords = ['lowest_relevant_freq', 
                             'wavelet_type',
@@ -42,18 +47,98 @@ def run_from_batchfile(batchfile_path):
 
     '''
     batch_data = load_batchfile(batchfile_path)
-    
-    for row_number, one_batchfile_row in batch_data.iterrows():
+    batchfile_name = get_only_filename(batchfile_path)
+
+    analysis_name = '_'.join(['measurements',batchfile_name])
+    measurements_output_file = analysis_name + '.csv'
+
+    all_measurements = []
+
+    for row_number, one_batchfile_row in tqdm(batch_data.iterrows(),
+                                              total=batch_data.shape[0]):
+        subplots_to_graph = []
         input_arguments = parse_batchfile_row(one_batchfile_row)
-        raw_audio, fs = load_raw_audio(input_arguments)
+        main_audio, fs = load_raw_audio(input_arguments)
+        
+        audio_file_name = get_only_filename(input_arguments['audio_path'])
+        print('Processing '+audio_file_name+' ...')
         segment_from_background = to_separate_from_background(input_arguments)
-        print('TO SEGMENT?', segment_from_background)
-        print('input type', type(input_arguments))
+        
         if segment_from_background:
-            main_call_window, _ = segment_call_into_cf_fm(raw_audio, 
+            main_call_window, _ = segment_call_from_background(main_audio, 
                                                               fs,
-                                                              input_arguments)
-            print(main_call_window.size)
+                                                              **input_arguments)
+            callbg_wavef, _ = check_call_background_segmentation(main_audio,
+                                                               fs,
+                                                               main_call_window,
+                                                               **input_arguments)
+            subplots_to_graph.append(callbg_wavef)
+        
+        (cf, fm, info), call_parts, measurements = segment_and_measure_call(main_audio,
+                                                    fs, **input_arguments)
+        
+        overview_figure = make_overview_figure(main_audio, fs,
+                             measurements,
+                             **input_arguments)
+        subplots_to_graph.append(overview_figure)
+        
+        save_overview_graphs(subplots_to_graph, batchfile_name, audio_file_name,
+                             row_number, **input_arguments)
+        measurements['audio_file'] = audio_file_name
+        all_measurements = save_measurements_to_file(measurements_output_file, 
+                                  audio_file_name,all_measurements,
+                                  measurements, row_number)
+
+def save_measurements_to_file(output_filepath,
+                              audio_file_name, 
+                              previous_rows, measurements, row_number):
+    '''
+    Thanks to tmss @ https://stackoverflow.com/a/46775108
+    
+    Parameters
+    ----------
+    output_filepath :str/path
+    previous_rows : pd.DataFrame
+        All the previous measurements. 
+        Can also just have a single row. 
+    row_data : dictionary 
+    row_number : int
+    
+    Returns
+    -------
+    None
+    
+    Notes
+    -----
+    Main side effect is to write an updated version of the 
+    output file. 
+    '''
+    current_row = pd.DataFrame(measurements, index=[row_number])
+    if row_number == 0:
+        previous_rows = current_row.copy()
+        previous_rows.sort_index(axis=1, inplace=True)
+        check_preexisting_file(output_filepath)
+        previous_rows.to_csv(output_filepath, 
+               mode='a', index=True, sep=',', encoding='utf-8')
+    else:
+        previous_rows = pd.concat((previous_rows, current_row))
+        print(previous_rows)
+        previous_rows.iloc[row_number: row_number+1,:].to_csv(output_filepath,
+               mode='a', index=True, sep=',', encoding='utf-8', header=False)
+    return previous_rows
+
+
+def check_preexisting_file(file_name):
+    '''
+    Raises
+    ------
+    ValueError : if the target file name already exists in the current directory
+    '''
+    exists = os.path.exists(file_name)
+
+    if exists:
+        mesg = 'The file: '+file_name+' already exists- please move it elsewhere or rename it!'
+        raise ValueError(mesg)
 
 def load_batchfile(batchfile):
     try:
@@ -97,6 +182,12 @@ def load_raw_audio(kwargs):
     else:
         return audio, fs
 
+def get_only_filename(file_path):
+    folder, file_w_extension = os.path.split(file_path)
+    filename, extension = os.path.splitext(file_w_extension)
+    return filename
+    
+
 def to_separate_from_background(arguments):
     '''
     '''
@@ -131,6 +222,23 @@ def convert_time_to_samples(time, fs):
     return samples 
         
 
+to_string = lambda X: str(X)
+to_float = lambda X: float(X)
+to_integer = lambda X: int(X)
+
+convert_column_to_proper_type = {
+        'audio_path': to_string,
+        'start': to_float,
+        'stop' : to_float,
+        'channel' : to_integer,
+        'peak_percentage' : to_float,
+        'window_size' : to_integer,
+        'min_fm_duration': to_float,
+        'lowest_relevant_freq' : to_float,
+        'background_threshold' : to_float,
+        'terminal_frequency_threshold' : to_float,
+        'fft_size' : to_integer
+        }
 
 def parse_batchfile_row(one_row):
     '''checks for all user-given arguments 
@@ -158,7 +266,7 @@ def parse_batchfile_row(one_row):
         else:
             # convert to relevant type:
             try:
-                arguments[column] = float(value)
+                arguments[column] = convert_column_to_proper_type[column](value)
             except:
                 pass
     

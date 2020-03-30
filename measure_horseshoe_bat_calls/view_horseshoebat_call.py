@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 
 from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import get_fm_snippets
+from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
 
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
@@ -36,12 +37,15 @@ def check_call_background_segmentation(whole_call, fs, main_call_mask,
     keyword arguments. For available keyword arguments see the visualise_call
     function. 
     '''
+    peak_freq, _ = get_peak_frequency(whole_call)
+    horizontal_line = peak_freq*1.1
+
     waveform, spec = visualise_call(whole_call, fs, **kwargs)
     waveform.plot(make_x_time(main_call_mask, fs),
                   main_call_mask*np.max(whole_call),'k')
     waveform.plot(make_x_time(main_call_mask, fs),
                   main_call_mask*np.min(whole_call),'k')
-    spec.plot(make_x_time(main_call_mask, fs),main_call_mask*120000,'k')
+    spec.plot(make_x_time(main_call_mask, fs),main_call_mask*horizontal_line,'k')
     return waveform, spec
 
 def check_call_parts_segmentation(only_call, fs, cf, fm,
