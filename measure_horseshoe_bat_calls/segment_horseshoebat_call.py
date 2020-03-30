@@ -10,7 +10,7 @@ import numpy as np
 import pywt
 import scipy.signal as signal 
 from measure_horseshoe_bat_calls.signal_processing import *
-
+from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 __version_segment_hbc = '0.0.1'
 __version__ = 'post_v1.0.0'
 
@@ -80,6 +80,7 @@ def get_fm_regions(fm_samples, fs, **kwargs):
     
     '''
     min_fm_duration = kwargs.get('min_fm_duration', 0.5*10**-3)
+    make_sure_its_positive(min_fm_duration, variable='min_fm_duration')
     min_fm_samples = int(fs*min_fm_duration)
 
     valid_fm = np.zeros(fm_samples.size, dtype='bool')
@@ -153,6 +154,8 @@ def segment_call_from_background(audio, fs,**kwargs):
     
     '''
     lowest_relevant_freq = kwargs.get('lowest_relevant_freq', 35000.0)
+    make_sure_its_positive(lowest_relevant_freq, 'lowest_relevant_freq')
+    
     wavelet_type = kwargs.get('wavelet_type', 'mexh')
     background_threshold = kwargs.get('background_threshold', -20)
     scales = kwargs.get('scales',np.arange(1,10))
@@ -354,7 +357,10 @@ def low_and_highpass_around_threshold(audio, fs, threshold_frequency, **kwargs):
     '''
     lowpass = kwargs.get('lowpass', signal.ellip(2,3,10, threshold_frequency/(0.5*fs), 'lowpass'))
     highpass = kwargs.get('highpass', signal.ellip(2,3,10, threshold_frequency/(0.5*fs), 'highpass'))
-    pad_length = int(kwargs.get('pad_duration', 0.1)*fs)
+    pad_duration = kwargs.get('pad_duration', 0.1)
+    make_sure_its_positive(pad_duration, variable='pad_duration')
+    pad_length = int(pad_duration*fs)
+    
     
     audio_padded = np.pad(audio, [pad_length]*2, mode='constant', constant_values=(0,0))
 

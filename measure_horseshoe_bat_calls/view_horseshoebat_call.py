@@ -10,6 +10,7 @@ import numpy as np
 
 from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import get_fm_snippets
 from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
+from measure_horseshoe_bat_calls.user_interface import make_sure_its_positive
 
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
@@ -173,9 +174,6 @@ def get_fftsize(fs, **kwargs):
 
 def calculate_window_size(freq_resoln, fs):
     return int(fs/freq_resoln)        
-        
-
-
 
 def make_overview_figure(call, fs,
                          measurements,

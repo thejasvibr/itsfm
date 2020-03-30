@@ -103,4 +103,4 @@ def save_overview_graphs(all_subplots, analysis_name, file_name, index,
     for one_subplot in all_subplots: 
         pdf.savefig(one_subplot.figure)
     pdf.close()
-        
+
