@@ -19,6 +19,7 @@ from measure_horseshoe_bat_calls.view_horseshoebat_call import check_call_backgr
 from measure_horseshoe_bat_calls.view_horseshoebat_call import make_overview_figure
 from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
 from measure_horseshoe_bat_calls.user_interface import save_overview_graphs
+from measure_horseshoe_bat_calls.sanity_checks import check_preexisting_file
 #keyword arguments for call-background segmentation
 call_background_keywords = ['lowest_relevant_freq', 
                             'wavelet_type',
@@ -122,23 +123,9 @@ def save_measurements_to_file(output_filepath,
                mode='a', index=True, sep=',', encoding='utf-8')
     else:
         previous_rows = pd.concat((previous_rows, current_row))
-        print(previous_rows)
         previous_rows.iloc[row_number: row_number+1,:].to_csv(output_filepath,
                mode='a', index=True, sep=',', encoding='utf-8', header=False)
     return previous_rows
-
-
-def check_preexisting_file(file_name):
-    '''
-    Raises
-    ------
-    ValueError : if the target file name already exists in the current directory
-    '''
-    exists = os.path.exists(file_name)
-
-    if exists:
-        mesg = 'The file: '+file_name+' already exists- please move it elsewhere or rename it!'
-        raise ValueError(mesg)
 
 def load_batchfile(batchfile):
     try:
@@ -237,7 +224,8 @@ convert_column_to_proper_type = {
         'lowest_relevant_freq' : to_float,
         'background_threshold' : to_float,
         'terminal_frequency_threshold' : to_float,
-        'fft_size' : to_integer
+        'fft_size' : to_integer,
+        'pad_duration' : to_float
         }
 
 def parse_batchfile_row(one_row):

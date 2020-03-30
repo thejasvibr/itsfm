@@ -11,7 +11,7 @@ from __future__ import absolute_import
 
 from measure_horseshoe_bat_calls.segment_horseshoebat_call import identify_maximum_contiguous_regions
 from measure_horseshoe_bat_calls.signal_processing import *
-
+from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_negative
 from datetime import datetime
 import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize']
@@ -231,7 +231,7 @@ def get_terminal_frequency(audio, **kwargs):
     audio : np.array
     fs : float>0
         Sampling rate in Hz
-    threshold : float, optional
+    terminal_frequency_threshold : float, optional
         The terminal frequency is calculated based on finding the level of the peak frequency
         and choosing the lowest frequency which is -10 dB (20log10) below the peak level. 
         Defaults to -10 dB
@@ -246,7 +246,9 @@ def get_terminal_frequency(audio, **kwargs):
     Careful about setting threshold too low - it might lead to output of terminal
     frequencies that are actually in the noise, and not part of the signal itself. 
     '''
-    threshold = kwargs.get('threshold', -10)
+    threshold = kwargs.get('terminal_frequency_threshold', -10)
+    make_sure_its_negative(threshold, variable='terminal frequency threshold')
+    
     power_spectrum, freqs,  = get_power_spectrum(audio, kwargs['fs'])
     # smooth the power spectrum over 3 frequency bands to remove 'comb'-iness in the spectrum
     smooth_spectrum = np.convolve(10**(power_spectrum/20.0), np.ones(3)/3,'same')

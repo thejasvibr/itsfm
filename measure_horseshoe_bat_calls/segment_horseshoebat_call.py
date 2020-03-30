@@ -154,7 +154,7 @@ def segment_call_from_background(audio, fs,**kwargs):
     
     '''
     lowest_relevant_freq = kwargs.get('lowest_relevant_freq', 35000.0)
-    make_sure_its_positive(lowest_relevant_freq, 'lowest_relevant_freq')
+    make_sure_its_positive(lowest_relevant_freq, variable='lowest_relevant_freq')
     
     wavelet_type = kwargs.get('wavelet_type', 'mexh')
     background_threshold = kwargs.get('background_threshold', -20)
@@ -312,6 +312,7 @@ def pre_process_for_segmentation(call, fs, **kwargs):
     peak_percentage = kwargs.get('peak_percentage', 0.99)
     if peak_percentage >= 1.0:
         raise ValueError('Peak percentage is %f. It cannot be >=1 '%np.round(peak_percentage,2))
+    make_sure_its_positive(peak_percentage, variable='peak percentage')
     
     peak_frequency, _ = get_peak_frequency(call, fs)
     
