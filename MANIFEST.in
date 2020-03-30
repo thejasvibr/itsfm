@@ -4,3 +4,4 @@ include *.wav
 include *.rst
 include *.md
 include *.ipynb
+include *.csv

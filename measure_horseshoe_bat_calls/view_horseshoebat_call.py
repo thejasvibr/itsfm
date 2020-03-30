@@ -138,6 +138,8 @@ def visualise_call(audio, fs, **kwargs):
     return a0, a1
 
 def make_specgram(audio, fs, **kwargs):
+    '''
+    '''
 
     fft_size = get_fftsize(fs, **kwargs)
     n_overlap = fft_size-1

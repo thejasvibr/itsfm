@@ -1,7 +1,4 @@
-|image0|
-
-measure horseshoe bat calls : v1.0.0 (user-friendly and ready for you!)
-#######################################################################
+.. image:: measure_CF_calls_logo_v1.0.png
 
 Automate measurements of horseshoe bat calls - (or any similar sound!).
 
@@ -9,7 +6,7 @@ What is a horseshoe bat call - why have I never heard one before?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Don’t know - no worries! Haven’t heard one before? No surprise - they’re
-literally in the ultrasonic range ($:raw-latex:`\geq`$80kHz frequency).
+literally in the ultrasonic range(>=40kHz frequency).
 
 However, if you really want to imagine what it’d be like if you could
 hear them, this is what a horseshoe bat call would sound like. You can
@@ -18,9 +15,6 @@ do this by slowing down the horseshoe bat calls by a *lot* (10X)!
 *If you want to run this Jupyter Notebook online without having to
 install anything on your computer - head to the Binder
 link*\ `here <>`__\ *!*
-
-.. |image0| image:: measure_CF_calls_logo_v1.0.png
-
 .. code:: ipython2
 
     # If you're running the Jupyter notebook on mybinder or your own computer:
