@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Runs the batch processing option.
-The main outputs are the call measurements and the visualisations. 
+"""Runs the batch processing option. The main outputs are the call measurements
+and the visualisations. 
 
-If you'd like to access the raw audio - then it's better writing a custom
-script yourself. 
+.. code-block:: bash
 
-Created on Fri Mar 27 15:46:00 2020
+    $ python -m measure-horseshoe-bat-calls -batchfile template_batchfile.csv
 
-@author: tbeleyur
 """
 import os
 import pandas as pd
@@ -64,19 +62,18 @@ def run_from_batchfile(batchfile_path):
         audio_file_name = get_only_filename(input_arguments['audio_path'])
         print('Processing '+audio_file_name+' ...')
         segment_from_background = to_separate_from_background(input_arguments)
-        
+
+        segment_and_measure = segment_and_measure_call(main_audio,
+                                                    fs, segment_from_background,
+                                                    **input_arguments)
+        (cf, fm, info), call_parts, measurements, bg_seg = segment_and_measure
+
         if segment_from_background:
-            main_call_window, _ = segment_call_from_background(main_audio, 
-                                                              fs,
-                                                              **input_arguments)
-            callbg_wavef, _ = check_call_background_segmentation(main_audio,
+            callbg_wavef, _ = check_call_background_segmentation(bg_seg['raw_audio'],
                                                                fs,
-                                                               main_call_window,
+                                                                bg_seg['call_mask'],
                                                                **input_arguments)
             subplots_to_graph.append(callbg_wavef)
-        
-        (cf, fm, info), call_parts, measurements = segment_and_measure_call(main_audio,
-                                                    fs, **input_arguments)
         
         overview_figure = make_overview_figure(main_audio, fs,
                              measurements,

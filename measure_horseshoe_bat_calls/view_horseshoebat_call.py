@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Bunch of functions which help in visualising data 
 and results
-Created on Tue Mar 10 19:55:41 2020
 
-@author: tbeleyur
 """
 import matplotlib.pyplot as plt
 import numpy as np 

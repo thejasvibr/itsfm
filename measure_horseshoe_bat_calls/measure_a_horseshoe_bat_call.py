@@ -1,11 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""Module that segments and measures
-parts of a horseshoebat CF call
+"""Module that segments and measures parts of a CF-FM call. 
 
-Created on Sun Feb  9 18:11:16 2020
-
-@author: tbeleyur
 """
 from __future__ import absolute_import
 

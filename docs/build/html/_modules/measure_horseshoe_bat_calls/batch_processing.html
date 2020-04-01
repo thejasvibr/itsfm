@@ -25,6 +25,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -142,15 +143,13 @@
             
   <h1>Source code for measure_horseshoe_bat_calls.batch_processing</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Runs the batch processing option.</span>
-<span class="sd">The main outputs are the call measurements and the visualisations. </span>
+<span class="sd">&quot;&quot;&quot;Runs the batch processing option. The main outputs are the call measurements</span>
+<span class="sd">and the visualisations. </span>
 
-<span class="sd">If you&#39;d like to access the raw audio - then it&#39;s better writing a custom</span>
-<span class="sd">script yourself. </span>
+<span class="sd">.. code-block:: bash</span>
 
-<span class="sd">Created on Fri Mar 27 15:46:00 2020</span>
+<span class="sd">    $ python -m measure-horseshoe-bat-calls -batchfile template_batchfile.csv</span>
 
-<span class="sd">@author: tbeleyur</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -207,19 +206,18 @@
         <span class="n">audio_file_name</span> <span class="o">=</span> <span class="n">get_only_filename</span><span class="p">(</span><span class="n">input_arguments</span><span class="p">[</span><span class="s1">&#39;audio_path&#39;</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing &#39;</span><span class="o">+</span><span class="n">audio_file_name</span><span class="o">+</span><span class="s1">&#39; ...&#39;</span><span class="p">)</span>
         <span class="n">segment_from_background</span> <span class="o">=</span> <span class="n">to_separate_from_background</span><span class="p">(</span><span class="n">input_arguments</span><span class="p">)</span>
-        
+
+        <span class="n">segment_and_measure</span> <span class="o">=</span> <span class="n">segment_and_measure_call</span><span class="p">(</span><span class="n">main_audio</span><span class="p">,</span>
+                                                    <span class="n">fs</span><span class="p">,</span> <span class="n">segment_from_background</span><span class="p">,</span>
+                                                    <span class="o">**</span><span class="n">input_arguments</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span> <span class="n">info</span><span class="p">),</span> <span class="n">call_parts</span><span class="p">,</span> <span class="n">measurements</span><span class="p">,</span> <span class="n">bg_seg</span> <span class="o">=</span> <span class="n">segment_and_measure</span>
+
         <span class="k">if</span> <span class="n">segment_from_background</span><span class="p">:</span>
-            <span class="n">main_call_window</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">segment_call_from_background</span><span class="p">(</span><span class="n">main_audio</span><span class="p">,</span> 
-                                                              <span class="n">fs</span><span class="p">,</span>
-                                                              <span class="o">**</span><span class="n">input_arguments</span><span class="p">)</span>
-            <span class="n">callbg_wavef</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">check_call_background_segmentation</span><span class="p">(</span><span class="n">main_audio</span><span class="p">,</span>
+            <span class="n">callbg_wavef</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">check_call_background_segmentation</span><span class="p">(</span><span class="n">bg_seg</span><span class="p">[</span><span class="s1">&#39;raw_audio&#39;</span><span class="p">],</span>
                                                                <span class="n">fs</span><span class="p">,</span>
-                                                               <span class="n">main_call_window</span><span class="p">,</span>
+                                                                <span class="n">bg_seg</span><span class="p">[</span><span class="s1">&#39;call_mask&#39;</span><span class="p">],</span>
                                                                <span class="o">**</span><span class="n">input_arguments</span><span class="p">)</span>
             <span class="n">subplots_to_graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">callbg_wavef</span><span class="p">)</span>
-        
-        <span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span> <span class="n">info</span><span class="p">),</span> <span class="n">call_parts</span><span class="p">,</span> <span class="n">measurements</span> <span class="o">=</span> <span class="n">segment_and_measure_call</span><span class="p">(</span><span class="n">main_audio</span><span class="p">,</span>
-                                                    <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">input_arguments</span><span class="p">)</span>
         
         <span class="n">overview_figure</span> <span class="o">=</span> <span class="n">make_overview_figure</span><span class="p">(</span><span class="n">main_audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span>
                              <span class="n">measurements</span><span class="p">,</span>

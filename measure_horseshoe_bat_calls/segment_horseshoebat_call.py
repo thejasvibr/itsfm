@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module that segments the horseshoebat call into FM and CF parts
 The primary logic of this 
-Created on Mon Mar  9 19:40:27 2020
 
-@author: tbeleyur
 """
 import warnings
 import numpy as np 
@@ -140,7 +138,10 @@ def segment_call_from_background(audio, fs,**kwargs):
         A boolean numpy array where True corresponds to the regions which
         are call samples, and False are the background samples. The single 
         longest continuous region is output.
-    
+    dbrms_profile : np.array
+        The dB rms profile of the summed up wavelet transform for all 
+        centre frequencies >= lowest_relevant_frequency.s
+
     Raises
     ------
     ValueError
@@ -150,8 +151,7 @@ def segment_call_from_background(audio, fs,**kwargs):
     IncorrectThreshold
         When the dynamic range of the relevant part of the signal is smaller
         or equal to the background_threshold.
-    
-    
+   
     '''
     lowest_relevant_freq = kwargs.get('lowest_relevant_freq', 35000.0)
     make_sure_its_positive(lowest_relevant_freq, variable='lowest_relevant_freq')

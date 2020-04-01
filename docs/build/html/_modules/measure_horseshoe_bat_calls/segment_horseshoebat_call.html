@@ -25,6 +25,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -283,7 +284,10 @@
 <span class="sd">        A boolean numpy array where True corresponds to the regions which</span>
 <span class="sd">        are call samples, and False are the background samples. The single </span>
 <span class="sd">        longest continuous region is output.</span>
-<span class="sd">    </span>
+<span class="sd">    dbrms_profile : np.array</span>
+<span class="sd">        The dB rms profile of the summed up wavelet transform for all </span>
+<span class="sd">        centre frequencies &gt;= lowest_relevant_frequency.s</span>
+
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
@@ -293,8 +297,7 @@
 <span class="sd">    IncorrectThreshold</span>
 <span class="sd">        When the dynamic range of the relevant part of the signal is smaller</span>
 <span class="sd">        or equal to the background_threshold.</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
+<span class="sd">   </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">lowest_relevant_freq</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lowest_relevant_freq&#39;</span><span class="p">,</span> <span class="mf">35000.0</span><span class="p">)</span>
     <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">lowest_relevant_freq</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;lowest_relevant_freq&#39;</span><span class="p">)</span>

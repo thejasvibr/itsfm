@@ -10,32 +10,34 @@ measure horseshoe bat call : Documentation
    :caption: Contents:
 
 High-level API
-###############
-
+~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.user_interface
    :members:
 
 Batch processing from batchfiles
-################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.batch_processing
    :members:
 
 Call -background and call-part segmentation
-############################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.segment_horseshoebat_call
    :members:
 
 Call-parts measurements
-########################
+~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call
    :members:
 
 Call segmentation and measurements visualisation
-################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.view_horseshoebat_call
    :members:
 
-
+Checking accuracy
+~~~~~~~~~~~~~~~~~
+.. automodule:: measure_horseshoe_bat_calls.simulate_calls
+	:members:
 
 Indices and tables
 ==================
