@@ -1,7 +1,10 @@
 from setuptools import setup, find_packages
+import measure_horseshoe_bat_calls as mhbc
+
+version_number = mhbc.__version__
 
 setup(name='measure_horseshoe_bat_calls',
-     version='1.0.0',
+     version=version_number,
      description='Measure single Cf bat calls, or sounds like it',
      long_description=open('README.md').read(),
      long_description_content_type="text/markdown",

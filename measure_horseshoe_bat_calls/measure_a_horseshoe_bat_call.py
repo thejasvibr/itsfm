@@ -124,7 +124,7 @@ def get_fm_snippets(whole_call, fm_segments, fs):
         fm_startand_stop = np.array([np.min(this_fm_samples),
                                      np.max(this_fm_samples)])/float(fs)
         this_fm_audio = whole_call[this_fm_samples]
-        this_fm_type = which_fm_type(np.max(this_fm_samples), whole_call)
+        this_fm_type = which_fm_type(this_fm_audio)
         fm_audio.append(this_fm_audio)
         fm_types.append(this_fm_type)
         fm_boundaries.append(fm_startand_stop)
@@ -206,13 +206,44 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
 
 
 
-def which_fm_type(end_of_fm, whole_call)        :
-    '''figures out whether its an up or down fm '''
-    if  end_of_fm <= whole_call.size*0.5:
-        fm_type = 'upfm_'
-    elif end_of_fm > whole_call.size*0.5:
-        fm_type = 'downfm_'
+def which_fm_type(fm_audio):
+    '''figures out whether its an up or down fm 
+    
+    Parameters
+    ----------
+    fm_audio : np.array
+
+    Returns
+    -------
+    fm_type : str. 
+        Either 'upfm_' or 'downfm_'
+    '''
+    fm_type = direction_of_frequency_sweep(fm_audio) + 'fm_'
     return fm_type
+
+def direction_of_frequency_sweep(audio):
+    '''Checks if the frequency changes upwards or downwards. The audio is split
+    into two halves and the peak frequency of each half is 
+    Parameters
+    ----------
+    audio : np.array
+
+    Returns
+    -------
+    direction : str
+        Either 'up' or 'down'
+    '''
+    left, right = np.array_split(audio, 2)
+    peak_left, _ = get_peak_frequency(left, 1)
+    peak_right, _ = get_peak_frequency(right,1)
+    
+    if peak_left > peak_right:
+        return 'down'
+    elif peak_right > peak_left:
+        return 'up'
+    else:
+        raise FMIdentificationError('The direction of FM sweep \ could not be determined')
+    
 
 def get_terminal_frequency(audio, **kwargs):
     '''Gives the -XdB frequency from the peak. 

@@ -5,9 +5,11 @@ Created on Wed Feb 12 17:53:58 2020
 
 @author: tbeleyur
 """
+import scipy.signal as signal 
 from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import *
 from measure_horseshoe_bat_calls.segment_horseshoebat_call import *
 from measure_horseshoe_bat_calls.signal_processing import *
+from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call,make_FM_with_joint
 import unittest     
 
 class TestMovingRMS(unittest.TestCase):
@@ -92,7 +94,52 @@ class TestGetFMRegions(unittest.TestCase):
         input_and_output_same = np.array_equal(valid_fm, expected)
         self.assertTrue(input_and_output_same)
         
+class TestWhichFMType(unittest.TestCase):
+    '''Checks if a given audio snippet is an upward FM or a 
+    downward FM. 
 
+    If it's neither...then we have a problem?
+    '''
+
+    def setUp(self):
+        # make a standard upward + downward sweep
+        fm_bw = np.array([1000, 2000, 4000, 8000])
+        cf = 100000
+        fm_terminal = cf - fm_bw
+        fm_duration = [0.001, 0.002, 0.004]
+        fs = 500000
+        dt = 1.0/fs
+        self.sweeps = {}
+        
+        fm_properties = []
+        for each_terminal in fm_terminal:
+            for each_duration in fm_duration:
+                fm_properties.append((each_terminal, each_duration))
+        
+        freq_profile = {}
+        # all DOWNFM sweeps
+        for i, each in enumerate(fm_properties):
+            fp, _ = make_FM_with_joint((each_terminal,
+                                        each_duration),
+                                        cf,fs, min_duration=0.0005)
+            freq_profile[i] = fp
+            self.sweeps[i] = np.sin(2*np.pi*np.cumsum(fp)*dt)
+    
+    def check_all_entries_match(self,run_output, string):
+        outputs = np.unique(run_output)
+        
+        if len(outputs)==1:
+            [self.assertEqual(each, string) for each in run_output]
+    
+    def test_up_fmtype_identified_correctly(self):
+        '''
+        '''
+        fmtype = []
+        for _, sweep in self.sweeps.items():
+            fmtype.append(which_fm_type(sweep))
+        
+        self.check_all_entries_match(fmtype, 'downfm_')
+        
 
 class check_2_5dB_accuracy_of_cffm(unittest.TestCase):
     '''Make sure that the accuracy of 
@@ -232,11 +279,32 @@ class call_background_segmentation(unittest.TestCase):
 class TestGetFMSnippets(unittest.TestCase):
     
     def setUp(self):
-        self.wholecall = np.arange(1,11)
-        self.fm_2segment = np.array([1,1,1,0,0,0,0,1,1,1])
-        self.fm_1segment_down = np.array([0,0,0,0,0,0,0,1,1,1])
+        fm_duration = 0.001
+        cf_duration = 0.01
+        
+        
+        self.fs = 50000.0
+        self.num_fm_samples = int(self.fs*fm_duration)
+        self.num_cf_samples = int(self.fs*cf_duration)
+        
+        t_fm = np.linspace(0, fm_duration, self.num_fm_samples)
+        upfm_sweep = signal.chirp(t_fm, 0, t_fm[-1], 15000)
+        downfm_sweep = np.flip(upfm_sweep)
+        cf_audio = np.zeros(self.num_cf_samples)
+        
+        fm_mask = np.tile(True, int(self.fs*fm_duration))
+        
+        self.wholecall = np.concatenate((upfm_sweep, cf_audio, downfm_sweep))
+        
+        self.fm_2segment = np.concatenate((fm_mask,
+                                           np.tile(False,self.num_cf_samples),
+                                           fm_mask))
+        
+        self.fm_1segment_down = np.concatenate((np.tile(False, self.num_cf_samples+self.num_fm_samples),
+                             fm_mask)         )
+
         self.fm_1segment_up = np.flip(self.fm_1segment_down)
-        self.fs = 1.0
+        
 
     def check_type_and_index_match(self,expected_types, expected_snippets,
                                     fm_types, fm_snippets):
@@ -254,8 +322,11 @@ class TestGetFMSnippets(unittest.TestCase):
                                                 self.fs)
         
         expected_types = ['upfm_', 'downfm_']
-        expected_snippets= [ np.arange(1,4), np.arange(8,11)]
-        
+        expected_snippets= [
+                            self.wholecall[:self.num_fm_samples],
+                            self.wholecall[-self.num_fm_samples:]
+                            ]
+
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
     
@@ -265,7 +336,7 @@ class TestGetFMSnippets(unittest.TestCase):
                                                 self.fs)
         
         expected_types = ['downfm_']
-        expected_snippets= [ np.arange(8,11)]
+        expected_snippets= [self.wholecall[-self.num_fm_samples:]]
         
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
@@ -275,12 +346,11 @@ class TestGetFMSnippets(unittest.TestCase):
                                                 self.fs)
         
         expected_types = ['upfm_']
-        expected_snippets= [ np.arange(1,4)]
+        expected_snippets= [self.wholecall[:self.num_fm_samples]]
         
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
  
-    
 
         
 if __name__ == '__main__':
