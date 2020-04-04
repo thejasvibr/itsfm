@@ -100,7 +100,7 @@ def get_robust_peak_frequency(audio, **kwargs):
     peak_frequency = frequency[peak]
     return peak_frequency
     
-def get_peak_frequency(audio, fs=250000):
+def get_peak_frequency(audio, fs):
     '''Gives peak frequency and frequency resolution
     with which the measurement is made
 
@@ -118,11 +118,11 @@ def get_peak_frequency(audio, fs=250000):
     '''
     spectrum = np.fft.rfft(audio)
     freqs = np.fft.rfftfreq(audio.size, 1.0/fs)
-    freq_resolution = get_frequency_resolution(freqs)
+    freq_resolution = get_frequency_resolution(freqs, fs)
     peak_freq = freqs[np.argmax(spectrum)]
     return peak_freq, freq_resolution
 
-def get_frequency_resolution(audio, fs=250000):
+def get_frequency_resolution(audio, fs):
     '''
     Parameters
     ----------

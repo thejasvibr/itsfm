@@ -53,6 +53,9 @@
           
 
           
+            
+            <img src="../../_static/measure_CF_calls_logo_v1.0.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -205,7 +208,10 @@
     <span class="n">measurements</span><span class="p">[</span><span class="s1">&#39;cf_peak_frequency&#39;</span><span class="p">],</span> <span class="n">measurements</span><span class="p">[</span><span class="s1">&#39;cf_peakfreq_resolution&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">get_peak_frequency</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
 
     <span class="c1"># FM measurements</span>
-    <span class="n">fm_types</span><span class="p">,</span> <span class="n">fm_sweeps</span><span class="p">,</span> <span class="n">fm_startstop</span> <span class="o">=</span> <span class="n">get_fm_snippets</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fm_segment</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    <span class="n">cf_startstop</span> <span class="o">=</span> <span class="p">(</span><span class="n">measurements</span><span class="p">[</span><span class="s1">&#39;cf_start&#39;</span><span class="p">],</span> <span class="n">measurements</span><span class="p">[</span><span class="s1">&#39;cf_end&#39;</span><span class="p">])</span>
+    <span class="n">fm_types</span><span class="p">,</span> <span class="n">fm_sweeps</span><span class="p">,</span> <span class="n">fm_startstop</span> <span class="o">=</span> <span class="n">get_fm_snippets</span><span class="p">(</span><span class="n">call</span><span class="p">,</span>
+                                                        <span class="n">fm_segment</span><span class="p">,</span>
+                                                        <span class="n">fs</span><span class="p">,</span> <span class="n">cf_startstop</span><span class="p">)</span>
     <span class="n">sound_segments</span><span class="p">[</span><span class="s1">&#39;fm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fm_sweeps</span>
 
     <span class="k">for</span> <span class="n">each_type</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">fm_boundaries</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fm_types</span><span class="p">,</span> <span class="n">fm_sweeps</span><span class="p">,</span> <span class="n">fm_startstop</span><span class="p">):</span>
@@ -225,7 +231,7 @@
 
     <span class="k">return</span> <span class="n">sound_segments</span><span class="p">,</span> <span class="n">measurements</span></div>
 
-<div class="viewcode-block" id="get_fm_snippets"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets">[docs]</a><span class="k">def</span> <span class="nf">get_fm_snippets</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fm_segments</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+<div class="viewcode-block" id="get_fm_snippets"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets">[docs]</a><span class="k">def</span> <span class="nf">get_fm_snippets</span><span class="p">(</span><span class="n">whole_call</span><span class="p">,</span> <span class="n">fm_segments</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">cf_startstop</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Creates separate audio clips for each FM sweep and labels them as</span>
 <span class="sd">    either &#39;upfm&#39; or &#39;downfm&#39; </span>
 
@@ -238,6 +244,8 @@
 <span class="sd">        that are FM sweeps. </span>
 <span class="sd">    fs : float&gt;0</span>
 <span class="sd">        Sampling rate in Hz</span>
+<span class="sd">    cf_startstop : tuple</span>
+<span class="sd">        The start and stop times of the CF segment in seconds. </span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
@@ -268,7 +276,7 @@
         <span class="n">fm_startand_stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">this_fm_samples</span><span class="p">),</span>
                                      <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">this_fm_samples</span><span class="p">)])</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span>
         <span class="n">this_fm_audio</span> <span class="o">=</span> <span class="n">whole_call</span><span class="p">[</span><span class="n">this_fm_samples</span><span class="p">]</span>
-        <span class="n">this_fm_type</span> <span class="o">=</span> <span class="n">which_fm_type</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">this_fm_samples</span><span class="p">),</span> <span class="n">whole_call</span><span class="p">)</span>
+        <span class="n">this_fm_type</span> <span class="o">=</span> <span class="n">which_fm_type</span><span class="p">(</span><span class="n">fm_startand_stop</span><span class="p">,</span> <span class="n">cf_startstop</span><span class="p">)</span>
         <span class="n">fm_audio</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_fm_audio</span><span class="p">)</span>
         <span class="n">fm_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_fm_type</span><span class="p">)</span>
         <span class="n">fm_boundaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fm_startand_stop</span><span class="p">)</span>
@@ -323,17 +331,21 @@
     <span class="n">freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
     <span class="n">numfm_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">fm_durn</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">call_shape</span> <span class="o">==</span> <span class="s1">&#39;staplepin&#39;</span><span class="p">:</span>       
-        <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_f</span><span class="p">,</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start_f</span><span class="p">,</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span>
+                                                     <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span>
+                                                     <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">polynomial_num</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">call_shape</span> <span class="o">==</span> <span class="s1">&#39;rightangle&#39;</span><span class="p">:</span>
         <span class="c1"># alternate between rising and falling right angle shapes</span>
         <span class="n">rightangle_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;rising&#39;</span><span class="p">,</span><span class="s1">&#39;falling&#39;</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rightangle_type</span> <span class="o">==</span> <span class="s1">&#39;rising&#39;</span><span class="p">:</span>
-            <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">freqs</span><span class="p">[:</span><span class="n">numfm_samples</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span>
+                                                         <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">rightangle_type</span> <span class="o">==</span> <span class="s1">&#39;falling&#39;</span><span class="p">:</span>
-            <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">freqs</span><span class="p">[</span><span class="o">-</span><span class="n">numfm_samples</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">cf_freq</span><span class="p">,</span><span class="n">start_f</span><span class="p">,</span><span class="n">numfm_samples</span><span class="p">,</span>
+                                                         <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">polynomial_num</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span> 
@@ -350,13 +362,28 @@
 
 
 
-<div class="viewcode-block" id="which_fm_type"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type">[docs]</a><span class="k">def</span> <span class="nf">which_fm_type</span><span class="p">(</span><span class="n">end_of_fm</span><span class="p">,</span> <span class="n">whole_call</span><span class="p">)</span>        <span class="p">:</span>
-    <span class="sd">&#39;&#39;&#39;figures out whether its an up or down fm &#39;&#39;&#39;</span>
-    <span class="k">if</span>  <span class="n">end_of_fm</span> <span class="o">&lt;=</span> <span class="n">whole_call</span><span class="o">.</span><span class="n">size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">:</span>
-        <span class="n">fm_type</span> <span class="o">=</span> <span class="s1">&#39;upfm_&#39;</span>
-    <span class="k">elif</span> <span class="n">end_of_fm</span> <span class="o">&gt;</span> <span class="n">whole_call</span><span class="o">.</span><span class="n">size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">:</span>
-        <span class="n">fm_type</span> <span class="o">=</span> <span class="s1">&#39;downfm_&#39;</span>
-    <span class="k">return</span> <span class="n">fm_type</span></div>
+<div class="viewcode-block" id="which_fm_type"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type">[docs]</a><span class="k">def</span> <span class="nf">which_fm_type</span><span class="p">(</span><span class="n">fm_startand_stop</span><span class="p">,</span> <span class="n">cf_startstop</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;figures out whether its an up or down fm using the start and stop times. </span>
+<span class="sd">    The distance between the midpoint of the fm segment and the cf start</span>
+<span class="sd">    and stop points are calculated. If the cf start is closer to the fm midpoint</span>
+<span class="sd">    the fm is considered a &#39;upfm_&#39; and a &#39;downfm_&#39; otherwise. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fm_startand_stop, cf_startstop : np.array</span>
+<span class="sd">     The start and stop time of the FM and CF segments in seconds. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fm_type : str. </span>
+<span class="sd">        Either &#39;upfm_&#39; or &#39;downfm_&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fm_middle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fm_startand_stop</span><span class="p">)</span>
+    <span class="n">fm_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cf_startstop</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">-</span> <span class="n">fm_startand_stop</span><span class="p">)</span>
+    <span class="n">fm_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;upfm_&#39;</span><span class="p">,</span> <span class="s1">&#39;downfm_&#39;</span><span class="p">]</span>
+    <span class="n">this_fm_type</span> <span class="o">=</span> <span class="n">fm_types</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">fm_distance</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">this_fm_type</span></div>
+
 
 <div class="viewcode-block" id="get_terminal_frequency"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_terminal_frequency">[docs]</a><span class="k">def</span> <span class="nf">get_terminal_frequency</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Gives the -XdB frequency from the peak. </span>

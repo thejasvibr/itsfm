@@ -36,7 +36,7 @@ def check_call_background_segmentation(whole_call, fs, main_call_mask,
     keyword arguments. For available keyword arguments see the visualise_call
     function. 
     '''
-    peak_freq, _ = get_peak_frequency(whole_call)
+    peak_freq, _ = get_peak_frequency(whole_call, fs)
     horizontal_line = peak_freq*1.1
 
     waveform, spec = visualise_call(whole_call, fs, **kwargs)

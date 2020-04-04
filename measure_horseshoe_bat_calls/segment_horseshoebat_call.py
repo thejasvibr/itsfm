@@ -9,8 +9,7 @@ import pywt
 import scipy.signal as signal 
 from measure_horseshoe_bat_calls.signal_processing import *
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
-__version_segment_hbc = '0.0.1'
-__version__ = 'post_v1.0.0'
+
 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''
@@ -109,28 +108,48 @@ def get_fm_regions(fm_samples, fs, **kwargs):
 def segment_call_from_background(audio, fs,**kwargs):
     '''Performs a wavelet transform to track the signal within the relevant portion of the bandwidth. 
     
+    This methods broadly works by summing up all the signal content 
+    above the ```lowest_relevant_frequency``` using a continuous wavelet transform. 
+    
+    If the call-background segmentation doesn't work well it's probably due 
+    to one of these things:
+    
+    #. Incorrect ``background_threshold`` : Play around with different ``background_threshold values``.
+    
+    #. Incorrect ``lowest_relevant_frequency`` : If the lowest relevant frequency is set outside of the signal's actual frequency range, then the segmentation will fail.
+       Try lower this parameter till you're sure all of the signal's spectral range is above it.     
+    
+    #. Low signal spectral range : This method uses a continuous wavelet transform to localise the relevant signal. Wavelet transforms have high temporal resolution 
+       in for high frequencies, but lower temporal resolutions for lower frequencies.
+       If your signal is dominantly low-frequency, try resampling it to a lower 
+       sampling rate and see if this works?
+
+    If the above tricks don't work, then try bandpassing your signal - may be it's
+    an issue with the in-band signal to noise ratio.
+    
     Parameters
     ----------
     audio : np.array
     fs : float>0
-        Frequency of sampling in Hertz. 
+        Frequency of sampling in Hertz.
     lowest_relevant_freq : float>0, optional
         The lowest frequency band in Hz whose coefficients will be tracked.
         The coefficients of all frequencies in the signal >= the lowest relevant
-        frequency are tracked. This is the lowest possible frequency the signal can take.
-        It is best to give ~10-20 kHz of berth.
+        frequency are tracked. This is the lowest possible frequency the signal can take. It is best to give a few kHz of berth.
         Defaults to 35kHz.
-	background_threshold : float < 0
+    background_threshold : float<0, optional
 		The relative threshold which is used to define the background. The segmentation is 
 		performed by selecting the region that is above background_threshold dB relative
 		to 	the max dB rms value in the audio. 
 		Defaults to -20 dB
     wavelet_type : str, optional
         The type of wavelet which will be used for the continuous wavelet transform. 
-        See  pywt.wavelist(kind='continuous') for all possible types in case the default
-        doesn't seem to work. 
+        Run  `pywt.wavelist(kind='continuous')` for all possible types in case the default
+        doesn't seem to work.
         Defaults to mexican hat, 'mexh'
     scales : array-like, optional
+        The scales to be used for the continuous wavelet transform. 
+        Defaults to np.arange(1,10).
 
     Returns
     -------
@@ -403,6 +422,133 @@ def get_thresholds_re_max(cf_dbrms, fm_dbrms):
     best_threshold = fm_and_cf_thresholds[best_index]
     
     return num_shared_fm_cf_samples, optimisation_metric, best_threshold
+
+def instantaneous_frequency_profile(audio, fs, **kwargs):
+    hil = signal.hilbert(audio)
+    instantaneous_phase = np.unwrap(np.angle(hil))
+    instantaneous_frequency = (np.diff(instantaneous_phase)/(2.0*np.pi)) * fs
+    instant_frequency_resized = resize_by_adding_one_sample(instantaneous_frequency, audio, **kwargs)
+    return instant_frequency_resized
+
+
+
+def calc_proper_kernel_size(durn, fs):
+    '''scipy.signal.medfilt requires an odd number of samples as
+    kernel_size. This function calculates the number of samples
+    for a given duration which is odd and is close to the 
+    required duration. 
+    
+    Parameters
+    ----------
+    durn : float
+        Duration in seconds. 
+    fs : float
+        Sampling rate in Hz
+    
+    Returns
+    -------
+    samples : int
+        Number of odd samples that is equal to or little 
+        less (by one sample) than the input duration. 
+    '''
+    samples = int(durn*fs)
+    if np.remainder(samples,2)==0:
+        samples -= 1
+    return samples
+
+def resize_by_adding_one_sample(input_signal, original_signal, **kwargs):
+    '''Resizes the input_signal to the same size as the original signal by repeating one
+    sample value. The sample value can either the last or the first sample of the input_signal. 
+    '''
+    check_signal_sizes(input_signal, original_signal)
+    
+    repeat_start = kwargs.get('repeat_start', True)
+    
+    if repeat_start:
+        return np.concatenate((np.array([input_signal[0]]), input_signal))
+    else:
+        return np.concatenate((input_signal, np.array([input_signal[-1]])))
+
+
+def check_signal_sizes(input_signal, original_signal):
+    if int(input_signal.size) >= int(original_signal.size):
+        msg1 = 'The input signal"s size %d'%int(input_signal.size)
+        msg2 = ' is greater or equal to the original signal"s size: %d'%(int(original_signal.size))
+        raise ValueError(msg1+msg2)
+    
+    if int(original_signal.size) - int(input_signal.size) >= 2:
+        raise ValueError('The original signal is >= 2 samples longer than the input signal.')
+    
+
+def median_filter(input_signal, fs, **kwargs):
+    '''Median filters a signal according to a user-settable
+    window size. 
+
+    Parameters
+    ----------
+    input_signal : np.array
+    fs : float
+        Sampling rate in Hz.
+    medianfilter_size : float, optional
+        The window size in seconds. Defaults to 0.001 seconds. 
+
+    Returns
+    -------
+    med_filtered : np.array
+        Median filtered version of the input_signal. 
+    '''
+    window_duration = kwargs.get('medianfilter_size',
+                              0.001)
+    kernel_size = calc_proper_kernel_size(window_duration, fs)
+    med_filtered = signal.medfilt(input_signal, kernel_size)
+    return med_filtered
+
+def identify_cf_ish_regions(frequency_profile, fs, **kwargs):
+    '''Identifies CF regions by comparing the rate of frequency modulation 
+    across the signal. If the frequency modulation within a region of 
+    the signal is less than the limit then it is considered a CF region. 
+
+    Parameters
+    ----------
+    frequency_profile : np.array
+        The instantaneous frequency of the signal over time in Hz. 
+    fm_limit : float, optional 
+        The maximum rate of frequency modulation in Hz/ms. 
+        Defaults to 200 Hz/ms
+    medianfilter_size : float, optional
+
+    Returns
+    -------
+    cfish_regions : np.array
+        Boolean array where True indicates a low FM rate region. 
+        The output may still need to be cleaned before final use. 
+    clean_fmrate_resized
+
+    See Also
+    --------
+    median_filter
+    '''
+    max_modulation = kwargs.get('fm_limit', 200) # Hz/msec
+    fm_rate = np.diff(frequency_profile)
+    
+    #convert from Hz/(1/fs) to Hz/msec
+    fm_rate_hz_sec = fm_rate/(1.0/fs)
+    fm_rate_hz_msec = fm_rate_hz_sec*10**-3
+    
+    clean_fmrate = median_filter(fm_rate_hz_msec, fs, **kwargs)
+    clean_fmrate_resized = resize_by_adding_one_sample(clean_fmrate, frequency_profile, **kwargs)
+
+    cfish_regions = np.abs(clean_fmrate_resized)<= max_modulation
+    return cfish_regions, clean_fmrate_resized
+
+def segment_cf_regions(audio, fs, **kwargs):
+    '''
+    '''
+    freq_profile_raw = instantaneous_frequency_profile(audio,fs, **kwargs)
+    freq_profile_clean = median_filter(freq_profile_raw, fs, **kwargs)
+    cf_region, fmrate_hz_per_msec = identify_cf_ish_regions(freq_profile_clean, fs, **kwargs)
+    return cf_region, fmrate_hz_per_msec
+    
 
 
 class IncorrectThreshold(ValueError):

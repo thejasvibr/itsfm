@@ -53,6 +53,9 @@
           
 
           
+            
+            <img src="_static/measure_CF_calls_logo_v1.0.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -767,9 +770,7 @@ ones</p>
 <div class="section" id="module-measure_horseshoe_bat_calls.segment_horseshoebat_call">
 <span id="call-background-and-call-part-segmentation"></span><h2>Call -background and call-part segmentation<a class="headerlink" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call" title="Permalink to this headline">¶</a></h2>
 <p>Module that segments the horseshoebat call into FM and CF parts
-The primary logic of this
-Created on Mon Mar  9 19:40:27 2020</p>
-<p>&#64;author: tbeleyur</p>
+The primary logic of this</p>
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_call_into_cf_fm</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_call_into_cf_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm" title="Permalink to this definition">¶</a></dt>
@@ -832,29 +833,40 @@ Defaults to 0.5 milliseconds.</p></li>
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_call_from_background</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_call_from_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs a wavelet transform to track the signal within the relevant portion of the bandwidth.</p>
+<p>This methods broadly works by summing up all the signal content
+above the <code class="docutils literal notranslate"><span class="pre">`lowest_relevant_frequency`</span></code> using a continuous wavelet transform.</p>
+<p>If the call-background segmentation doesn’t work well it’s probably due
+to one of these things:</p>
+<ol class="arabic simple">
+<li><p>Incorrect <code class="docutils literal notranslate"><span class="pre">background_threshold</span></code> : Play around with different <code class="docutils literal notranslate"><span class="pre">background_threshold</span> <span class="pre">values</span></code>.</p></li>
+<li><p>Incorrect <code class="docutils literal notranslate"><span class="pre">lowest_relevant_frequency</span></code> : If the lowest relevant frequency is set outside of the signal’s actual frequency range, then the segmentation will fail.
+Try lower this parameter till you’re sure all of the signal’s spectral range is above it.</p></li>
+<li><p>Low signal spectral range : This method uses a continuous wavelet transform to localise the relevant signal. Wavelet transforms have high temporal resolution
+in for high frequencies, but lower temporal resolutions for lower frequencies.
+If your signal is dominantly low-frequency, try resampling it to a lower
+sampling rate and see if this works?</p></li>
+</ol>
+<p>If the above tricks don’t work, then try bandpassing your signal - may be it’s
+an issue with the in-band signal to noise ratio.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>audio</strong> (<em>np.array</em>) – </p></li>
 <li><p><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hertz.</p></li>
-<li><p><strong>lowest_relevant_freq</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – <p>The lowest frequency band in Hz whose coefficients will be tracked.
+<li><p><strong>lowest_relevant_freq</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – The lowest frequency band in Hz whose coefficients will be tracked.
 The coefficients of all frequencies in the signal &gt;= the lowest relevant
-frequency are tracked. This is the lowest possible frequency the signal can take.
-It is best to give ~10-20 kHz of berth.
-Defaults to 35kHz.
-background_threshold : float &lt; 0</p>
-<blockquote>
-<div><p>The relative threshold which is used to define the background. The segmentation is
+frequency are tracked. This is the lowest possible frequency the signal can take. It is best to give a few kHz of berth.
+Defaults to 35kHz.</p></li>
+<li><p><strong>background_threshold</strong> (<em>float&lt;0</em><em>, </em><em>optional</em>) – The relative threshold which is used to define the background. The segmentation is
 performed by selecting the region that is above background_threshold dB relative
 to      the max dB rms value in the audio.
-Defaults to -20 dB</p>
-</div></blockquote>
-</p></li>
+Defaults to -20 dB</p></li>
 <li><p><strong>wavelet_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The type of wavelet which will be used for the continuous wavelet transform.
-See  pywt.wavelist(kind=’continuous’) for all possible types in case the default
+Run  <cite>pywt.wavelist(kind=’continuous’)</cite> for all possible types in case the default
 doesn’t seem to work.
 Defaults to mexican hat, ‘mexh’</p></li>
-<li><p><strong>scales</strong> (<em>array-like</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>scales</strong> (<em>array-like</em><em>, </em><em>optional</em>) – The scales to be used for the continuous wavelet transform.
+Defaults to np.arange(1,10).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1034,7 +1046,7 @@ and upto two entries for ‘fm’.</p></li>
 
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets">
-<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">get_fm_snippets</code><span class="sig-paren">(</span><em class="sig-param">whole_call</em>, <em class="sig-param">fm_segments</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#get_fm_snippets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">get_fm_snippets</code><span class="sig-paren">(</span><em class="sig-param">whole_call</em>, <em class="sig-param">fm_segments</em>, <em class="sig-param">fs</em>, <em class="sig-param">cf_startstop</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#get_fm_snippets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates separate audio clips for each FM sweep and labels them as
 either ‘upfm’ or ‘downfm’</p>
 <dl class="field-list simple">
@@ -1044,6 +1056,7 @@ either ‘upfm’ or ‘downfm’</p>
 <li><p><strong>fm_segments</strong> (<em>np.array</em>) – Boolean numpy array with True indicating samples in the whole_call
 that are FM sweeps.</p></li>
 <li><p><strong>fs</strong> (<em>float&gt;0</em>) – Sampling rate in Hz</p></li>
+<li><p><strong>cf_startstop</strong> (<em>tuple</em>) – The start and stop times of the CF segment in seconds.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1097,8 +1110,22 @@ with very short FM parts lead to rippling of the frequency.</p>
 
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type">
-<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">which_fm_type</code><span class="sig-paren">(</span><em class="sig-param">end_of_fm</em>, <em class="sig-param">whole_call</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#which_fm_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>figures out whether its an up or down fm</p>
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.</code><code class="sig-name descname">which_fm_type</code><span class="sig-paren">(</span><em class="sig-param">fm_startand_stop</em>, <em class="sig-param">cf_startstop</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/measure_a_horseshoe_bat_call.html#which_fm_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>figures out whether its an up or down fm using the start and stop times.
+The distance between the midpoint of the fm segment and the cf start
+and stop points are calculated. If the cf start is closer to the fm midpoint
+the fm is considered a ‘<a href="#id5"><span class="problematic" id="id6">upfm_</span></a>’ and a ‘<a href="#id7"><span class="problematic" id="id8">downfm_</span></a>’ otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cf_startstop</strong> (<em>fm_startand_stop</em><em>,</em>) – The start and stop time of the FM and CF segments in seconds.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fm_type</strong> – Either ‘<a href="#id9"><span class="problematic" id="id10">upfm_</span></a>’ or ‘<a href="#id11"><span class="problematic" id="id12">downfm_</span></a>’</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -1267,6 +1294,15 @@ following parameters.</p>
 <span class="n">spec</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">125000</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The ‘make_cffm_call’ makes simulated calls  which match actual bat calls
+in all relevant aspects pretty well (temporal+spectral).
+However, there are still some issues to be sorted - for example, the
+level of the CF portion of the signal is always a little bit lower. If you
+have any suggestions for that it’d be great to hear. See <a class="reference internal" href="#measure_horseshoe_bat_calls.simulate_calls.make_cffm_call" title="measure_horseshoe_bat_calls.simulate_calls.make_cffm_call"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_cffm_call()</span></code></a>,
+and <a class="reference internal" href="#measure_horseshoe_bat_calls.simulate_calls.make_call_frequency_profile" title="measure_horseshoe_bat_calls.simulate_calls.make_call_frequency_profile"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_call_frequency_profile()</span></code></a>  and <a class="reference internal" href="#measure_horseshoe_bat_calls.simulate_calls.make_FM_with_joint" title="measure_horseshoe_bat_calls.simulate_calls.make_FM_with_joint"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_FM_with_joint()</span></code></a> for more details.</p>
+</div>
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.simulate_calls.make_cffm_call">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.simulate_calls.</code><code class="sig-name descname">make_cffm_call</code><span class="sig-paren">(</span><em class="sig-param">call_properties</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/simulate_calls.html#make_cffm_call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.simulate_calls.make_cffm_call" title="Permalink to this definition">¶</a></dt>
@@ -1300,17 +1336,9 @@ following parameters.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>call_properties</strong> (<em>dictionary</em>) – <p>With keys : ‘cf’, ‘upfm’, ‘downfm’
-Each key has a tuple entry with a frequency and a duration value
-eg. cp = {‘cf’:(100000, 0.01),</p>
-<blockquote>
-<div><p>’upfm’:{50000, 0.005},
-‘downfm’:{20000, 0.003}}</p>
-</div></blockquote>
-<p>This corresponds to a call with an upfm starting at 50kHz of 5ms
-and a CF at 100kHz of 10ms, followed by a downfm ending at 20kHz of 3ms.</p>
-</p></li>
-<li><p><strong>fs</strong> (<em>float</em>) – </p></li>
+<li><p><strong>call_properties</strong> (<em>dictionary</em>) – With keys : ‘cf’, ‘upfm’, ‘downfm’
+Each key has a tuple entry with a frequency and a duration value</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling rate in Hz</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1323,6 +1351,16 @@ and a CF at 100kHz of 10ms, followed by a downfm ending at 20kHz of 3ms.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#measure_horseshoe_bat_calls.simulate_calls.make_FM_with_joint" title="measure_horseshoe_bat_calls.simulate_calls.make_FM_with_joint"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_FM_with_joint()</span></code></a></p>
+</div>
+<p class="rubric">Example</p>
+<p>This corresponds to a call with an upfm starting at 50kHz of 5ms
+and a CF at 100kHz of 10ms, followed by a downfm ending at 20kHz of 3ms.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cf&#39;</span><span class="p">:(</span><span class="mi">100000</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>
+<span class="go">          &#39;upfm&#39;:{50000, 0.005},</span>
+<span class="go">          &#39;downfm&#39;:{20000, 0.003}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span> <span class="o">=</span> <span class="mi">500000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">call_freq_profile</span> <span class="o">=</span> <span class="n">make_call_frequency_profile</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+</pre></div>
 </div>
 </dd></dl>
 

@@ -132,7 +132,10 @@ def load_batchfile(batchfile):
         raise ValueError(error_msg)
  
 def load_raw_audio(kwargs):
-    '''Checks to see 
+    '''Takes a dictioanry input. 
+    All the parameter names need to be keys in the
+    input dictionary. 
+
     Parameters
     -----------
     audio_path : str/path
@@ -140,6 +143,8 @@ def load_raw_audio(kwargs):
     channel : int, optional
         Channel number to be loaded - starting from 1!
         Defaults to 1.
+    start,stop : float, optional
+
     Returns
     --------
     raw_audio : np.array

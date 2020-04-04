@@ -49,6 +49,17 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 
+
+# html options
+html_theme_options = {
+    'display_version': True,
+    'style_external_links': False,
+    # Toc options
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+}
+
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -59,3 +70,7 @@ master_doc = 'index'
 
 # Keep the original order of functions in each module 
 autodoc_member_order = 'bysource'
+
+# Add a logo
+html_logo = 'measure_CF_calls_logo_v1.0.png'
+

@@ -53,6 +53,9 @@
           
 
           
+            
+            <img src="../../_static/measure_CF_calls_logo_v1.0.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -145,9 +148,7 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Module that segments the horseshoebat call into FM and CF parts</span>
 <span class="sd">The primary logic of this </span>
-<span class="sd">Created on Mon Mar  9 19:40:27 2020</span>
 
-<span class="sd">@author: tbeleyur</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
@@ -155,8 +156,7 @@
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span> 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.sanity_checks</span> <span class="kn">import</span> <span class="n">make_sure_its_positive</span>
-<span class="n">__version_segment_hbc</span> <span class="o">=</span> <span class="s1">&#39;0.0.1&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;post_v1.0.0&#39;</span>
+
 
 <div class="viewcode-block" id="segment_call_into_cf_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_call_into_cf_fm</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -255,28 +255,48 @@
 <div class="viewcode-block" id="segment_call_from_background"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background">[docs]</a><span class="k">def</span> <span class="nf">segment_call_from_background</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Performs a wavelet transform to track the signal within the relevant portion of the bandwidth. </span>
 <span class="sd">    </span>
+<span class="sd">    This methods broadly works by summing up all the signal content </span>
+<span class="sd">    above the ```lowest_relevant_frequency``` using a continuous wavelet transform. </span>
+<span class="sd">    </span>
+<span class="sd">    If the call-background segmentation doesn&#39;t work well it&#39;s probably due </span>
+<span class="sd">    to one of these things:</span>
+<span class="sd">    </span>
+<span class="sd">    #. Incorrect ``background_threshold`` : Play around with different ``background_threshold values``.</span>
+<span class="sd">    </span>
+<span class="sd">    #. Incorrect ``lowest_relevant_frequency`` : If the lowest relevant frequency is set outside of the signal&#39;s actual frequency range, then the segmentation will fail.</span>
+<span class="sd">       Try lower this parameter till you&#39;re sure all of the signal&#39;s spectral range is above it.     </span>
+<span class="sd">    </span>
+<span class="sd">    #. Low signal spectral range : This method uses a continuous wavelet transform to localise the relevant signal. Wavelet transforms have high temporal resolution </span>
+<span class="sd">       in for high frequencies, but lower temporal resolutions for lower frequencies.</span>
+<span class="sd">       If your signal is dominantly low-frequency, try resampling it to a lower </span>
+<span class="sd">       sampling rate and see if this works?</span>
+
+<span class="sd">    If the above tricks don&#39;t work, then try bandpassing your signal - may be it&#39;s</span>
+<span class="sd">    an issue with the in-band signal to noise ratio.</span>
+<span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    audio : np.array</span>
 <span class="sd">    fs : float&gt;0</span>
-<span class="sd">        Frequency of sampling in Hertz. </span>
+<span class="sd">        Frequency of sampling in Hertz.</span>
 <span class="sd">    lowest_relevant_freq : float&gt;0, optional</span>
 <span class="sd">        The lowest frequency band in Hz whose coefficients will be tracked.</span>
 <span class="sd">        The coefficients of all frequencies in the signal &gt;= the lowest relevant</span>
-<span class="sd">        frequency are tracked. This is the lowest possible frequency the signal can take.</span>
-<span class="sd">        It is best to give ~10-20 kHz of berth.</span>
+<span class="sd">        frequency are tracked. This is the lowest possible frequency the signal can take. It is best to give a few kHz of berth.</span>
 <span class="sd">        Defaults to 35kHz.</span>
-<span class="sd">	background_threshold : float &lt; 0</span>
+<span class="sd">    background_threshold : float&lt;0, optional</span>
 <span class="sd">		The relative threshold which is used to define the background. The segmentation is </span>
 <span class="sd">		performed by selecting the region that is above background_threshold dB relative</span>
 <span class="sd">		to 	the max dB rms value in the audio. </span>
 <span class="sd">		Defaults to -20 dB</span>
 <span class="sd">    wavelet_type : str, optional</span>
 <span class="sd">        The type of wavelet which will be used for the continuous wavelet transform. </span>
-<span class="sd">        See  pywt.wavelist(kind=&#39;continuous&#39;) for all possible types in case the default</span>
-<span class="sd">        doesn&#39;t seem to work. </span>
+<span class="sd">        Run  `pywt.wavelist(kind=&#39;continuous&#39;)` for all possible types in case the default</span>
+<span class="sd">        doesn&#39;t seem to work.</span>
 <span class="sd">        Defaults to mexican hat, &#39;mexh&#39;</span>
 <span class="sd">    scales : array-like, optional</span>
+<span class="sd">        The scales to be used for the continuous wavelet transform. </span>
+<span class="sd">        Defaults to np.arange(1,10).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

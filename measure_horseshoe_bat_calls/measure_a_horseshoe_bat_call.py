@@ -61,7 +61,10 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
     measurements['cf_peak_frequency'], measurements['cf_peakfreq_resolution']  = get_peak_frequency(cf, fs)
 
     # FM measurements
-    fm_types, fm_sweeps, fm_startstop = get_fm_snippets(call, fm_segment, fs)
+    cf_startstop = (measurements['cf_start'], measurements['cf_end'])
+    fm_types, fm_sweeps, fm_startstop = get_fm_snippets(call,
+                                                        fm_segment,
+                                                        fs, cf_startstop)
     sound_segments['fm'] = fm_sweeps
 
     for each_type, sweep, fm_boundaries in zip(fm_types, fm_sweeps, fm_startstop):
@@ -81,7 +84,7 @@ def measure_hbc_call(call, fs, cf_segment, fm_segment, **kwargs):
 
     return sound_segments, measurements
 
-def get_fm_snippets(whole_call, fm_segments, fs):
+def get_fm_snippets(whole_call, fm_segments, fs, cf_startstop):
     '''Creates separate audio clips for each FM sweep and labels them as
     either 'upfm' or 'downfm' 
 
@@ -94,6 +97,8 @@ def get_fm_snippets(whole_call, fm_segments, fs):
         that are FM sweeps. 
     fs : float>0
         Sampling rate in Hz
+    cf_startstop : tuple
+        The start and stop times of the CF segment in seconds. 
 
     Returns
     --------
@@ -112,7 +117,9 @@ def get_fm_snippets(whole_call, fm_segments, fs):
         fms, fm_and_samples = identify_maximum_contiguous_regions(fm_segments, 2)
     except:
         fms, fm_and_samples = identify_maximum_contiguous_regions(fm_segments, 1)
-    
+    finally:
+        raise FMIdentificationError('Could not detect any FM parts...')
+
     fm_id = fm_and_samples[:,0]
     fm_samples = fm_and_samples[:,1]
 
@@ -124,7 +131,7 @@ def get_fm_snippets(whole_call, fm_segments, fs):
         fm_startand_stop = np.array([np.min(this_fm_samples),
                                      np.max(this_fm_samples)])/float(fs)
         this_fm_audio = whole_call[this_fm_samples]
-        this_fm_type = which_fm_type(this_fm_audio)
+        this_fm_type = which_fm_type(fm_startand_stop, cf_startstop)
         fm_audio.append(this_fm_audio)
         fm_types.append(this_fm_type)
         fm_boundaries.append(fm_startand_stop)
@@ -179,17 +186,21 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
     freqs = np.tile(cf_freq, t.size)
     numfm_samples = int(fs*fm_durn)
     if call_shape == 'staplepin':       
-        freqs[:numfm_samples] = np.linspace(start_f,cf_freq,numfm_samples, endpoint=True)
-        freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples, endpoint=True)
+        freqs[:numfm_samples] = np.linspace(start_f,cf_freq,numfm_samples,
+                                                     endpoint=True)
+        freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                     endpoint=True)
         p = np.polyfit(t, freqs, polynomial_num)
 
     elif call_shape == 'rightangle':
         # alternate between rising and falling right angle shapes
         rightangle_type = np.random.choice(['rising','falling'],1)
         if rightangle_type == 'rising':
-            freqs[:numfm_samples] = np.linspace(cf_freq,start_f,numfm_samples, endpoint=True)
+            freqs[:numfm_samples] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                         endpoint=True)
         elif rightangle_type == 'falling':
-            freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples, endpoint=True)
+            freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                         endpoint=True)
         p = np.polyfit(t, freqs, polynomial_num)
 
     else: 
@@ -206,44 +217,28 @@ def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
 
 
 
-def which_fm_type(fm_audio):
-    '''figures out whether its an up or down fm 
-    
+def which_fm_type(fm_startand_stop, cf_startstop):
+    '''figures out whether its an up or down fm using the start and stop times. 
+    The distance between the midpoint of the fm segment and the cf start
+    and stop points are calculated. If the cf start is closer to the fm midpoint
+    the fm is considered a 'upfm_' and a 'downfm_' otherwise. 
+
     Parameters
     ----------
-    fm_audio : np.array
+    fm_startand_stop, cf_startstop : np.array
+     The start and stop time of the FM and CF segments in seconds. 
 
     Returns
     -------
     fm_type : str. 
         Either 'upfm_' or 'downfm_'
     '''
-    fm_type = direction_of_frequency_sweep(fm_audio) + 'fm_'
-    return fm_type
+    fm_middle = np.mean(fm_startand_stop)
+    fm_distance = np.abs(np.array(cf_startstop).flatten() - fm_startand_stop)
+    fm_types = ['upfm_', 'downfm_']
+    this_fm_type = fm_types[np.argmin(fm_distance)]
+    return this_fm_type
 
-def direction_of_frequency_sweep(audio):
-    '''Checks if the frequency changes upwards or downwards. The audio is split
-    into two halves and the peak frequency of each half is 
-    Parameters
-    ----------
-    audio : np.array
-
-    Returns
-    -------
-    direction : str
-        Either 'up' or 'down'
-    '''
-    left, right = np.array_split(audio, 2)
-    peak_left, _ = get_peak_frequency(left, 1)
-    peak_right, _ = get_peak_frequency(right,1)
-    
-    if peak_left > peak_right:
-        return 'down'
-    elif peak_right > peak_left:
-        return 'up'
-    else:
-        raise FMIdentificationError('The direction of FM sweep \ could not be determined')
-    
 
 def get_terminal_frequency(audio, **kwargs):
     '''Gives the -XdB frequency from the peak. 

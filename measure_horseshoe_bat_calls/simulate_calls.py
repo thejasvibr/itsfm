@@ -26,6 +26,14 @@ The code snippet below recreates the call with the above parameters
     wavef, spec = visualise_call(synthetic_call, fs, fft_size=512)
     spec.set_ylim(0,125000)
 
+Note
+----
+The 'make_cffm_call' makes simulated calls  which match actual bat calls
+in all relevant aspects pretty well (temporal+spectral).
+However, there are still some issues to be sorted - for example, the 
+level of the CF portion of the signal is always a little bit lower. If you 
+have any suggestions for that it'd be great to hear. See :func:`make_cffm_call`,
+and :func:`make_call_frequency_profile`  and :func:`make_FM_with_joint` for more details.
 """
 import numpy as np
 
@@ -73,13 +81,9 @@ def make_call_frequency_profile(call_properties, fs, **kwargs):
     call_properties : dictionary
         With keys : 'cf', 'upfm', 'downfm'
         Each key has a tuple entry with a frequency and a duration value
-        eg. cp = {'cf':(100000, 0.01),
-                  'upfm':{50000, 0.005},
-                  'downfm':{20000, 0.003}}
-        This corresponds to a call with an upfm starting at 50kHz of 5ms
-        and a CF at 100kHz of 10ms, followed by a downfm ending at 20kHz of 3ms. 
 
     fs : float
+        Sampling rate in Hz
     
     Returns
     --------
@@ -90,8 +94,16 @@ def make_call_frequency_profile(call_properties, fs, **kwargs):
     --------
     make_FM_with_joint
     
-                  
+    Example
+    --------
+    This corresponds to a call with an upfm starting at 50kHz of 5ms
+    and a CF at 100kHz of 10ms, followed by a downfm ending at 20kHz of 3ms. 
 
+    >>> cp = {'cf':(100000, 0.01),
+              'upfm':{50000, 0.005},
+              'downfm':{20000, 0.003}}        
+    >>> fs = 500000
+    >>> call_freq_profile = make_call_frequency_profile(cp, fs)
     '''
     cf_freq, cf_durn = call_properties['cf']
 
@@ -175,8 +187,10 @@ def make_cffm_joint_profile(cf, fm_slope, fs, joint_type='down', **kwargs):
     fs : float>0
     poly_order : int, optional
         Polynomial order to be used by np.polyfit
+        Defaults to 10
     joint_duration : float, optional 
         The length of the CF and FM joints.
+        Default to 0.5 ms
     Returns 
     -------
     freq_profile : np.array
