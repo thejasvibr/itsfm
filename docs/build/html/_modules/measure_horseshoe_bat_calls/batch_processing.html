@@ -279,7 +279,10 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
  
 <div class="viewcode-block" id="load_raw_audio"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.batch_processing.load_raw_audio">[docs]</a><span class="k">def</span> <span class="nf">load_raw_audio</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Checks to see </span>
+    <span class="sd">&#39;&#39;&#39;Takes a dictioanry input. </span>
+<span class="sd">    All the parameter names need to be keys in the</span>
+<span class="sd">    input dictionary. </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    audio_path : str/path</span>
@@ -287,6 +290,8 @@
 <span class="sd">    channel : int, optional</span>
 <span class="sd">        Channel number to be loaded - starting from 1!</span>
 <span class="sd">        Defaults to 1.</span>
+<span class="sd">    start,stop : float, optional</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
 <span class="sd">    raw_audio : np.array</span>

@@ -264,7 +264,9 @@
         <span class="n">fms</span><span class="p">,</span> <span class="n">fm_and_samples</span> <span class="o">=</span> <span class="n">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">fm_segments</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">fms</span><span class="p">,</span> <span class="n">fm_and_samples</span> <span class="o">=</span> <span class="n">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">fm_segments</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FMIdentificationError</span><span class="p">(</span><span class="s1">&#39;Could not detect any FM parts...&#39;</span><span class="p">)</span>
+
     <span class="n">fm_id</span> <span class="o">=</span> <span class="n">fm_and_samples</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">fm_and_samples</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
 

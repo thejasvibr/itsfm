@@ -12,55 +12,178 @@ from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 
 
 def segment_call_into_cf_fm(call, fs, **kwargs):
-    '''
+    '''Function which identifies regions into CF and FM based on the following   process. 
+
+    1. Candidate regions of CF and FM are first produced based on the segmentation
+    method chosen'.
+
+    2. These candidate regions are then refined based on the 
+    user's requirements (minimum length of region, maximum number of CF/FM
+    regions in the sound)
+
+    3. The finalised CF and FM regions are output as Boolean arrays.
+
     Parameters
     -----------
     call : np.array
         Audio with horseshoe bat call
     fs : float>0
         Frequency of sampling in Hz. 
-    
+    method : str, optional 
+        One of ['peak_percentage', 'pwvd', 'inst_freq'].
+        Checkout 'See Also' for more information. 
+        Defaults to 'peak_percentage'
+
     Returns
     --------
     cf_samples, fm_samples : np.array
         Boolean numpy array showing which of the samples belong 
         to the cf and the fm respectively. 
-    info : list
-        List with two np.array. The first array has the 
-        max normalised dB rms profile of the highpassed filtered
-        call (cf dominant). The second array has the max normalised
-        dB rms profile of the  lowpassed filtered call (fm dominant).
-    
-    Notes
-    ------
-    For more information on how to handle/improve the segmentation see
-    documentation for pre_process_for_segmentation
+    fmrate : np.array
+        The rate of frequency modulation in Hz/ms.
+    info : dictionary
+        Post-processing information depending on 
+        the methods used. 
+
+
+    See Also
+    ----------
+    segment_by_peak_percentage
+    segment_by_pwvd
+    segment_by_inst_frequency
     '''
-    cf_dbrms, fm_dbrms = pre_process_for_segmentation(call, fs, **kwargs)
-    cf_samples, fm_samples, info = segment_cf_and_fm(cf_dbrms, fm_dbrms, 
-                                                     fs,**kwargs)
+    method = kwargs.get('method', 'peak_percentage')
+    # identify candidate CF and FM regions 
+    cf_candidates, fm_candidates, info = perform_segmentation[method](call, fs,
+                                                       **kwargs)
+    # refine the candidate regions based on user requirements
+    cf_samples, fm_samples = refine_candidate_regions(call, fs, 
+                                                      cf_candidates,
+                                                      fm_candidates,
+                                                      info,**kwargs)
     return cf_samples, fm_samples, info
 
-def segment_cf_and_fm(cf_dbrms, fm_dbrms, fs, **kwargs):
-    '''Calculates the relative increase in signal levels 
-    between the CF and FM dominant versions of the audio. 
+
+
+def segment_by_peak_percentage(call, fs, **kwargs):
+    '''This is ideal for calls with one clear CF section with the CF 
+    portion being the highest frequency in the call: bat/bird CF-FM
+    calls which have on CF and one/two sweep section.
+
+    Calculates the peak frequency of the whole call and performs 
+    low+high pass filtering at a frequency slightly lower than the peak frequency. 
+
+
+    Parameters
+    ----------
+    call : np.array
+    fs : float>0
     
-    Regions which have not been amplified will show <= 0 dB change, 
-    and this is used to identify the CF and FM portions reliably.
+    Returns
+    -------
+    cf_samples, fm_samples : np.array
+        Boolean array with True indicating that sample has been categorised
+        as being CF and/or FM. 
+    info : dictionary
+        With keys 'fm_re_cf' and 'cf_re_fm' indicating the relative 
+        dBrms profiles of the candidate FM regions relative to Cf 
+        and vice versa.
+    
+    Notes
+    -----
+    This method is not well suited for audio with uniform call envelopes. 
+    When there is high variation over the call envelope, the peak frequency 
+    is likely to be miscalculated, and thus lead to wrong segmentation.
+
+    This method is somewhat inspired by the protocol in Schoeppler et al. 2018. 
+    However, it differs in the important aspect of being done entirely in the 
+    time domain. Schoeppler et al. 2018 use a spectrogram based method 
+    to segment the CF and FM segments of H. armiger calls. 
+
+    References
+    ----------
+    [1] Schoeppler, D., Schnitzler, H. U., & Denzinger, A. (2018). 
+    Precise Doppler shift compensation in the hipposiderid bat, 
+    Hipposideros armiger. Scientific Reports, 8(1), 1-11.     
+
+    See Also
+    --------
+    pre_process_for_segmentation
     '''
+    cf_dbrms, fm_dbrms = pre_process_for_segmentation(call, fs, **kwargs)
     fm_re_cf = fm_dbrms - cf_dbrms
     cf_re_fm = cf_dbrms - fm_dbrms
     
     fm_samples = fm_re_cf > 0 
     cf_samples = cf_re_fm > 0
 
-    main_cf = identify_valid_regions(cf_samples, 1)
+    info = {'fm_re_cf': fm_re_cf,
+            'cf_re_fm':cf_re_fm}
+
+    return cf_samples, fm_samples, info 
+
+
+def segment_by_pwvd():
+    pass
+
+def segment_by_inst_frequency():
+    pass
+
+perform_segmentation = {'peak_percentage':segment_by_peak_percentage, 
+                        'pwvd':segment_by_pwvd,
+                        'inst_freq':segment_by_inst_frequency}
+
+
+def refine_candidate_regions():
+    '''Takes in candidate CF and FM regions and tries to satisfy the 
+    constraints set by the user. 
+    '''
+    
+    
+    
+    return fm_regions, cf_regions
+
+
+
+def check_segment_cf_and_fm(cf_samples, fm_samples, fs, **kwargs):
+    '''
+    '''
+
+    main_cf = get_cf_region(cf_samples, 1)
     main_fm = get_fm_regions(fm_samples, fs, **kwargs)
 
-    return main_cf, main_fm, [cf_re_fm, fm_re_cf]
+    return main_cf, main_fm
+
+
+def get_cf_region(cf_samples, fs, **kwargs):
+    '''TODO : generalise to multiple CF regions 
+    
+    Parameters
+    ----------
+    cf_samples : np.array
+        Boolean with True indicating a Cf region. 
+    fs : float
+
+    Returns
+    -------
+    cf_region : np.array
+        The longest continuous stretch
+    
+    '''
+    min_cf_duration = kwargs.get('min_cf_duration', 0.001)
+    make_sure_its_positive(min_cf_duration, variable='min_cf_duration')
+    min_cf_samples = int(fs*min_cf_duration)
+    cf_region = identify_valid_regions(cf_samples, 1)
+    if sum(cf_region) < min_cf_samples:
+        msg1 = 'CF segment of minimum length (%3f)s'%(min_cf_duration)
+        msg2 = ' could not be found'
+        raise CFIdentificationError(msg1+msg2)
+        
+    return cf_region
+
 
 def get_fm_regions(fm_samples, fs, **kwargs):
-    '''
+    '''TODO : generalise to multiple FM regions
     Parameters
     ----------
     fm_samples : np.array
@@ -218,7 +341,7 @@ def identify_valid_regions(condition_satisfied, num_expected_regions=1):
         separated by smaller regions which don't (False).
     num_expected_regions : int > 0 
         The number of expected regions which satisfy a condition. 
-        If >1, then the first two longest continuous regions will be returned,
+        If >2, then the first two longest continuous regions will be returned,
         and the smaller regions will be suppressed/eliminated.
         Defaults to 1. 
 
@@ -227,7 +350,6 @@ def identify_valid_regions(condition_satisfied, num_expected_regions=1):
     valid_regions : np.array
         Boolean array which identifies the regions with the longest
         contiguous lengths.
-    ADDDDD HERE !! 
     '''
     regions_of_interest, all_region_data = identify_maximum_contiguous_regions(condition_satisfied, num_expected_regions)
     valid_samples = []
@@ -431,6 +553,38 @@ def instantaneous_frequency_profile(audio, fs, **kwargs):
     return instant_frequency_resized
 
 
+def resize_by_adding_one_sample(input_signal, original_signal, **kwargs):
+    '''Resizes the input_signal to the same size as the original signal by repeating one
+    sample value. The sample value can either the last or the first sample of the input_signal. 
+    '''
+    check_signal_sizes(input_signal, original_signal)
+    
+    repeat_start = kwargs.get('repeat_start', True)
+    
+    if repeat_start:
+        return np.concatenate((np.array([input_signal[0]]), input_signal))
+    else:
+        return np.concatenate((input_signal, np.array([input_signal[-1]])))
+
+
+def check_signal_sizes(input_signal, original_signal):
+    if int(input_signal.size) >= int(original_signal.size):
+        msg1 = 'The input signal"s size %d'%int(input_signal.size)
+        msg2 = ' is greater or equal to the original signal"s size: %d'%(int(original_signal.size))
+        raise ValueError(msg1+msg2)
+    
+    if int(original_signal.size) - int(input_signal.size) >= 2:
+        raise ValueError('The original signal is >= 2 samples longer than the input signal.')
+
+
+def instantaneous_frequency_profile(audio, fs, **kwargs):
+    hil = signal.hilbert(audio)
+    instantaneous_phase = np.unwrap(np.angle(hil))
+    instantaneous_frequency = (np.diff(instantaneous_phase)/(2.0*np.pi)) * fs
+    instant_frequency_resized = resize_by_adding_one_sample(instantaneous_frequency, audio, **kwargs)
+    return instant_frequency_resized
+
+
 
 def calc_proper_kernel_size(durn, fs):
     '''scipy.signal.medfilt requires an odd number of samples as
@@ -513,8 +667,8 @@ def identify_cf_ish_regions(frequency_profile, fs, **kwargs):
     frequency_profile : np.array
         The instantaneous frequency of the signal over time in Hz. 
     fm_limit : float, optional 
-        The maximum rate of frequency modulation in Hz/ms. 
-        Defaults to 200 Hz/ms
+        The maximum rate of frequency modulation in Hz/s. 
+        Defaults to 1000 Hz/s
     medianfilter_size : float, optional
 
     Returns
@@ -523,19 +677,29 @@ def identify_cf_ish_regions(frequency_profile, fs, **kwargs):
         Boolean array where True indicates a low FM rate region. 
         The output may still need to be cleaned before final use. 
     clean_fmrate_resized
+    
+    Notes
+    -----
+    If you're used to reading FM modulation rates in kHz/ms then just 
+    follow this relation to get the required modulation rate in Hz/s:
+    
+    X kHz/ms = (X Hz/s)* 10^-6 
+    
+    OR 
+    
+    X Hz/s = (X kHz/ms) * 10^6
 
     See Also
     --------
     median_filter
     '''
-    max_modulation = kwargs.get('fm_limit', 200) # Hz/msec
+    max_modulation = kwargs.get('fm_limit', 10000) # Hz/sec
     fm_rate = np.diff(frequency_profile)
     
-    #convert from Hz/(1/fs) to Hz/msec
+    #convert from Hz/sec to Hz/msec
     fm_rate_hz_sec = fm_rate/(1.0/fs)
-    fm_rate_hz_msec = fm_rate_hz_sec*10**-3
     
-    clean_fmrate = median_filter(fm_rate_hz_msec, fs, **kwargs)
+    clean_fmrate = median_filter(fm_rate_hz_sec, fs, **kwargs)
     clean_fmrate_resized = resize_by_adding_one_sample(clean_fmrate, frequency_profile, **kwargs)
 
     cfish_regions = np.abs(clean_fmrate_resized)<= max_modulation
@@ -550,6 +714,15 @@ def segment_cf_regions(audio, fs, **kwargs):
     return cf_region, fmrate_hz_per_msec
     
 
+
+
+
+
+
+
+
+class CFIdentificationError(ValueError):
+    pass
 
 class IncorrectThreshold(ValueError):
     pass

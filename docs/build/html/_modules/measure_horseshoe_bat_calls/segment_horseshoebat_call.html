@@ -159,55 +159,178 @@
 
 
 <div class="viewcode-block" id="segment_call_into_cf_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_call_into_cf_fm</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;Function which identifies regions into CF and FM based on the following   process. </span>
+
+<span class="sd">    1. Candidate regions of CF and FM are first produced based on the segmentation</span>
+<span class="sd">    method chosen&#39;.</span>
+
+<span class="sd">    2. These candidate regions are then refined based on the </span>
+<span class="sd">    user&#39;s requirements (minimum length of region, maximum number of CF/FM</span>
+<span class="sd">    regions in the sound)</span>
+
+<span class="sd">    3. The finalised CF and FM regions are output as Boolean arrays.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    -----------</span>
 <span class="sd">    call : np.array</span>
 <span class="sd">        Audio with horseshoe bat call</span>
 <span class="sd">    fs : float&gt;0</span>
 <span class="sd">        Frequency of sampling in Hz. </span>
-<span class="sd">    </span>
+<span class="sd">    method : str, optional </span>
+<span class="sd">        One of [&#39;peak_percentage&#39;, &#39;pwvd&#39;, &#39;inst_freq&#39;].</span>
+<span class="sd">        Checkout &#39;See Also&#39; for more information. </span>
+<span class="sd">        Defaults to &#39;peak_percentage&#39;</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
 <span class="sd">    cf_samples, fm_samples : np.array</span>
 <span class="sd">        Boolean numpy array showing which of the samples belong </span>
 <span class="sd">        to the cf and the fm respectively. </span>
-<span class="sd">    info : list</span>
-<span class="sd">        List with two np.array. The first array has the </span>
-<span class="sd">        max normalised dB rms profile of the highpassed filtered</span>
-<span class="sd">        call (cf dominant). The second array has the max normalised</span>
-<span class="sd">        dB rms profile of the  lowpassed filtered call (fm dominant).</span>
-<span class="sd">    </span>
-<span class="sd">    Notes</span>
-<span class="sd">    ------</span>
-<span class="sd">    For more information on how to handle/improve the segmentation see</span>
-<span class="sd">    documentation for pre_process_for_segmentation</span>
+<span class="sd">    fmrate : np.array</span>
+<span class="sd">        The rate of frequency modulation in Hz/ms.</span>
+<span class="sd">    info : dictionary</span>
+<span class="sd">        Post-processing information depending on </span>
+<span class="sd">        the methods used. </span>
+
+
+<span class="sd">    See Also</span>
+<span class="sd">    ----------</span>
+<span class="sd">    segment_by_peak_percentage</span>
+<span class="sd">    segment_by_pwvd</span>
+<span class="sd">    segment_by_inst_frequency</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span> <span class="o">=</span> <span class="n">pre_process_for_segmentation</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">segment_cf_and_fm</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span><span class="p">,</span> 
-                                                     <span class="n">fs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;peak_percentage&#39;</span><span class="p">)</span>
+    <span class="c1"># identify candidate CF and FM regions </span>
+    <span class="n">cf_candidates</span><span class="p">,</span> <span class="n">fm_candidates</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">perform_segmentation</span><span class="p">[</span><span class="n">method</span><span class="p">](</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span>
+                                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># refine the candidate regions based on user requirements</span>
+    <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">refine_candidate_regions</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> 
+                                                      <span class="n">cf_candidates</span><span class="p">,</span>
+                                                      <span class="n">fm_candidates</span><span class="p">,</span>
+                                                      <span class="n">info</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span></div>
 
-<div class="viewcode-block" id="segment_cf_and_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_cf_and_fm</span><span class="p">(</span><span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Calculates the relative increase in signal levels </span>
-<span class="sd">    between the CF and FM dominant versions of the audio. </span>
+
+
+<div class="viewcode-block" id="segment_by_peak_percentage"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage">[docs]</a><span class="k">def</span> <span class="nf">segment_by_peak_percentage</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This is ideal for calls with one clear CF section with the CF </span>
+<span class="sd">    portion being the highest frequency in the call: bat/bird CF-FM</span>
+<span class="sd">    calls which have on CF and one/two sweep section.</span>
+
+<span class="sd">    Calculates the peak frequency of the whole call and performs </span>
+<span class="sd">    low+high pass filtering at a frequency slightly lower than the peak frequency. </span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    call : np.array</span>
+<span class="sd">    fs : float&gt;0</span>
 <span class="sd">    </span>
-<span class="sd">    Regions which have not been amplified will show &lt;= 0 dB change, </span>
-<span class="sd">    and this is used to identify the CF and FM portions reliably.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cf_samples, fm_samples : np.array</span>
+<span class="sd">        Boolean array with True indicating that sample has been categorised</span>
+<span class="sd">        as being CF and/or FM. </span>
+<span class="sd">    info : dictionary</span>
+<span class="sd">        With keys &#39;fm_re_cf&#39; and &#39;cf_re_fm&#39; indicating the relative </span>
+<span class="sd">        dBrms profiles of the candidate FM regions relative to Cf </span>
+<span class="sd">        and vice versa.</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This method is not well suited for audio with uniform call envelopes. </span>
+<span class="sd">    When there is high variation over the call envelope, the peak frequency </span>
+<span class="sd">    is likely to be miscalculated, and thus lead to wrong segmentation.</span>
+
+<span class="sd">    This method is inspired by the protocol in Schoeppler et al. 2018, </span>
+<span class="sd">    but differs from it in the important aspect of being done entirely in the </span>
+<span class="sd">    time domain. Schoeppler et al. 2018 use a spectrogram based method </span>
+<span class="sd">    to segment the CF and FM segments of H. armiger calls. </span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Schoeppler, D., Schnitzler, H. U., &amp; Denzinger, A. (2018). </span>
+<span class="sd">    Precise Doppler shift compensation in the hipposiderid bat, </span>
+<span class="sd">    Hipposideros armiger. Scientific Reports, 8(1), 1-11.     </span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    pre_process_for_segmentation</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">cf_dbrms</span><span class="p">,</span> <span class="n">fm_dbrms</span> <span class="o">=</span> <span class="n">pre_process_for_segmentation</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">fm_re_cf</span> <span class="o">=</span> <span class="n">fm_dbrms</span> <span class="o">-</span> <span class="n">cf_dbrms</span>
     <span class="n">cf_re_fm</span> <span class="o">=</span> <span class="n">cf_dbrms</span> <span class="o">-</span> <span class="n">fm_dbrms</span>
     
     <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">fm_re_cf</span> <span class="o">&gt;</span> <span class="mi">0</span> 
     <span class="n">cf_samples</span> <span class="o">=</span> <span class="n">cf_re_fm</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
-    <span class="n">main_cf</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;fm_re_cf&#39;</span><span class="p">:</span> <span class="n">fm_re_cf</span><span class="p">,</span>
+            <span class="s1">&#39;cf_re_fm&#39;</span><span class="p">:</span><span class="n">cf_re_fm</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span> </div>
+
+
+<span class="k">def</span> <span class="nf">segment_by_pwvd</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">segment_by_inst_frequency</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="n">perform_segmentation</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;peak_percentage&#39;</span><span class="p">:</span><span class="n">segment_by_peak_percentage</span><span class="p">,</span> 
+                        <span class="s1">&#39;pwvd&#39;</span><span class="p">:</span><span class="n">segment_by_pwvd</span><span class="p">,</span>
+                        <span class="s1">&#39;inst_freq&#39;</span><span class="p">:</span><span class="n">segment_by_inst_frequency</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="refine_candidate_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.refine_candidate_regions">[docs]</a><span class="k">def</span> <span class="nf">refine_candidate_regions</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Takes in candidate CF and FM regions and tries to satisfy the </span>
+<span class="sd">    constraints set by the user. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    
+    
+    <span class="k">return</span> <span class="n">fm_regions</span><span class="p">,</span> <span class="n">cf_regions</span></div>
+
+
+
+<div class="viewcode-block" id="check_segment_cf_and_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.check_segment_cf_and_fm">[docs]</a><span class="k">def</span> <span class="nf">check_segment_cf_and_fm</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">main_cf</span> <span class="o">=</span> <span class="n">get_cf_region</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">main_fm</span> <span class="o">=</span> <span class="n">get_fm_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">main_cf</span><span class="p">,</span> <span class="n">main_fm</span><span class="p">,</span> <span class="p">[</span><span class="n">cf_re_fm</span><span class="p">,</span> <span class="n">fm_re_cf</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">main_cf</span><span class="p">,</span> <span class="n">main_fm</span></div>
+
+
+<div class="viewcode-block" id="get_cf_region"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_cf_region">[docs]</a><span class="k">def</span> <span class="nf">get_cf_region</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;TODO : generalise to multiple CF regions </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cf_samples : np.array</span>
+<span class="sd">        Boolean with True indicating a Cf region. </span>
+<span class="sd">    fs : float</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cf_region : np.array</span>
+<span class="sd">        The longest continuous stretch</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">min_cf_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_cf_duration&#39;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+    <span class="n">make_sure_its_positive</span><span class="p">(</span><span class="n">min_cf_duration</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;min_cf_duration&#39;</span><span class="p">)</span>
+    <span class="n">min_cf_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">min_cf_duration</span><span class="p">)</span>
+    <span class="n">cf_region</span> <span class="o">=</span> <span class="n">identify_valid_regions</span><span class="p">(</span><span class="n">cf_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">cf_region</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_cf_samples</span><span class="p">:</span>
+        <span class="n">msg1</span> <span class="o">=</span> <span class="s1">&#39;CF segment of minimum length (</span><span class="si">%3f</span><span class="s1">)s&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">min_cf_duration</span><span class="p">)</span>
+        <span class="n">msg2</span> <span class="o">=</span> <span class="s1">&#39; could not be found&#39;</span>
+        <span class="k">raise</span> <span class="n">CFIdentificationError</span><span class="p">(</span><span class="n">msg1</span><span class="o">+</span><span class="n">msg2</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">cf_region</span></div>
+
 
 <div class="viewcode-block" id="get_fm_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions">[docs]</a><span class="k">def</span> <span class="nf">get_fm_regions</span><span class="p">(</span><span class="n">fm_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;TODO : generalise to multiple FM regions</span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    fm_samples : np.array</span>
@@ -365,7 +488,7 @@
 <span class="sd">        separated by smaller regions which don&#39;t (False).</span>
 <span class="sd">    num_expected_regions : int &gt; 0 </span>
 <span class="sd">        The number of expected regions which satisfy a condition. </span>
-<span class="sd">        If &gt;1, then the first two longest continuous regions will be returned,</span>
+<span class="sd">        If &gt;2, then the first two longest continuous regions will be returned,</span>
 <span class="sd">        and the smaller regions will be suppressed/eliminated.</span>
 <span class="sd">        Defaults to 1. </span>
 
@@ -374,7 +497,6 @@
 <span class="sd">    valid_regions : np.array</span>
 <span class="sd">        Boolean array which identifies the regions with the longest</span>
 <span class="sd">        contiguous lengths.</span>
-<span class="sd">    ADDDDD HERE !! </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">regions_of_interest</span><span class="p">,</span> <span class="n">all_region_data</span> <span class="o">=</span> <span class="n">identify_maximum_contiguous_regions</span><span class="p">(</span><span class="n">condition_satisfied</span><span class="p">,</span> <span class="n">num_expected_regions</span><span class="p">)</span>
     <span class="n">valid_samples</span> <span class="o">=</span> <span class="p">[]</span>
@@ -570,6 +692,184 @@
     
     <span class="k">return</span> <span class="n">num_shared_fm_cf_samples</span><span class="p">,</span> <span class="n">optimisation_metric</span><span class="p">,</span> <span class="n">best_threshold</span></div>
 
+<span class="k">def</span> <span class="nf">instantaneous_frequency_profile</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">hil</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">instantaneous_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">hil</span><span class="p">))</span>
+    <span class="n">instantaneous_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">instantaneous_phase</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="n">fs</span>
+    <span class="n">instant_frequency_resized</span> <span class="o">=</span> <span class="n">resize_by_adding_one_sample</span><span class="p">(</span><span class="n">instantaneous_frequency</span><span class="p">,</span> <span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">instant_frequency_resized</span>
+
+
+<span class="k">def</span> <span class="nf">resize_by_adding_one_sample</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Resizes the input_signal to the same size as the original signal by repeating one</span>
+<span class="sd">    sample value. The sample value can either the last or the first sample of the input_signal. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">check_signal_sizes</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">)</span>
+    
+    <span class="n">repeat_start</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;repeat_start&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">repeat_start</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">input_signal</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">input_signal</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">input_signal</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])))</span>
+
+
+<span class="k">def</span> <span class="nf">check_signal_sizes</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">msg1</span> <span class="o">=</span> <span class="s1">&#39;The input signal&quot;s size </span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">msg2</span> <span class="o">=</span> <span class="s1">&#39; is greater or equal to the original signal&quot;s size: </span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg1</span><span class="o">+</span><span class="n">msg2</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The original signal is &gt;= 2 samples longer than the input signal.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">instantaneous_frequency_profile</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">hil</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span>
+    <span class="n">instantaneous_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">hil</span><span class="p">))</span>
+    <span class="n">instantaneous_frequency</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">instantaneous_phase</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span> <span class="n">fs</span>
+    <span class="n">instant_frequency_resized</span> <span class="o">=</span> <span class="n">resize_by_adding_one_sample</span><span class="p">(</span><span class="n">instantaneous_frequency</span><span class="p">,</span> <span class="n">audio</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">instant_frequency_resized</span>
+
+
+
+<div class="viewcode-block" id="calc_proper_kernel_size"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.calc_proper_kernel_size">[docs]</a><span class="k">def</span> <span class="nf">calc_proper_kernel_size</span><span class="p">(</span><span class="n">durn</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;scipy.signal.medfilt requires an odd number of samples as</span>
+<span class="sd">    kernel_size. This function calculates the number of samples</span>
+<span class="sd">    for a given duration which is odd and is close to the </span>
+<span class="sd">    required duration. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    durn : float</span>
+<span class="sd">        Duration in seconds. </span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling rate in Hz</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : int</span>
+<span class="sd">        Number of odd samples that is equal to or little </span>
+<span class="sd">        less (by one sample) than the input duration. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">durn</span><span class="o">*</span><span class="n">fs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">samples</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">samples</span></div>
+
+<div class="viewcode-block" id="resize_by_adding_one_sample"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.resize_by_adding_one_sample">[docs]</a><span class="k">def</span> <span class="nf">resize_by_adding_one_sample</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Resizes the input_signal to the same size as the original signal by repeating one</span>
+<span class="sd">    sample value. The sample value can either the last or the first sample of the input_signal. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">check_signal_sizes</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">)</span>
+    
+    <span class="n">repeat_start</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;repeat_start&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">repeat_start</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">input_signal</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">input_signal</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">input_signal</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])))</span></div>
+
+
+<span class="k">def</span> <span class="nf">check_signal_sizes</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">original_signal</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">msg1</span> <span class="o">=</span> <span class="s1">&#39;The input signal&quot;s size </span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">msg2</span> <span class="o">=</span> <span class="s1">&#39; is greater or equal to the original signal&quot;s size: </span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg1</span><span class="o">+</span><span class="n">msg2</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">original_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_signal</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The original signal is &gt;= 2 samples longer than the input signal.&#39;</span><span class="p">)</span>
+    
+
+<div class="viewcode-block" id="median_filter"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter">[docs]</a><span class="k">def</span> <span class="nf">median_filter</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Median filters a signal according to a user-settable</span>
+<span class="sd">    window size. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_signal : np.array</span>
+<span class="sd">    fs : float</span>
+<span class="sd">        Sampling rate in Hz.</span>
+<span class="sd">    medianfilter_size : float, optional</span>
+<span class="sd">        The window size in seconds. Defaults to 0.001 seconds. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    med_filtered : np.array</span>
+<span class="sd">        Median filtered version of the input_signal. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">window_duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;medianfilter_size&#39;</span><span class="p">,</span>
+                              <span class="mf">0.001</span><span class="p">)</span>
+    <span class="n">kernel_size</span> <span class="o">=</span> <span class="n">calc_proper_kernel_size</span><span class="p">(</span><span class="n">window_duration</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+    <span class="n">med_filtered</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">medfilt</span><span class="p">(</span><span class="n">input_signal</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">med_filtered</span></div>
+
+<div class="viewcode-block" id="identify_cf_ish_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_cf_ish_regions">[docs]</a><span class="k">def</span> <span class="nf">identify_cf_ish_regions</span><span class="p">(</span><span class="n">frequency_profile</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Identifies CF regions by comparing the rate of frequency modulation </span>
+<span class="sd">    across the signal. If the frequency modulation within a region of </span>
+<span class="sd">    the signal is less than the limit then it is considered a CF region. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frequency_profile : np.array</span>
+<span class="sd">        The instantaneous frequency of the signal over time in Hz. </span>
+<span class="sd">    fm_limit : float, optional </span>
+<span class="sd">        The maximum rate of frequency modulation in Hz/s. </span>
+<span class="sd">        Defaults to 1000 Hz/s</span>
+<span class="sd">    medianfilter_size : float, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cfish_regions : np.array</span>
+<span class="sd">        Boolean array where True indicates a low FM rate region. </span>
+<span class="sd">        The output may still need to be cleaned before final use. </span>
+<span class="sd">    clean_fmrate_resized</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If you&#39;re used to reading FM modulation rates in kHz/ms then just </span>
+<span class="sd">    follow this relation to get the required modulation rate in Hz/s:</span>
+<span class="sd">    </span>
+<span class="sd">    X kHz/ms = (X Hz/s)* 10^-6 </span>
+<span class="sd">    </span>
+<span class="sd">    OR </span>
+<span class="sd">    </span>
+<span class="sd">    X Hz/s = (X kHz/ms) * 10^6</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    median_filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">max_modulation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fm_limit&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span> <span class="c1"># Hz/sec</span>
+    <span class="n">fm_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">frequency_profile</span><span class="p">)</span>
+    
+    <span class="c1">#convert from Hz/sec to Hz/msec</span>
+    <span class="n">fm_rate_hz_sec</span> <span class="o">=</span> <span class="n">fm_rate</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">fs</span><span class="p">)</span>
+    
+    <span class="n">clean_fmrate</span> <span class="o">=</span> <span class="n">median_filter</span><span class="p">(</span><span class="n">fm_rate_hz_sec</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">clean_fmrate_resized</span> <span class="o">=</span> <span class="n">resize_by_adding_one_sample</span><span class="p">(</span><span class="n">clean_fmrate</span><span class="p">,</span> <span class="n">frequency_profile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">cfish_regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">clean_fmrate_resized</span><span class="p">)</span><span class="o">&lt;=</span> <span class="n">max_modulation</span>
+    <span class="k">return</span> <span class="n">cfish_regions</span><span class="p">,</span> <span class="n">clean_fmrate_resized</span></div>
+
+<div class="viewcode-block" id="segment_cf_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_regions">[docs]</a><span class="k">def</span> <span class="nf">segment_cf_regions</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">freq_profile_raw</span> <span class="o">=</span> <span class="n">instantaneous_frequency_profile</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span><span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">freq_profile_clean</span> <span class="o">=</span> <span class="n">median_filter</span><span class="p">(</span><span class="n">freq_profile_raw</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">cf_region</span><span class="p">,</span> <span class="n">fmrate_hz_per_msec</span> <span class="o">=</span> <span class="n">identify_cf_ish_regions</span><span class="p">(</span><span class="n">freq_profile_clean</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cf_region</span><span class="p">,</span> <span class="n">fmrate_hz_per_msec</span></div>
+    
+
+
+
+
+
+
+
+
+<div class="viewcode-block" id="CFIdentificationError"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.CFIdentificationError">[docs]</a><span class="k">class</span> <span class="nc">CFIdentificationError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="IncorrectThreshold"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold">[docs]</a><span class="k">class</span> <span class="nc">IncorrectThreshold</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
     <span class="k">pass</span></div>

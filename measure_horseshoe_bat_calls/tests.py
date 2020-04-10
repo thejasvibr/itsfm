@@ -306,7 +306,25 @@ class TestGetFMSnippets(unittest.TestCase):
         
         self.check_type_and_index_match(expected_types, expected_snippets,
                                         fm_types, fm_snippets)
- 
+
+
+
+#### Tesing the segment_call_into_cf_fm
+class CheckingDifferentSegmentationMethods(unittest.TestCase):
+    
+    def setUp(self):
+        call_properties = {'upfm':(98000, 0.001),
+                           'cf':(100000, 0.005),
+                           'downfm':(85000, 0.002)}
+        self.fs = 500000
+        self.cffm_call, _ = make_cffm_call(call_properties, self.fs)
+    
+    def test_peak_percentage_method_works(self):
+        '''Check that perform_segmentation doesn't raise an error
+        '''
+        cf, fm, _ = perform_segmentation['peak_percentage'](self.cffm_call,
+                                                self.fs)
+        
 
         
 if __name__ == '__main__':

@@ -107,6 +107,7 @@
 </li>
 <li><a class="reference internal" href="#feedback-and-contributions-welcome">Feedback and Contributions Welcome!!</a></li>
 <li><a class="reference internal" href="#author-thejasvi-beleyur-acoustic-and-functional-ecology-group-max-planck-institute-for-ornithology-seewiesen">Author: Thejasvi Beleyur, Acoustic and Functional Ecology Group, Max Planck Institute for Ornithology, Seewiesen</a></li>
+<li><a class="reference internal" href="#how-the-package-works">How the package works</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.user_interface">High-level API</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.batch_processing">Batch processing from batchfiles</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call">Call -background and call-part segmentation</a></li>
@@ -546,6 +547,23 @@ happy to look into it.</p>
 <div class="toctree-wrapper compound">
 </div>
 </div>
+<div class="section" id="how-the-package-works">
+<h2>How the package works<a class="headerlink" href="#how-the-package-works" title="Permalink to this headline">¶</a></h2>
+<p>The package assumes that any given sound could have a set of three elements</p>
+<ul class="simple">
+<li><p>Constant Frequency (CF) :  a pure tone like element</p></li>
+<li><p>Frequency Modulated (FM) :  an element with a varying frequency</p></li>
+<li><p>Gap : a silence between two elements that is neither a CF nor an FM.</p></li>
+</ul>
+<p>Any input audio goes through the following steps:</p>
+<ol class="arabic simple">
+<li><p>Time frequency localisation within audio (STFT, WignerVille, instantaneous frequency,..)</p></li>
+<li><p>FM rate calculation</p></li>
+<li><p>Rough candidate region assignment into CF and FM regions</p></li>
+<li><p>Refined sample-level assignment into CF,FM and Gap regions based on user-input constraints</p></li>
+<li><p>Segmentation of assigned elements and measurements of various parameters (peak frequency, energy, duration,…)</p></li>
+</ol>
+</div>
 <div class="section" id="module-measure_horseshoe_bat_calls.user_interface">
 <span id="high-level-api"></span><h2>High-level API<a class="headerlink" href="#module-measure_horseshoe_bat_calls.user_interface" title="Permalink to this headline">¶</a></h2>
 <p>User-friendly top-level functions which allow the user to handle</p>
@@ -723,20 +741,24 @@ output file.</p>
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.batch_processing.load_raw_audio">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.batch_processing.</code><code class="sig-name descname">load_raw_audio</code><span class="sig-paren">(</span><em class="sig-param">kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/batch_processing.html#load_raw_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.batch_processing.load_raw_audio" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks to see
-:param audio_path: Path to audio file
-:type audio_path: str/path
-:param channel: Channel number to be loaded - starting from 1!</p>
-<blockquote>
-<div><p>Defaults to 1.</p>
-</div></blockquote>
+<dd><p>Takes a dictioanry input.
+All the parameter names need to be keys in the
+input dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>raw_audio</strong> – The audio corresponding to the start and stop times
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>audio_path</strong> (<em>str/path</em>) – Path to audio file</p></li>
+<li><p><strong>channel</strong> (<em>int</em><em>, </em><em>optional</em>) – Channel number to be loaded - starting from 1!
+Defaults to 1.</p></li>
+<li><p><strong>start</strong><strong>,</strong><strong>stop</strong> (<em>float</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>raw_audio</strong> – The audio corresponding to the start and stop times
 and the required channel.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -774,57 +796,137 @@ The primary logic of this</p>
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_call_into_cf_fm</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_call_into_cf_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Function which identifies regions into CF and FM based on the following   process.</p>
+<p>1. Candidate regions of CF and FM are first produced based on the segmentation
+method chosen’.</p>
+<p>2. These candidate regions are then refined based on the
+user’s requirements (minimum length of region, maximum number of CF/FM
+regions in the sound)</p>
+<ol class="arabic simple" start="3">
+<li><p>The finalised CF and FM regions are output as Boolean arrays.</p></li>
+</ol>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>call</strong> (<em>np.array</em>) – Audio with horseshoe bat call</p></li>
 <li><p><strong>fs</strong> (<em>float&gt;0</em>) – Frequency of sampling in Hz.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – One of [‘peak_percentage’, ‘pwvd’, ‘inst_freq’].
+Checkout ‘See Also’ for more information.
+Defaults to ‘peak_percentage’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>cf_samples, fm_samples</strong> (<em>np.array</em>) – Boolean numpy array showing which of the samples belong
 to the cf and the fm respectively.</p></li>
-<li><p><strong>info</strong> (<em>list</em>) – List with two np.array. The first array has the
-max normalised dB rms profile of the highpassed filtered
-call (cf dominant). The second array has the max normalised
-dB rms profile of the  lowpassed filtered call (fm dominant).</p></li>
+<li><p><strong>fmrate</strong> (<em>np.array</em>) – The rate of frequency modulation in Hz/ms.</p></li>
+<li><p><strong>info</strong> (<em>dictionary</em>) – Post-processing information depending on
+the methods used.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage" title="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage"><code class="xref py py-func docutils literal notranslate"><span class="pre">segment_by_peak_percentage()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">segment_by_pwvd()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">segment_by_inst_frequency()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_by_peak_percentage</code><span class="sig-paren">(</span><em class="sig-param">call</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_by_peak_percentage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is ideal for calls with one clear CF section with the CF
+portion being the highest frequency in the call: bat/bird CF-FM
+calls which have on CF and one/two sweep section.</p>
+<p>Calculates the peak frequency of the whole call and performs
+low+high pass filtering at a frequency slightly lower than the peak frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>call</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>cf_samples, fm_samples</strong> (<em>np.array</em>) – Boolean array with True indicating that sample has been categorised
+as being CF and/or FM.</p></li>
+<li><p><strong>info</strong> (<em>dictionary</em>) – With keys ‘fm_re_cf’ and ‘cf_re_fm’ indicating the relative
+dBrms profiles of the candidate FM regions relative to Cf
+and vice versa.</p></li>
 </ul>
 </p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>For more information on how to handle/improve the segmentation see
-documentation for pre_process_for_segmentation</p>
+<p>This method is not well suited for audio with uniform call envelopes.
+When there is high variation over the call envelope, the peak frequency
+is likely to be miscalculated, and thus lead to wrong segmentation.</p>
+<p>This method is inspired by the protocol in Schoeppler et al. 2018,
+but differs from it in the important aspect of being done entirely in the
+time domain. Schoeppler et al. 2018 use a spectrogram based method
+to segment the CF and FM segments of H. armiger calls.</p>
+<p class="rubric">References</p>
+<p>[1] Schoeppler, D., Schnitzler, H. U., &amp; Denzinger, A. (2018).
+Precise Doppler shift compensation in the hipposiderid bat,
+Hipposideros armiger. Scientific Reports, 8(1), 1-11.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation" title="measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation"><code class="xref py py-func docutils literal notranslate"><span class="pre">pre_process_for_segmentation()</span></code></a></p>
+</div>
 </dd></dl>
 
 <dl class="function">
-<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm">
-<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_cf_and_fm</code><span class="sig-paren">(</span><em class="sig-param">cf_dbrms</em>, <em class="sig-param">fm_dbrms</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_cf_and_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_and_fm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the relative increase in signal levels
-between the CF and FM dominant versions of the audio.</p>
-<p>Regions which have not been amplified will show &lt;= 0 dB change,
-and this is used to identify the CF and FM portions reliably.</p>
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.refine_candidate_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">refine_candidate_regions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#refine_candidate_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.refine_candidate_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in candidate CF and FM regions and tries to satisfy the
+constraints set by the user.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.check_segment_cf_and_fm">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">check_segment_cf_and_fm</code><span class="sig-paren">(</span><em class="sig-param">cf_samples</em>, <em class="sig-param">fm_samples</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#check_segment_cf_and_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.check_segment_cf_and_fm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.get_cf_region">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">get_cf_region</code><span class="sig-paren">(</span><em class="sig-param">cf_samples</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#get_cf_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_cf_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO : generalise to multiple CF regions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cf_samples</strong> (<em>np.array</em>) – Boolean with True indicating a Cf region.</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cf_region</strong> – The longest continuous stretch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">get_fm_regions</code><span class="sig-paren">(</span><em class="sig-param">fm_samples</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#get_fm_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fm_samples</strong> (<em>np.array</em>) – Boolean numpy array with candidate FM samples.</p></li>
-<li><p><strong>fs</strong> (<em>float&gt;0</em>) – </p></li>
-<li><p><strong>min_fm_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum fm duration expected in seconds. Any fm segment lower than this
-duration  is considered to be a bad read and discarded.
-Defaults to 0.5 milliseconds.</p></li>
-</ul>
+<dd><p>TODO : generalise to multiple FM regions
+:param fm_samples: Boolean numpy array with candidate FM samples.
+:type fm_samples: np.array
+:param fs:
+:type fs: float&gt;0
+:param min_fm_duration: minimum fm duration expected in seconds. Any fm segment lower than this</p>
+<blockquote>
+<div><p>duration  is considered to be a bad read and discarded.
+Defaults to 0.5 milliseconds.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>valid_fm</strong> – Boolean numpy array with the corrected fm samples.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>valid_fm</strong> – Boolean numpy array with the corrected fm samples.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -901,18 +1003,17 @@ centre frequencies &gt;= lowest_relevant_frequency.s</p></li>
 The array may have multiple regions which satisfy a conditions (True)
 separated by smaller regions which don’t (False).</p></li>
 <li><p><strong>num_expected_regions</strong> (<em>int &gt; 0</em>) – The number of expected regions which satisfy a condition.
-If &gt;1, then the first two longest continuous regions will be returned,
+If &gt;2, then the first two longest continuous regions will be returned,
 and the smaller regions will be suppressed/eliminated.
 Defaults to 1.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>valid_regions</strong> (<em>np.array</em>) – Boolean array which identifies the regions with the longest
-contiguous lengths.</p></li>
-<li><p><em>ADDDDD HERE !!</em></p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>valid_regions</strong> – Boolean array which identifies the regions with the longest
+contiguous lengths.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1008,6 +1109,105 @@ Defaults to 0.1 seconds.</p></li>
 <dl class="function">
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max">
 <code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">get_thresholds_re_max</code><span class="sig-paren">(</span><em class="sig-param">cf_dbrms</em>, <em class="sig-param">fm_dbrms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#get_thresholds_re_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.calc_proper_kernel_size">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">calc_proper_kernel_size</code><span class="sig-paren">(</span><em class="sig-param">durn</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#calc_proper_kernel_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.calc_proper_kernel_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>scipy.signal.medfilt requires an odd number of samples as
+kernel_size. This function calculates the number of samples
+for a given duration which is odd and is close to the
+required duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>durn</strong> (<em>float</em>) – Duration in seconds.</p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling rate in Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>samples</strong> – Number of odd samples that is equal to or little
+less (by one sample) than the input duration.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.resize_by_adding_one_sample">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">resize_by_adding_one_sample</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">original_signal</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#resize_by_adding_one_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.resize_by_adding_one_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resizes the input_signal to the same size as the original signal by repeating one
+sample value. The sample value can either the last or the first sample of the input_signal.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">median_filter</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#median_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Median filters a signal according to a user-settable
+window size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling rate in Hz.</p></li>
+<li><p><strong>medianfilter_size</strong> (<em>float</em><em>, </em><em>optional</em>) – The window size in seconds. Defaults to 0.001 seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>med_filtered</strong> – Median filtered version of the input_signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_cf_ish_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">identify_cf_ish_regions</code><span class="sig-paren">(</span><em class="sig-param">frequency_profile</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#identify_cf_ish_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_cf_ish_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies CF regions by comparing the rate of frequency modulation
+across the signal. If the frequency modulation within a region of
+the signal is less than the limit then it is considered a CF region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequency_profile</strong> (<em>np.array</em>) – The instantaneous frequency of the signal over time in Hz.</p></li>
+<li><p><strong>fm_limit</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum rate of frequency modulation in Hz/s.
+Defaults to 1000 Hz/s</p></li>
+<li><p><strong>medianfilter_size</strong> (<em>float</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>cfish_regions</strong> (<em>np.array</em>) – Boolean array where True indicates a low FM rate region.
+The output may still need to be cleaned before final use.</p></li>
+<li><p><em>clean_fmrate_resized</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If you’re used to reading FM modulation rates in kHz/ms then just
+follow this relation to get the required modulation rate in Hz/s:</p>
+<p>X kHz/ms = (X Hz/s)* 10^-6</p>
+<p>OR</p>
+<p>X Hz/s = (X kHz/ms) * 10^6</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter" title="measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter"><code class="xref py py-func docutils literal notranslate"><span class="pre">median_filter()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_regions">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">segment_cf_regions</code><span class="sig-paren">(</span><em class="sig-param">audio</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#segment_cf_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_regions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.CFIdentificationError">
+<em class="property">exception </em><code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">CFIdentificationError</code><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#CFIdentificationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.CFIdentificationError" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="exception">
@@ -1403,8 +1603,10 @@ of the joint sticking out.</p>
 <li><p><strong>cf</strong> (<em>float&gt;0</em>) – </p></li>
 <li><p><strong>fm_slope</strong> (<em>float&gt;0</em>) – </p></li>
 <li><p><strong>fs</strong> (<em>float&gt;0</em>) – </p></li>
-<li><p><strong>poly_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Polynomial order to be used by np.polyfit</p></li>
-<li><p><strong>joint_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The length of the CF and FM joints.</p></li>
+<li><p><strong>poly_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Polynomial order to be used by np.polyfit
+Defaults to 10</p></li>
+<li><p><strong>joint_duration</strong> (<em>float</em><em>, </em><em>optional</em>) – The length of the CF and FM joints.
+Default to 0.5 ms</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
