@@ -71,7 +71,24 @@ def make_cffm_call(call_properties, fs, **kwargs):
     call = np.sin(2*np.pi*dt*np.cumsum(call_frequency_profile)) 
     return call, call_frequency_profile
 
+def make_fm_chirp(start_f, end_f, durn, fs, chirp_type='linear'):
+    t = np.linspace(0,durn, int(fs*durn))
+    chirp = signal.chirp(t, start_f, t[-1], end_f, method=chirp_type)
+    chirp *= signal.tukey(chirp.size, 0.05)
+    return chirp
 
+def make_tone(tone_freq, durn, fs):
+    t = np.linspace(0,durn, int(fs*durn))
+    tone = np.sin(2*np.pi*tone_freq*t)
+    tone *= signal.tukey(tone.size, 0.05)
+    return tone
+
+def silence(durn, fs):
+    return np.zeros(int(fs*durn))
+
+def add_noise(sound, dBrms):
+    sound += np.random.normal(0,10**(dBrms/20.0),sound.size)
+    return sound
 
 def make_call_frequency_profile(call_properties, fs, **kwargs):
     '''

@@ -223,3 +223,155 @@ def form_consensus_moving_rms(forward, backward):
                                     backward[half_samples:]))
 
     return consensus_rms
+
+
+def median_filter(input_signal, fs, **kwargs):
+    '''Median filters a signal according to a user-settable
+    window size. 
+
+    Parameters
+    ----------
+    input_signal : np.array
+    fs : float
+        Sampling rate in Hz.
+    medianfilter_size : float, optional
+        The window size in seconds. Defaults to 0.001 seconds. 
+
+    Returns
+    -------
+    med_filtered : np.array
+        Median filtered version of the input_signal. 
+    '''
+    window_duration = kwargs.get('medianfilter_size',
+                              0.001)
+    kernel_size = calc_proper_kernel_size(window_duration, fs)
+    med_filtered = signal.medfilt(input_signal, kernel_size)
+    return med_filtered
+
+
+def calc_proper_kernel_size(durn, fs):
+    '''scipy.signal.medfilt requires an odd number of samples as
+    kernel_size. This function calculates the number of samples
+    for a given duration which is odd and is close to the 
+    required duration. 
+    
+    Parameters
+    ----------
+    durn : float
+        Duration in seconds. 
+    fs : float
+        Sampling rate in Hz
+    
+    Returns
+    -------
+    samples : int
+        Number of odd samples that is equal to or little 
+        less (by one sample) than the input duration. 
+    '''
+    samples = int(durn*fs)
+    if np.remainder(samples,2)==0:
+        samples -= 1
+    return samples
+
+def suppress_background_noise(main_signal, input_audio, **kwargs):
+    '''
+    '''
+    background_noise = kwargs.get('background_noise', -40) # dBrms
+    signal_dBrms = dB(moving_rms_edge_robust(input_audio, **kwargs))
+    bg_noise_suppressed = suppress_to_zero(main_signal, signal_dBrms, background_noise, 'below')
+    return bg_noise_suppressed
+
+
+def suppress_frequency_spikes(noisy_profile, input_audio, fs, **kwargs):
+    '''
+    '''
+    max_spike_rate = kwargs.get('max_spike_rate', 3000) # Hz jump/sample 
+    
+    # median filter to get rid of smaller fluctuations in the noisy profile *not*
+    # caused by abrupt transitions in the edges. 
+    med_filtered = median_filter(noisy_profile, fs, **kwargs)
+    
+    raw_fmrate = abs(np.diff(med_filtered))
+    delta_profile = resize_by_adding_one_sample(raw_fmrate, input_audio)
+    spike_suppressed = suppress_to_zero(noisy_profile, delta_profile, max_spike_rate, 'above')
+    return spike_suppressed
+
+
+
+def suppress_to_zero(target_signal, basis_signal, threshold, mode='below'):
+    '''
+    Sets the values of the target signal to zero if the 
+    samples in the basis_signal are $\geq$ or $\leq$ the threshold
+
+    Parameters
+    ----------
+    target_signal, basis_signal : np.array
+    threshold : float
+    mode : ['below', 'above'], str
+
+    Returns
+    -------
+    cleaned_signal : np.array
+        A copy of the target signal with the values that are below/above the threshold 
+        set to zero
+
+    Example
+    --------
+    # create a basis signal with a 'weak' left half and a 'loud' right hald
+    # we want to suppress the we
+    >>> basis = np.concatenate((np.arange(10), np.arange(100,200)))
+    >>> target_signal = np.random.normal(0,1,basis.size)
+    >>> cleaned_target = suppress_to_zero(basis, target_signal, 100, mode='above')
+    '''
+    if mode == 'below':
+        to_suppress = basis_signal < threshold
+    elif mode == 'above':
+        to_suppress = basis_signal > threshold
+    else: 
+        raise ValueError('Mode should be either "below" or "above" and not: %s'%(mode))
+    cleaned_signal = np.copy(target_signal)
+    cleaned_signal[to_suppress.flatten()] = 0 
+    return cleaned_signal
+
+
+def resize_by_adding_one_sample(input_signal, original_signal, **kwargs):
+    '''Resizes the input_signal to the same size as the original signal by repeating one
+    sample value. The sample value can either the last or the first sample of the input_signal. 
+    '''
+    check_signal_sizes(input_signal, original_signal)
+    
+    repeat_start = kwargs.get('repeat_start', True)
+    
+    if repeat_start:
+        return np.concatenate((np.array([input_signal[0]]), input_signal))
+    else:
+        return np.concatenate((input_signal, np.array([input_signal[-1]])))
+
+def check_signal_sizes(input_signal, original_signal):
+    if int(input_signal.size) >= int(original_signal.size):
+        msg1 = 'The input signal"s size %d'%int(input_signal.size)
+        msg2 = ' is greater or equal to the original signal"s size: %d'%(int(original_signal.size))
+        raise ValueError(msg1+msg2)
+    
+    if int(original_signal.size) - int(input_signal.size) >= 2:
+        raise ValueError('The original signal is >= 2 samples longer than the input signal.')
+
+
+def remove_bursts(frequency_profile, fs, **kwargs):
+    '''Bursts are tiny but big jumps in the signal. Even though they satisfy most of the 
+    other conditions of begin above the noise floor and of being above 0 frequency, they 
+    still are too short to be relevant signals. 
+    '''
+    inter_sample_durn = 1.0/fs
+    min_element_length = kwargs.get('min_element_length', 5*inter_sample_durn) #to 5 samples 
+    
+    if  min_element_length <= inter_sample_durn:
+        raise ValueError('Please set the min element length.\
+        The current value of:%f is less than 1/sampling rate'%(min_element_length))
+    min_element_samples = int(fs*min_element_length)
+    
+    non_spikey_regions = segments_above_min_duration(frequency_profile>0, min_element_samples)
+   
+    frequency_profile_nonspikey = np.zeros(frequency_profile.size)
+    frequency_profile_nonspikey[non_spikey_regions] = frequency_profile[non_spikey_regions]
+    return frequency_profile_nonspikey

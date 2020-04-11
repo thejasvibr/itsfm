@@ -9,8 +9,7 @@ import pywt
 import scipy.signal as signal 
 from measure_horseshoe_bat_calls.signal_processing import *
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
-
-
+#from measure_horseshoe_bat_calls.pwvd import 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''Function which identifies regions into CF and FM based on the following   process. 
 
@@ -62,7 +61,6 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
                                                       fm_candidates,
                                                       info,**kwargs)
     return cf_samples, fm_samples, info
-
 
 
 def segment_by_peak_percentage(call, fs, **kwargs):
@@ -123,25 +121,23 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     return cf_samples, fm_samples, info 
 
 
-def segment_by_pwvd():
+def segment_by_pwvd(call, fs):
     pass
 
 def segment_by_inst_frequency():
     pass
-
-perform_segmentation = {'peak_percentage':segment_by_peak_percentage, 
-                        'pwvd':segment_by_pwvd,
-                        'inst_freq':segment_by_inst_frequency}
 
 
 def refine_candidate_regions():
     '''Takes in candidate CF and FM regions and tries to satisfy the 
     constraints set by the user. 
     '''
-    
-    
-    
-    return fm_regions, cf_regions
+    pass
+
+
+perform_segmentation = {'peak_percentage':segment_by_peak_percentage, 
+                        'pwvd':segment_by_pwvd,
+                        'inst_freq':segment_by_inst_frequency}
 
 
 

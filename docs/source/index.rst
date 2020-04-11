@@ -40,6 +40,11 @@ Call -background and call-part segmentation
 .. automodule:: measure_horseshoe_bat_calls.segment_horseshoebat_call
    :members:
 
+Call background and call-part segmentation: part 2 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd
+	:members:
+
 Call-parts measurements
 ~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call

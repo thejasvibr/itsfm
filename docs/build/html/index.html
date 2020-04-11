@@ -111,6 +111,7 @@
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.user_interface">High-level API</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.batch_processing">Batch processing from batchfiles</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.segment_horseshoebat_call">Call -background and call-part segmentation</a></li>
+<li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd">Call background and call-part segmentation: part 2</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">Call-parts measurements</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.view_horseshoebat_call">Call segmentation and measurements visualisation</a></li>
 <li><a class="reference internal" href="#module-measure_horseshoe_bat_calls.simulate_calls">Checking accuracy</a></li>
@@ -557,10 +558,10 @@ happy to look into it.</p>
 </ul>
 <p>Any input audio goes through the following steps:</p>
 <ol class="arabic simple">
-<li><p>Time frequency localisation within audio (STFT, WignerVille, instantaneous frequency,..)</p></li>
-<li><p>FM rate calculation</p></li>
+<li><p>Time frequency localisation within audio: either one of STFT, WignerVille, instantaneous frequency</p></li>
+<li><p>FM rate calculation : regions with modulation below the set limit are considered CF, and those above the FM rate are considered FM.</p></li>
 <li><p>Rough candidate region assignment into CF and FM regions</p></li>
-<li><p>Refined sample-level assignment into CF,FM and Gap regions based on user-input constraints</p></li>
+<li><p>Refined sample-level assignment into CF,FM and Gap regions based on user-input constraints (max number of elements, presence/absence of gaps, etc)</p></li>
 <li><p>Segmentation of assigned elements and measurements of various parameters (peak frequency, energy, duration,…)</p></li>
 </ol>
 </div>
@@ -862,8 +863,8 @@ and vice versa.</p></li>
 <p>This method is not well suited for audio with uniform call envelopes.
 When there is high variation over the call envelope, the peak frequency
 is likely to be miscalculated, and thus lead to wrong segmentation.</p>
-<p>This method is inspired by the protocol in Schoeppler et al. 2018,
-but differs from it in the important aspect of being done entirely in the
+<p>This method is somewhat inspired by the protocol in Schoeppler et al. 2018.
+However, it differs in the important aspect of being done entirely in the
 time domain. Schoeppler et al. 2018 use a spectrogram based method
 to segment the CF and FM segments of H. armiger calls.</p>
 <p class="rubric">References</p>
@@ -1214,6 +1215,190 @@ follow this relation to get the required modulation rate in Hz/s:</p>
 <dt id="measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold">
 <em class="property">exception </em><code class="sig-prename descclassname">measure_horseshoe_bat_calls.segment_horseshoebat_call.</code><code class="sig-name descname">IncorrectThreshold</code><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/segment_horseshoebat_call.html#IncorrectThreshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd">
+<span id="call-background-and-call-part-segmentation-part-2"></span><h2>Call background and call-part segmentation: part 2<a class="headerlink" href="#module-measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd" title="Permalink to this headline">¶</a></h2>
+<p>The Pseudo Wigner Ville Distribution is an accurate but not so well known
+method to represent a signal on the time-frequency axis[1]. This module tracks the
+instantaneous frequency over the signal’s duration, calcualtes the rate of
+frequency modulation and then segments it into CF and FM.</p>
+<p class="rubric">References</p>
+<p>[1] Cohen, L. (1995). Time-frequency analysis (Vol. 778). Prentice hall.</p>
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_frequency_profile_through_pwvd">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">get_frequency_profile_through_pwvd</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#get_frequency_profile_through_pwvd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_frequency_profile_through_pwvd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the sample-resolution frequency profile of the input signal and
+also perform some cleaning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – Sampling rate in Hz.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>raw_freq_profile, noise_suppressed_freq_profile, cleaned_frequency_profile</strong> (<em>np.array</em>)</p></li>
+<li><p><em>The instantaneous frequency over the input signal. All output arrays are the same size as the input_signal</em> –</p>
+<ul>
+<li><p>raw_freq_profile : the raw frequency estimate across samples</p></li>
+<li><p>noise_suppressed_freq_profile : regions of the input signal below the threshold dB rms are set to zero frequency</p></li>
+<li><dl class="simple">
+<dt>cleaned_frequency_profile<span class="classifier">the noise_suppressed frequency profile is further</span></dt><dd><p>checked for any abrupt frequency transitions and corrected/filtered.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This is a higher-level function which can be modulated to achieve better
+frequency tracking. Check the optional arguments in See Also.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.generate_pwvd_frequency_profile" title="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.generate_pwvd_frequency_profile"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_pwvd_frequency_profile()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">suppress_background_noise()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">remove_bursts()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.generate_pwvd_frequency_profile">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">generate_pwvd_frequency_profile</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#generate_pwvd_frequency_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.generate_pwvd_frequency_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the raw instantaneous frequency estimate at each sample.
+using the Pseudo Wigner Ville Distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – </p></li>
+<li><p><strong>pwvd_filter</strong> (<em>Boolean</em><em>, </em><em>optional</em>) – Whether to perform median filtering with a 2D kernel.
+Defaults to False</p></li>
+<li><p><strong>pwvd_filter_size</strong> (<em>int</em><em>, </em><em>optional</em>) – The size of the square 2D kernel used to median filter the
+initial PWVD time-frequency representation.</p></li>
+<li><p><strong>pwvd_window</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – The duration of the window used in the PWVD. See pwvd_transform
+for the default value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>raw_frequency_profile, frequency_indx</strong> – Both outputs are the same size as input_signal.
+raw_frequency_profile is the inst. frequency in Hz.
+frequency_indx is the row index of the PWVD array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.pwvd_transform">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">pwvd_transform</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">fs</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#pwvd_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.pwvd_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the input signal into an analytical signal and then generates
+the PWVD of the analytical signal.</p>
+<p>Uses the PseudoWignerVilleDistribution class from the tftb package[1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float</em>) – </p></li>
+<li><p><strong>pwvd_window</strong> (<em>float&gt;0</em><em>, </em><em>optional</em>) – The duration of the window used in the PWVD. Defaults to 0.001s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>time_frequency_output</strong> – Two dimensional array with dimensions of NsamplesxNsamples, where
+Nsamples is the number of samples in input_signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] tftb 0.1.1 ,Python module for time-frequency analysis, Jaidev Deshpande,</dt><dd><p><a class="reference external" href="https://pypi.org/project/tftb/">https://pypi.org/project/tftb/</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.track_peak_frequency_over_time">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">track_peak_frequency_over_time</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">fs</em>, <em class="sig-param">time_freq_rep</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#track_peak_frequency_over_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.track_peak_frequency_over_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tracks the lowest possible peak frequency. This ensures that the
+lowest harmonic is being tracked in a multiharmonic signal with similar
+levels across the harmonics.</p>
+<p>EAch ‘column’ of the 2D PWVD is inspected for the lowest peak that crosses
+a percentile threshold, and this is then taken as the peak frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>fs</strong> (<em>float&gt;0</em>) – </p></li>
+<li><p><strong>time_freq_rep</strong> (<em>np.array</em>) – 2D array with the PWVD representation.</p></li>
+<li><p><strong>percentile</strong> (<em>0&lt;float&lt;100</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>peak_freqs, peak_inds</strong> – Arrays with same size as the input_signal. peak_freqs is the
+frequencies in Hz, peak_inds is the row index.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.find_lowest_intense_harmonic_across_TFR" title="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.find_lowest_intense_harmonic_across_TFR"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_lowest_intense_harmonic_across_TFR()</span></code></a>, <a class="reference internal" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_most_intense_harmonic" title="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_most_intense_harmonic"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_most_intense_harmonic()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.find_lowest_intense_harmonic_across_TFR">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">find_lowest_intense_harmonic_across_TFR</code><span class="sig-paren">(</span><em class="sig-param">tf_representation</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#find_lowest_intense_harmonic_across_TFR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.find_lowest_intense_harmonic_across_TFR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_most_intense_harmonic">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">get_most_intense_harmonic</code><span class="sig-paren">(</span><em class="sig-param">time_slice</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#get_most_intense_harmonic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_most_intense_harmonic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches a single column in a 2D array for the first region which
+crosses the given percentile threshold.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_midpoint_of_a_region">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">get_midpoint_of_a_region</code><span class="sig-paren">(</span><em class="sig-param">region_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#get_midpoint_of_a_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_midpoint_of_a_region" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_first_region_above_threshold">
+<code class="sig-prename descclassname">measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.</code><code class="sig-name descname">get_first_region_above_threshold</code><span class="sig-paren">(</span><em class="sig-param">input_signal</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/measure_horseshoe_bat_calls/pwvd/frequency_tracking_pwvd.html#get_first_region_above_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd.get_first_region_above_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a 1D signal expecting a few peaks in it above the percentil threshold.
+If all samples are of the same value, the region is restricted to the first two samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_signal</strong> (<em>np.array</em>) – </p></li>
+<li><p><strong>percentile</strong> (<em>0&lt;float&lt;100</em><em>, </em><em>optional</em>) – The percentile threshold used to set the threshold.
+Defaults to 98.5</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>region_location</strong> – If there is at least one region above the threshold a tuple with
+the output from scipy.ndimage.find_objects. Otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple or None</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">https()</span></code></dt><dd><p>//docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.find_objects.html</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
 
 </div>
 <div class="section" id="module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">
