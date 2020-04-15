@@ -15,12 +15,36 @@ import scipy.ndimage as ndimage
 import scipy.signal as signal 
 import skimage.filters as filters
 from tftb.processing import PseudoWignerVilleDistribution
-from measure_horseshoe_bat_calls.signal_processing import suppress_background_noise
-from measure_horseshoe_bat_calls.signal_processing import remove_bursts
+from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise
+from measure_horseshoe_bat_calls.signal_cleaning import remove_bursts, smooth_over_potholes
+
+
+
+def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
+    '''Generates a clean frequency profile through the PWVD. 
+
+    Also checks for regions with 
+    Parameters
+    ----------
+    input_signal : np.array
+    fs  : float
+    
+    
+    '''
+    raw_profile, noise_suppressed, cleaned_profile = get_frequency_profile_through_pwvd(input_signal,
+                                                                      fs, **kwargs)
+    
+    info = {'raw_frequency_profile' : raw_profile,
+            'noise_suppressed_profile' : noise_suppressed
+            }
+     
+    pothole_covered_profile, _ = smooth_over_potholes(cleaned_profile, fs, **kwargs)
+    
+    return pothole_covered_profile, info
+
 
 def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
-    '''Generate the sample-resolution frequency profile of the input signal and 
-    also perform some cleaning. 
+    '''Generate the sample-resolution frequency profile of the input signal. 
 
     Parameters
     ----------
@@ -42,9 +66,11 @@ def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
 
     Notes
     -----
-    This is a higher-level function which can be modulated to achieve better
-    frequency tracking. Check the optional arguments in See Also. 
-    
+    This method can take a few seconds or more to finish running and is memory intensive.
+    It may also raise a MemoryError if the input signal is very long. To overcome memory
+    issues either try downsampling the signal to reduce the overall number of 
+    samples.
+
     See Also
     --------
     generate_pwvd_frequency_profile
@@ -92,7 +118,7 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
 
     time_freq_course = np.abs(pwvd_transform(input_signal, fs, **kwargs))
     if pwvd_filter:
-        print('....median filtering the PWVD...')
+        print('....A 2D median filter kernel is being applied to the PWVD...')
         median_filtered_tf = filters.median_filter(time_freq_course, size=filter_dims)
         print('..done with PWVD filtering..')
         raw_frequency_profile, frequency_indx = track_peak_frequency_over_time(input_signal, fs,
@@ -110,7 +136,7 @@ def pwvd_transform(input_signal, fs, **kwargs):
     '''Converts the input signal into an analytical signal and then generates
     the PWVD of the analytical signal. 
 
-    Uses the PseudoWignerVilleDistribution class from the tftb package [1]s. 
+    Uses the PseudoWignerVilleDistribution class from the tftb package [1]. 
 
     Parameters
     ----------
@@ -133,7 +159,7 @@ def pwvd_transform(input_signal, fs, **kwargs):
 
     References
     ----------
-    [1] tftb 0.1.1 ,Python module for time-frequency analysis, Jaidev Deshpande, 
+    [1] Jaidev Deshpande, tftb 0.1.1 ,Python module for time-frequency analysis, 
         https://pypi.org/project/tftb/
     '''
     window_length = kwargs.get('window_length', 0.001)

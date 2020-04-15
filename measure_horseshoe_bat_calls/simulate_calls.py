@@ -45,7 +45,8 @@ def make_cffm_call(call_properties, fs, **kwargs):
     ----------
     call_properties : dictionary
         With keys corresponding to the upto 3 components
-        (cf,upfm,downfm) make_call_components for further info. 
+        cf, upfm, downfm
+        See make_call_frequency_profile for further info. 
     fs : float>0
         sampling rate in Hz
     poly_order : int, optional
@@ -57,6 +58,10 @@ def make_cffm_call(call_properties, fs, **kwargs):
     -------
     call, frequency_profile : np.array
         The audio and the final frequency profile. 
+
+    See Also
+    --------
+    make_call_frequency_profile
 
     References
     ----------
@@ -124,7 +129,8 @@ def make_call_frequency_profile(call_properties, fs, **kwargs):
     '''
     cf_freq, cf_durn = call_properties['cf']
 
-    double_fm_call = np.all([call_properties.get('upfm')!=None, call_properties.get('downfm')!=None,])
+    double_fm_call = np.all([call_properties.get('upfm')!=None, 
+                             call_properties.get('downfm')!=None,])
     if double_fm_call:
         upfm_freq_profile, joint_durn = make_FM_with_joint(call_properties['upfm'],
                                                cf_freq,fs,

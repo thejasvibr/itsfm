@@ -6,9 +6,12 @@ The primary logic of this
 import warnings
 import numpy as np 
 import pywt
+import scipy.interpolate as interpolate 
+import scipy.ndimage.filters as flts
 import scipy.signal as signal 
 from measure_horseshoe_bat_calls.signal_processing import *
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
+from measure_horseshoe_bat_calls.frequency_tracking import get_pwvd_frequency_profile
 #from measure_horseshoe_bat_calls.pwvd import 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''Function which identifies regions into CF and FM based on the following   process. 
@@ -38,8 +41,7 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     cf_samples, fm_samples : np.array
         Boolean numpy array showing which of the samples belong 
         to the cf and the fm respectively. 
-    fmrate : np.array
-        The rate of frequency modulation in Hz/ms.
+
     info : dictionary
         Post-processing information depending on 
         the methods used. 
@@ -50,6 +52,18 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     segment_by_peak_percentage
     segment_by_pwvd
     segment_by_inst_frequency
+    
+    Notes
+    -----
+    The post-processing information in the object `info` depends on the method 
+    used. 
+    
+    peak_percentage : the two keys 'fm_re_cf' and 'cf_re_fm' which are the 
+        relative dBrms profiles of FM with relation to the CF portion and vice versa
+    
+    pwvd : 
+    
+    
     '''
     method = kwargs.get('method', 'peak_percentage')
     # identify candidate CF and FM regions 
@@ -59,7 +73,9 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     cf_samples, fm_samples = refine_candidate_regions(call, fs, 
                                                       cf_candidates,
                                                       fm_candidates,
-                                                      info,**kwargs)
+                                                      method,
+                                                      info,
+                                                      **kwargs)
     return cf_samples, fm_samples, info
 
 
@@ -89,7 +105,7 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     
     Notes
     -----
-    This method is not well suited for audio with uniform call envelopes. 
+    This method unsuited for audio with non-uniform call envelopes. 
     When there is high variation over the call envelope, the peak frequency 
     is likely to be miscalculated, and thus lead to wrong segmentation.
 
@@ -121,12 +137,101 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     return cf_samples, fm_samples, info 
 
 
-def segment_by_pwvd(call, fs):
-    pass
+def segment_by_pwvd(call, fs, **kwargs):
+    '''This method is technically more accurate in segmenting CF and FM portions
+    of a sound. The Pseudo-Wigner-Ville Distribution of the input signal 
+    is generated. 
+    
+    Parameters
+    ----------
+    call : np.array
+    fs : float>0
+    fmrate_threshold : float >=0
+        The threshold rate of frequency modulation in kHz/ms. Beyond this value a segment
+        of audio is considered a frequency modulated region. 
+        Defaults to 0.5 kHz/ms
 
-def segment_by_inst_frequency():
-    pass
+    
+    Returns
+    -------
+    cf_samples, fm_samples : np.array
+        Boolean array of same size as call indicating candidate CF and FM regions. 
+    
+    info : dictionary
+        See get_pwvd_frequency_profile for the keys it outputs in the `info` 
+        dictioanry. In addition, another key 'fmrate' is also calculated
+        which has an np. array with the rate of frequency modulation across
+        the signal in kHz/ms.
 
+    Notes
+    -----
+    This method may takes some time to run. It is computationally intensive. 
+    This method may not work very well in the presence of multiple harmonics
+    or noise. Some basic tweaking of the optional parameters may be required. 
+
+    
+    
+    See Also
+    --------
+    get_pwvd_frequency_profile
+    
+    '''
+    fmrate_threshold = kwargs.get('fmrate_threshold', 0.5) # kHz/ms
+    
+    clean_frequency_profile, info = get_pwvd_frequency_profile(call, fs, **kwargs)
+    
+    fmrate = calculate_fm_rate(clean_frequency_profile, fs, **kwargs)
+    
+    info['fmrate'] = fmrate
+    
+    cf_samples = fmrate > fmrate_threshold
+    fm_samples = fmrate <= fmrate_threshold
+    
+    return cf_samples, fm_samples, info
+
+def segment_by_inst_frequency(call, fs, **kwargs):
+    
+    raise NotImplementedError('Plain Instant Tracking has not yet been implemented!')
+    
+    return None, None, None 
+
+
+
+def calculate_fm_rate(frequency_profile, fs, **kwargs):
+    '''A frequency profile is generally oversampled. This means that 
+    there will be many repeated values and sometimes minor drops in 
+    frequency over time. This leads to more apparent FM than is actually
+    there when a sample-wise diff is performed. 
+    
+    This method downsamples the frequency profile, fits a quadratic polynomial 
+    to it and then gets the smoothened frequency profile with unique values. 
+    
+    The sample-level FM rate can now be calculated reliably. 
+
+    Parameters
+    ----------
+    frequency_profile : np.array
+        Array of same size as the original audio. Each sample has 
+        the estimated instantaneous frequency in Hz. 
+    fs : sampling rate
+    
+    
+    '''
+    sample_every = kwargs.get('sample_every', 0.001)
+    interpolation_kind = kwargs.get('interpolation_kind', 2)
+    medianfilter_length = kwargs.get('medianfilter_length', 0.25*10**-3)
+    ds_factor = int(fs*sample_every)
+    full_x = np.arange(frequency_profile.size)
+    partX = np.unique(np.concatenate((full_x[:2], full_x[3::ds_factor], full_x[-2:]))).flatten()
+    partY = frequency_profile[partX]
+    fit = interpolate.interp1d(partX, partY, kind=interpolation_kind)
+    fitted = fit(np.arange(frequency_profile.size))                           
+    fm_rate_hz_per_sec = np.abs(np.gradient(fitted))
+    median_filtered = flts.percentile_filter(fm_rate_hz_per_sec, 50, int(fs*medianfilter_length))
+    fm_rate =10**-6*(median_filtered/(1/fs))
+    return fm_rate
+
+    
 
 def refine_candidate_regions():
     '''Takes in candidate CF and FM regions and tries to satisfy the 
