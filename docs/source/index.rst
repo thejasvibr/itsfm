@@ -45,6 +45,9 @@ Call background and call-part segmentation: part 2
 .. automodule:: measure_horseshoe_bat_calls.pwvd.frequency_tracking_pwvd
 	:members:
 
+.. automodule:: measure_horseshoe_bat_calls.pwvd.quantify_frequency_modulation
+	:members:
+
 Call-parts measurements
 ~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call

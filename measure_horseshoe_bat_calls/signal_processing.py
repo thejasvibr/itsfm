@@ -6,6 +6,7 @@ Created on Wed Mar 11 16:28:46 2020
 @author: tbeleyur
 """
 import numpy as np 
+import scipy.ndimage as ndimage
 import scipy.signal as signal 
 
 def dB(X):
@@ -358,12 +359,13 @@ def check_signal_sizes(input_signal, original_signal):
 
 
 def remove_bursts(frequency_profile, fs, **kwargs):
-    '''Bursts are tiny but big jumps in the signal. Even though they satisfy most of the 
-    other conditions of begin above the noise floor and of being above 0 frequency, they 
-    still are too short to be relevant signals. 
+    '''Bursts are brief but large jumps in the signal. Even though they satisfy
+    most of the other conditions of beginning above the noise floor and of 
+    being above 0 frequency, they still are too short to be relevant signals. 
     '''
     inter_sample_durn = 1.0/fs
     min_element_length = kwargs.get('min_element_length', 5*inter_sample_durn) #to 5 samples 
+    min_element_samples = int(fs*min_element_length)
     
     if  min_element_length <= inter_sample_durn:
         raise ValueError('Please set the min element length.\
@@ -375,3 +377,18 @@ def remove_bursts(frequency_profile, fs, **kwargs):
     frequency_profile_nonspikey = np.zeros(frequency_profile.size)
     frequency_profile_nonspikey[non_spikey_regions] = frequency_profile[non_spikey_regions]
     return frequency_profile_nonspikey
+
+
+def segments_above_min_duration(satisfies_condition, min_samples):
+    '''
+    '''
+    all_regions, number_regions = ndimage.label(satisfies_condition)
+    region_stretches = ndimage.find_objects(all_regions)
+    
+    above_min_duration = np.tile(False, satisfies_condition.size)
+    
+    for each_stretch in region_stretches:
+        if satisfies_condition[each_stretch].size > min_samples:
+            above_min_duration[each_stretch] = True
+    return above_min_duration
+

@@ -1243,7 +1243,7 @@ also perform some cleaning.</p>
 <li><p><em>The instantaneous frequency over the input signal. All output arrays are the same size as the input_signal</em> –</p>
 <ul>
 <li><p>raw_freq_profile : the raw frequency estimate across samples</p></li>
-<li><p>noise_suppressed_freq_profile : regions of the input signal below the threshold dB rms are set to zero frequency</p></li>
+<li><p>noise_suppressed_freq_profile : regions of the input signal below the threshold dB rms are set to zero frequency.</p></li>
 <li><dl class="simple">
 <dt>cleaned_frequency_profile<span class="classifier">the noise_suppressed frequency profile is further</span></dt><dd><p>checked for any abrupt frequency transitions and corrected/filtered.</p>
 </dd>
@@ -1400,6 +1400,22 @@ the output from scipy.ndimage.find_objects. Otherwise None.</p>
 </div>
 </dd></dl>
 
+<span class="target" id="module-measure_horseshoe_bat_calls.pwvd.quantify_frequency_modulation"></span><p>Once the frequency profile have been calculated, its
+‘velocity’ must be measured to get the rate of frequency modulation. Once
+the FM rate can be calculated, the CF and FM parts of the sound can be
+segmented accurately.</p>
+<p>The primary problems with estimated frequency profiles are :</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>‘spikiness’ due to edge effects<span class="classifier">when the background wasn’t succesfully isolated</span></dt><dd><p>from the signal. This appears especially at the edges of the sound segments.</p>
+</dd>
+</dl>
+</li>
+<li><p>Repeated back-and-forth between somewhat disparate frequencies. Over the course of one samples,
+the instantaneous frequency can switch upto a few kHz. This is typically caused
+by harmonics or noise causing the well-known interference terms in the PWVD.
+This typically occurs in the middle of the signal itself.</p></li>
+</ol>
 </div>
 <div class="section" id="module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">
 <span id="call-parts-measurements"></span><h2>Call-parts measurements<a class="headerlink" href="#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call" title="Permalink to this headline">¶</a></h2>

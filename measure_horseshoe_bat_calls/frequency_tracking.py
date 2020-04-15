@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """The Pseudo Wigner Ville Distribution is an accurate but not so well known 
 method to represent a signal on the time-frequency axis[1]. This module tracks the
-instantaneous frequency over the signal's duration, calcualtes the rate of
-frequency modulation and then segments it into CF and FM.
+instantaneous frequency over the signal's duration.
 
 
 
@@ -56,8 +55,6 @@ def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
     raw_freq_profile, frequency_index = generate_pwvd_frequency_profile(input_signal, fs, **kwargs)
     # get rid of the silent parts of the audio
     noise_suppressed_freq_profile = suppress_background_noise(raw_freq_profile,input_signal, **kwargs)
-    # get rid of abrupt large frequency jumps
-    #nonspikey_frequency_profile = suppress_frequency_spikes(noise_suppressed_freq_profile, input_signal, fs, **kwargs)
     # remove any small frequency spikes that still remain based on duration
     cleaned_frequency_profile = remove_bursts(noise_suppressed_freq_profile, fs, **kwargs)
     return raw_freq_profile, noise_suppressed_freq_profile, cleaned_frequency_profile
@@ -113,16 +110,19 @@ def pwvd_transform(input_signal, fs, **kwargs):
     '''Converts the input signal into an analytical signal and then generates
     the PWVD of the analytical signal. 
 
-    Uses the PseudoWignerVilleDistribution class from the tftb package[1]. 
-    
-    
-    
+    Uses the PseudoWignerVilleDistribution class from the tftb package [1]s. 
 
     Parameters
     ----------
     input_signal : np.array
     fs : float
-    pwvd_window : float>0, optional 
+    
+    window : np.array, optional
+        The window to be used for the pseudo wigner-ville distribution.
+        If not given, then a hanning signal is used of the default length.
+        The window given here supercedes the 'window_length' argument below.
+
+    window_length : float>0, optional 
         The duration of the window used in the PWVD. Defaults to 0.001s
 
     Returns
@@ -136,10 +136,10 @@ def pwvd_transform(input_signal, fs, **kwargs):
     [1] tftb 0.1.1 ,Python module for time-frequency analysis, Jaidev Deshpande, 
         https://pypi.org/project/tftb/
     '''
-    pwvd_window = kwargs.get('pwvd_window', 0.001)
-    fw = signal.hamming(int(fs*pwvd_window))
+    window_length = kwargs.get('window_length', 0.001)
+    window = kwargs.get('window', signal.hanning(int(fs*window_length)))
     analytical = signal.hilbert(input_signal)
-    p = PseudoWignerVilleDistribution(analytical, fwindow=fw)
+    p = PseudoWignerVilleDistribution(analytical, fwindow=window)
     pwvd_output = p.run();
     time_frequency_output = pwvd_output[0]
     return time_frequency_output
