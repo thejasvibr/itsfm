@@ -153,9 +153,12 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
 <span class="kn">import</span> <span class="nn">pywt</span>
+<span class="kn">import</span> <span class="nn">scipy.interpolate</span> <span class="k">as</span> <span class="nn">interpolate</span> 
+<span class="kn">import</span> <span class="nn">scipy.ndimage.filters</span> <span class="k">as</span> <span class="nn">flts</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span> 
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.signal_processing</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.sanity_checks</span> <span class="kn">import</span> <span class="n">make_sure_its_positive</span>
+<span class="kn">from</span> <span class="nn">measure_horseshoe_bat_calls.frequency_tracking</span> <span class="kn">import</span> <span class="n">get_pwvd_frequency_profile</span>
 <span class="c1">#from measure_horseshoe_bat_calls.pwvd import </span>
 <div class="viewcode-block" id="segment_call_into_cf_fm"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">[docs]</a><span class="k">def</span> <span class="nf">segment_call_into_cf_fm</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Function which identifies regions into CF and FM based on the following   process. </span>
@@ -185,8 +188,7 @@
 <span class="sd">    cf_samples, fm_samples : np.array</span>
 <span class="sd">        Boolean numpy array showing which of the samples belong </span>
 <span class="sd">        to the cf and the fm respectively. </span>
-<span class="sd">    fmrate : np.array</span>
-<span class="sd">        The rate of frequency modulation in Hz/ms.</span>
+
 <span class="sd">    info : dictionary</span>
 <span class="sd">        Post-processing information depending on </span>
 <span class="sd">        the methods used. </span>
@@ -197,6 +199,18 @@
 <span class="sd">    segment_by_peak_percentage</span>
 <span class="sd">    segment_by_pwvd</span>
 <span class="sd">    segment_by_inst_frequency</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The post-processing information in the object `info` depends on the method </span>
+<span class="sd">    used. </span>
+<span class="sd">    </span>
+<span class="sd">    peak_percentage : the two keys &#39;fm_re_cf&#39; and &#39;cf_re_fm&#39; which are the </span>
+<span class="sd">        relative dBrms profiles of FM with relation to the CF portion and vice versa</span>
+<span class="sd">    </span>
+<span class="sd">    pwvd : </span>
+<span class="sd">    </span>
+<span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;peak_percentage&#39;</span><span class="p">)</span>
     <span class="c1"># identify candidate CF and FM regions </span>
@@ -206,7 +220,9 @@
     <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">refine_candidate_regions</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> 
                                                       <span class="n">cf_candidates</span><span class="p">,</span>
                                                       <span class="n">fm_candidates</span><span class="p">,</span>
-                                                      <span class="n">info</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                                                      <span class="n">method</span><span class="p">,</span>
+                                                      <span class="n">info</span><span class="p">,</span>
+                                                      <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span></div>
 
 
@@ -236,7 +252,7 @@
 <span class="sd">    </span>
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    This method is not well suited for audio with uniform call envelopes. </span>
+<span class="sd">    This method unsuited for audio with non-uniform call envelopes. </span>
 <span class="sd">    When there is high variation over the call envelope, the peak frequency </span>
 <span class="sd">    is likely to be miscalculated, and thus lead to wrong segmentation.</span>
 
@@ -268,12 +284,101 @@
     <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span> </div>
 
 
-<span class="k">def</span> <span class="nf">segment_by_pwvd</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
-    <span class="k">pass</span>
+<div class="viewcode-block" id="segment_by_pwvd"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_pwvd">[docs]</a><span class="k">def</span> <span class="nf">segment_by_pwvd</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This method is technically more accurate in segmenting CF and FM portions</span>
+<span class="sd">    of a sound. The Pseudo-Wigner-Ville Distribution of the input signal </span>
+<span class="sd">    is generated. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    call : np.array</span>
+<span class="sd">    fs : float&gt;0</span>
+<span class="sd">    fmrate_threshold : float &gt;=0</span>
+<span class="sd">        The threshold rate of frequency modulation in kHz/ms. Beyond this value a segment</span>
+<span class="sd">        of audio is considered a frequency modulated region. </span>
+<span class="sd">        Defaults to 0.5 kHz/ms</span>
 
-<span class="k">def</span> <span class="nf">segment_by_inst_frequency</span><span class="p">():</span>
-    <span class="k">pass</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cf_samples, fm_samples : np.array</span>
+<span class="sd">        Boolean array of same size as call indicating candidate CF and FM regions. </span>
+<span class="sd">    </span>
+<span class="sd">    info : dictionary</span>
+<span class="sd">        See get_pwvd_frequency_profile for the keys it outputs in the `info` </span>
+<span class="sd">        dictioanry. In addition, another key &#39;fmrate&#39; is also calculated</span>
+<span class="sd">        which has an np. array with the rate of frequency modulation across</span>
+<span class="sd">        the signal in kHz/ms.</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This method may takes some time to run. It is computationally intensive. </span>
+<span class="sd">    This method may not work very well in the presence of multiple harmonics</span>
+<span class="sd">    or noise. Some basic tweaking of the optional parameters may be required. </span>
+
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_pwvd_frequency_profile</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fmrate_threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fmrate_threshold&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># kHz/ms</span>
+    
+    <span class="n">clean_frequency_profile</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">get_pwvd_frequency_profile</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="n">fmrate</span> <span class="o">=</span> <span class="n">calculate_fm_rate</span><span class="p">(</span><span class="n">clean_frequency_profile</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="n">info</span><span class="p">[</span><span class="s1">&#39;fmrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fmrate</span>
+    
+    <span class="n">cf_samples</span> <span class="o">=</span> <span class="n">fmrate</span> <span class="o">&gt;</span> <span class="n">fmrate_threshold</span>
+    <span class="n">fm_samples</span> <span class="o">=</span> <span class="n">fmrate</span> <span class="o">&lt;=</span> <span class="n">fmrate_threshold</span>
+    
+    <span class="k">return</span> <span class="n">cf_samples</span><span class="p">,</span> <span class="n">fm_samples</span><span class="p">,</span> <span class="n">info</span></div>
+
+<span class="k">def</span> <span class="nf">segment_by_inst_frequency</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Plain Instant Tracking has not yet been implemented!&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span> 
+
+
+
+<div class="viewcode-block" id="calculate_fm_rate"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.calculate_fm_rate">[docs]</a><span class="k">def</span> <span class="nf">calculate_fm_rate</span><span class="p">(</span><span class="n">frequency_profile</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A frequency profile is generally oversampled. This means that </span>
+<span class="sd">    there will be many repeated values and sometimes minor drops in </span>
+<span class="sd">    frequency over time. This leads to more apparent FM than is actually</span>
+<span class="sd">    there when a sample-wise diff is performed. </span>
+<span class="sd">    </span>
+<span class="sd">    This method downsamples the frequency profile, fits a quadratic polynomial </span>
+<span class="sd">    to it and then gets the smoothened frequency profile with unique values. </span>
+<span class="sd">    </span>
+<span class="sd">    The sample-level FM rate can now be calculated reliably. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frequency_profile : np.array</span>
+<span class="sd">        Array of same size as the original audio. Each sample has </span>
+<span class="sd">        the estimated instantaneous frequency in Hz. </span>
+<span class="sd">    fs : sampling rate</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sample_every</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sample_every&#39;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+    <span class="n">interpolation_kind</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interpolation_kind&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">medianfilter_length</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;medianfilter_length&#39;</span><span class="p">,</span> <span class="mf">0.25</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ds_factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">sample_every</span><span class="p">)</span>
+    <span class="n">full_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">frequency_profile</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">partX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">full_x</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">full_x</span><span class="p">[</span><span class="mi">3</span><span class="p">::</span><span class="n">ds_factor</span><span class="p">],</span> <span class="n">full_x</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">partY</span> <span class="o">=</span> <span class="n">frequency_profile</span><span class="p">[</span><span class="n">partX</span><span class="p">]</span>
+    <span class="n">fit</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">partX</span><span class="p">,</span> <span class="n">partY</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">interpolation_kind</span><span class="p">)</span>
+    <span class="n">fitted</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">frequency_profile</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>                           
+    <span class="n">fm_rate_hz_per_sec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">fitted</span><span class="p">))</span>
+    <span class="n">median_filtered</span> <span class="o">=</span> <span class="n">flts</span><span class="o">.</span><span class="n">percentile_filter</span><span class="p">(</span><span class="n">fm_rate_hz_per_sec</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fs</span><span class="o">*</span><span class="n">medianfilter_length</span><span class="p">))</span>
+    <span class="n">fm_rate</span> <span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">6</span><span class="o">*</span><span class="p">(</span><span class="n">median_filtered</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">fs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">fm_rate</span></div>
+
+    
 
 <div class="viewcode-block" id="refine_candidate_regions"><a class="viewcode-back" href="../../index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.refine_candidate_regions">[docs]</a><span class="k">def</span> <span class="nf">refine_candidate_regions</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;Takes in candidate CF and FM regions and tries to satisfy the </span>
