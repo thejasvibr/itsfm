@@ -1,9 +1,21 @@
 # -*- coding: utf-8 -*-
-"""The Pseudo Wigner Ville Distribution is an accurate but not so well known 
-method to represent a signal on the time-frequency axis[1]. This module tracks the
-instantaneous frequency over the signal's duration.
+"""
+
+Even though the spectrogram is one of the most dominant time-frequency 
+representation, there are whole class of alternate representations. This
+module has the code which tracks the dominant frequency in a sound using 
+non-spectrogram methods. 
+
+The Pseudo Wigner Ville Distribution
+------------------------------------
+The Pseudo Wigner Ville Distribution is an accurate but not so well known 
+method to represent a signal on the time-frequency axis[1]. This time-frequency
+representation is implemented in the `get_pwvd_frequency_profile`. 
 
 
+See Also
+--------
+get_pwvd_frequency_profile
 
 References
 ----------
@@ -15,33 +27,143 @@ import scipy.ndimage as ndimage
 import scipy.signal as signal 
 import skimage.filters as filters
 from tftb.processing import PseudoWignerVilleDistribution
-from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise
-from measure_horseshoe_bat_calls.signal_cleaning import remove_bursts, smooth_over_potholes
-
+import measure_horseshoe_bat_calls.signal_cleaning 
+from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
+from measure_horseshoe_bat_calls.signal_cleaning import exterpolate_over_anomalies
+from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
 
 
 def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates a clean frequency profile through the PWVD. 
+    The order of frequency profile processing is as follows
 
-    Also checks for regions with 
+    #. Split input signal into regions that are above the 
+        background noise. This speeds up the whole process
+        of pwvd tracking multiple sounds, and ignores the
+        background samples. 
+
+    #. Generate PWVD for each above-noise region.
+    
+    #. Set regions below background noise to 0Hz
+    
+    #. Remove sudden spikes and set these regions to values
+       decided by interpolation between adjacent non-spike regions. 
+      
     Parameters
     ----------
     input_signal : np.array
     fs  : float
     
-    
+    Notes
+    -----
+    The fact that each signal part is split into independent 
+    above-background segments and then frequency tracked can 
+    have implications for frequency resolution. Short sounds
+    may end up with frequency profiles that have a lower
+    resolution than longer sounds. Each sound is handled separately
+    primarily for memory and speed considerations.
+
+
+    See Also
+    --------
+    signal_cleaning.exterpolate_over_anomalies
+
     '''
-    raw_profile, noise_suppressed, cleaned_profile = get_frequency_profile_through_pwvd(input_signal,
-                                                                      fs, **kwargs)
+
+    above_noise_regions, moving_dbrms = find_above_noise_regions(input_signal, fs, **kwargs)
+
+    full_fp = np.zeros(input_signal.size)
+    for region in above_noise_regions:    
+        raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
+                                                                  fs, **kwargs)
+        
+        
+        
+        full_fp[region] = raw_fp
     
-    info = {'raw_frequency_profile' : raw_profile,
-            'noise_suppressed_profile' : noise_suppressed
+    despiked = clean_up_spikes(noise_supp_fp, fs, **kwargs)
+    
+    
+    
+    info = {'raw_fp' : raw_fp,
+            'noise_supp_fp' : noise_suppressed,
+            'despiked' : despiked,
+            'no_bursts_fp':cleaned_profile
             }
      
     pothole_covered_profile, _ = smooth_over_potholes(cleaned_profile, fs, **kwargs)
     
     return pothole_covered_profile, info
 
+def find_above_noise_regions(X, fs, **kwargs):
+    '''
+    '''
+    background_noise = kwargs.get('background_noise', -40)
+    signal_level = dB(moving_rms_edge_robust(X, **kwargs))
+    
+    ids_above_noise, num_regions = ndimage.label(signal_level>background_noise)
+    if num_regions <1:
+        raise ValueError('No regions above noise level found!')
+
+    return ndimage.find_objects(ids_above_noise), signal_level
+    
+    
+
+
+def clean_up_spikes(whole_freqeuncy_profile, fs, **kwargs):
+    '''Applies smooth_over_potholes on each non-zero frequency segment
+    in the profile. 
+
+    Parameters
+    ----------
+    
+    Returns 
+    -------
+    
+    See Also
+    --------
+    smooth_over_potholes
+    
+    Example
+    -------
+    Let's create a case with an FM and CF tone
+  >>> from measure_horseshoe_bat_calls.simulate_calls import make_tone, make_fm_chirp, silence
+    >>> fs = 22100
+    >>> tone = make_tone(5000, 0.01, fs)
+    >>> sweep = make_fm_chirp(1000, 6000, 0.005, fs)
+    >>> gap = silence(0.005, fs)
+    >>> full_call = np.concatenate((tone, gap, sweep))
+    
+    The raw frequency profile, with very noisy frequency estimates needs
+    to be further cleaned 
+   
+    >>> raw_fp, frequency_index = generate_pwvd_frequency_profile(full_call,
+                                                                    fs)
+    >>> noise_supp_fp = noise_supp_fp = suppress_background_noise(raw_fp,
+                                              full_call, 
+                                              window_size=25,
+                                              background_noise=-30)
+    
+    Even after the noisy parts have been suppressed, there're still some 
+    spikes caused by the 
+    
+    >>> 
+    
+    '''
+    
+    nonzero_freqs, num_regions = ndimage.label(whole_freqeuncy_profile>0)
+    segment_locations = ndimage.find_objects(nonzero_freqs)
+    
+    if len(segments) <1 : 
+        raise ValueError('No non-zero frequency sounds found..!')
+    
+    de_spiked = np.zeros(whole_freqeuncy_profile.size)
+    
+    for segment in segment_locations:
+        smoothed, _ = smooth_over_potholes(whole_freqeuncy_profile[segment],
+                                           fs, **kwargs)
+        de_spiked[segment] = smoothed
+    return de_spiked
 
 def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
     '''Generate the sample-resolution frequency profile of the input signal. 
@@ -78,9 +200,9 @@ def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
     remove_bursts
     '''    
 
-    raw_freq_profile, frequency_index = generate_pwvd_frequency_profile(input_signal, fs, **kwargs)
+    
     # get rid of the silent parts of the audio
-    noise_suppressed_freq_profile = suppress_background_noise(raw_freq_profile,input_signal, **kwargs)
+    
     # remove any small frequency spikes that still remain based on duration
     cleaned_frequency_profile = remove_bursts(noise_suppressed_freq_profile, fs, **kwargs)
     return raw_freq_profile, noise_suppressed_freq_profile, cleaned_frequency_profile
@@ -104,6 +226,12 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     pwvd_window : float>0, optional 
         The duration of the window used in the PWVD. See pwvd_transform
         for the default value.
+    pwvd_zero_pad : int, optional
+        Number of samples to zero-pad on left and right of the 
+        input_signal. The zero-padding prevents 0's and spikes
+        at the start and end of the signal. Defaults to
+        the equivalent samples for 1ms. 
+
     Returns
     -------
     raw_frequency_profile, frequency_indx : np.array
@@ -116,7 +244,9 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     pwvd_filter_size = kwargs.get('pwvd_filter_size', 10)
     filter_dims = (pwvd_filter_size, pwvd_filter_size)
 
-    time_freq_course = np.abs(pwvd_transform(input_signal, fs, **kwargs))
+
+    time_freq_course = np.abs(pwvd_transform(input_signal, fs, 
+                                             **kwargs))
     if pwvd_filter:
         print('....A 2D median filter kernel is being applied to the PWVD...')
         median_filtered_tf = filters.median_filter(time_freq_course, size=filter_dims)
@@ -228,6 +358,11 @@ def get_midpoint_of_a_region(region_object):
     mid_point = int(np.mean([region_object[0].stop,region_object[0].start]))
     return mid_point
 
+def accelaration(X, fs):
+    '''Calculates the accelrateion of a frequency profile in kHz/ms^2
+    '''
+    velocity = 10**-6*np.abs(np.gradient(X))/(1.0/fs)
+    return np.abs(np.gradient(velocity))
 
 def get_first_region_above_threshold(input_signal,**kwargs):
     '''Takes in a 1D signal expecting a few peaks in it above the percentil threshold. 
@@ -246,11 +381,9 @@ def get_first_region_above_threshold(input_signal,**kwargs):
         If there is at least one region above the threshold a tuple with
         the output from scipy.ndimage.find_objects. Otherwise None. 
 
-    See Also
-    --------
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.find_objects.html
+
     '''
-    percentile = kwargs.get('percentile', 98.5)
+    percentile = kwargs.get('percentile', 99.5)
     above_threshold  = input_signal > np.percentile(input_signal, percentile)
     regions, num_regions = ndimage.label(above_threshold)
     
@@ -259,3 +392,27 @@ def get_first_region_above_threshold(input_signal,**kwargs):
         return region_location
     else:
         return None
+
+
+def frequency_spike_detection(X, fs, max_acc = 0.5):
+    '''Detects spikes in the frequency profile by 
+    monitoring the accelration profile through the sound. 
+    
+    Parameters
+    ----------
+    X : np.array
+        A frequency profile with sample-level estimates of frequency in Hz
+    fs : float>0
+    max_acc : float>0
+        Maximum acceleration in the frequency profile. 
+        Defaults to 0.5kHz/ms^2
+    
+    Returns
+    --------
+    anomalous : np.array
+        Boolean 
+    '''
+    freq_accelaration = accelaration(X,fs)
+    anomalous = freq_accelaration>max_acc
+    return anomalous, freq_accelaration
+

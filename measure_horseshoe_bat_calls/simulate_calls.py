@@ -36,8 +36,7 @@ have any suggestions for that it'd be great to hear. See :func:`make_cffm_call`,
 and :func:`make_call_frequency_profile`  and :func:`make_FM_with_joint` for more details.
 """
 import numpy as np
-
-
+import scipy.signal as signal 
 
 def make_cffm_call(call_properties, fs, **kwargs):
     '''
@@ -75,6 +74,8 @@ def make_cffm_call(call_properties, fs, **kwargs):
     dt = 1.0/fs
     call = np.sin(2*np.pi*dt*np.cumsum(call_frequency_profile)) 
     return call, call_frequency_profile
+
+
 
 def make_fm_chirp(start_f, end_f, durn, fs, chirp_type='linear'):
     t = np.linspace(0,durn, int(fs*durn))
@@ -238,3 +239,79 @@ def make_cffm_joint_profile(cf, fm_slope, fs, joint_type='down', **kwargs):
     if joint_type=='up':
         freq_profile = np.flip(freq_profile)
     return freq_profile, joint_duration
+
+
+## from the make_CF_training_data module
+def make_one_CFcall(call_durn, fm_durn, cf_freq, fs, call_shape, **kwargs):
+    '''A test function used to check how well the segmenting+measurement
+    functions in the module work. 
+    
+    Parameters
+    ----------
+    call_durn : float
+    fm_durn : float
+    cf_freq : float
+    fs : float
+    call_shape : str
+        One of either 'staplepin' OR 'rightangle'
+    fm_bandwidth : float, optional
+        FM bandwidth in Hz.
+
+
+    Returns
+    --------
+    cfcall : np.array
+        The synthesised call. 
+
+    Raises
+    -------
+    ValueError
+        If a call_shape that is not  'staplepin' OR 'rightangle' is given
+
+    Notes
+    ------
+    This is not really the besssst kind of CF call to test the functions on, 
+    but it works okay. The CF call is made by using the poly spline function 
+    and this leads to weird jumps in frequency especially around the CF-FM
+    junctions. Longish calls with decently long FM parts look fine, but calls
+    with very short FM parts lead to rippling of the frequency. 
+    '''
+    # choose an Fm start/end fr equency :
+    FM_bandwidth = np.arange(2,20)
+    fm_bw = kwargs.get('fm_bandwidth', np.random.choice(FM_bandwidth, 1)*10.0**3)
+    start_f = cf_freq - fm_bw
+    # 
+    polynomial_num = 25
+    t = np.linspace(0, call_durn, int(call_durn*fs))
+    # define the transition points in the staplepin
+    freqs = np.tile(cf_freq, t.size)
+    numfm_samples = int(fs*fm_durn)
+    if call_shape == 'staplepin':       
+        freqs[:numfm_samples] = np.linspace(start_f,cf_freq,numfm_samples,
+                                                     endpoint=True)
+        freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                     endpoint=True)
+        p = np.polyfit(t, freqs, polynomial_num)
+
+    elif call_shape == 'rightangle':
+        # alternate between rising and falling right angle shapes
+        rightangle_type = np.random.choice(['rising','falling'],1)
+        if rightangle_type == 'rising':
+            freqs[:numfm_samples] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                         endpoint=True)
+        elif rightangle_type == 'falling':
+            freqs[-numfm_samples:] = np.linspace(cf_freq,start_f,numfm_samples,
+                                                         endpoint=True)
+        p = np.polyfit(t, freqs, polynomial_num)
+
+    else: 
+        raise ValueError('Wrong input given')
+      
+    cfcall = signal.sweep_poly(t, p)
+
+    #windowing = np.random.choice(['hann', 'nuttall', 'bartlett','boxcar'], 1)[0]
+    windowing= 'boxcar'
+    cfcall *= signal.get_window(windowing, cfcall.size)
+    cfcall *= signal.tukey(cfcall.size, 0.01)
+    return cfcall
+

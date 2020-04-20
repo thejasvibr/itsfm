@@ -6,10 +6,9 @@ and results
 import matplotlib.pyplot as plt
 import numpy as np 
 
-from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import get_fm_snippets
 from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
-
+from measure_horseshoe_bat_calls.frequency_tracking import accelaration
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
 def check_call_background_segmentation(whole_call, fs, main_call_mask, 
@@ -47,29 +46,6 @@ def check_call_background_segmentation(whole_call, fs, main_call_mask,
     spec.plot(make_x_time(main_call_mask, fs),main_call_mask*horizontal_line,'k')
     return waveform, spec
 
-def check_call_parts_segmentation(only_call, fs, cf, fm,
-                                      **kwargs):
-    '''
-    '''
-
-    wavef, specg = visualise_call(only_call, fs, **kwargs)
-    
-    cf_time = np.argwhere(cf).flatten()/float(fs)
-    wavef.vlines(np.array([np.min(cf_time), np.max(cf_time)]),
-                         np.min(only_call), np.max(only_call), zorder=3)
-    
-    fm_types, fm_sweeps, fm_startstop = get_fm_snippets(only_call, fm, fs)
-    
-    for each in fm_startstop:
-        wavef.vlines([each[0], each[1]],
-                     np.max(only_call)*-0.5, np.max(only_call)*0.5, 
-                     'r',zorder=3)
-
-    specg.plot(make_x_time(cf, fs),cf*120000,'k',label='CF')
-    specg.plot(make_x_time(fm, fs),fm*70000,'r',label='FM')
-    plt.legend()
-    
-    return wavef, specg
 
 def show_all_call_parts(only_call, call_parts, fs, **kwargs):
     '''
@@ -112,6 +88,30 @@ def show_all_call_parts(only_call, call_parts, fs, **kwargs):
             pass
 
 
+def plot_accelaration_profile(X,fs):
+    '''
+    Plots the frequency acclearation profile of a frequency
+    profile
+    
+    Parameters
+    ----------
+    X : np.array
+        The frequency profile with sample-level 
+        estimates of frequency in Hz. 
+    fs : float>0
+
+    Returns
+    -------
+    A plt.plot which can be used as an independent figure ot
+    a subplot. 
+    '''
+    acc_profile = accelaration(X,fs)
+    t = np.linspace(0,X.size/fs, X.size)
+    plt.plot(t, acc_profile)
+    plt.ylabel('Frequency accelaration, $\\frac{kHz}{ms^{2}}$')
+    plt.xlabel('Time, s')
+
+
 def visualise_call(audio, fs, **kwargs):
     '''
     Parameters
@@ -149,11 +149,15 @@ def make_specgram(audio, fs, **kwargs):
                                noverlap=n_overlap,
                                vmin=vmin, 
                                cmap=cmap)
+    plt.ylabel('Frequency, Hz')
+    plt.xlabel('Time, s')
     return specgram
 
 def make_waveform(audio, fs):
      plt.plot(make_x_time(audio,fs), audio)
     
+def time_plot(X, fs):
+    plt.plot(make_x_time(X,fs), X)
 
 def get_fftsize(fs, **kwargs):
     '''

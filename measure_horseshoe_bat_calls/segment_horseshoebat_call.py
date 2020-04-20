@@ -7,12 +7,15 @@ import warnings
 import numpy as np 
 import pywt
 import scipy.interpolate as interpolate 
+from scipy import ndimage
 import scipy.ndimage.filters as flts
 import scipy.signal as signal 
 from measure_horseshoe_bat_calls.signal_processing import *
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 from measure_horseshoe_bat_calls.frequency_tracking import get_pwvd_frequency_profile
-#from measure_horseshoe_bat_calls.pwvd import 
+import measure_horseshoe_bat_calls.refine_cfm_regions as refine_cfm
+from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise
+
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''Function which identifies regions into CF and FM based on the following   process. 
 
@@ -31,11 +34,18 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
         Audio with horseshoe bat call
     fs : float>0
         Frequency of sampling in Hz. 
-    method : str, optional 
+    segment_method : str, optional 
         One of ['peak_percentage', 'pwvd', 'inst_freq'].
         Checkout 'See Also' for more information. 
         Defaults to 'peak_percentage'
-
+    refinement_method : function, str, optional
+        The method used to refine the initial CF and FM
+        candidate regions according to the different constraints
+        and rules set by the user. 
+        
+        Defaults to 'do_nothing'
+        
+        
     Returns
     --------
     cf_samples, fm_samples : np.array
@@ -52,7 +62,9 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     segment_by_peak_percentage
     segment_by_pwvd
     segment_by_inst_frequency
-    
+    measure_horseshoe_bat_calls.refine_cfm_regions 
+    refine_cf_fm_candidates
+
     Notes
     -----
     The post-processing information in the object `info` depends on the method 
@@ -65,19 +77,63 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     
     
     '''
-    method = kwargs.get('method', 'peak_percentage')
+    segment_method = kwargs.get('segment_method', 'peak_percentage')
+    refinement_method = kwargs.get('refinement_method', 'do_nothing')
     # identify candidate CF and FM regions 
-    cf_candidates, fm_candidates, info = perform_segmentation[method](call, fs,
-                                                       **kwargs)
-    # refine the candidate regions based on user requirements
-    cf_samples, fm_samples = refine_candidate_regions(call, fs, 
-                                                      cf_candidates,
-                                                      fm_candidates,
-                                                      method,
-                                                      info,
-                                                      **kwargs)
-    return cf_samples, fm_samples, info
+    cf_candidates, fm_candidates, info = perform_segmentation[segment_method](call, fs,
+                                                                 **kwargs)
 
+    cf, fm = refine_cf_fm_candidates(refinement_method,
+                                     [cf_candidates, fm_candidates],
+                                     fs, info, **kwargs)
+
+    return cf, fm, info
+
+def refine_cf_fm_candidates(refinement_method, cf_fm_candidates,
+                            fs, info, 
+                            **kwargs):
+    '''Parses the refinement method, checks if its string or function
+    and calls the relevant objects. 
+    
+    Parameters
+    ----------
+    refinement_method : str/function 
+        A string from the list of inbuilt functions in the module
+        `refine_cfm_regions` or a user-defined function. 
+        Defaults to `do_nothing`, an inbuilt function which
+        doesn't returns the candidate Cf-fm regions without 
+        alteration. 
+    cf_fm_candidates : list with 2 np.arrays
+        Both np.arrays need to be Boolean and of the same size as the original
+        audio. 
+    fs : float>0
+    info : dictionary
+
+
+    Returns
+    -------
+    cf, fm : np.array
+        Boolean arrays wher True indicates the sample is of the corresponding
+        region. 
+
+    '''
+
+    if isinstance(refinement_method, str):
+        refinement_function = getattr(refine_cfm, refinement_method)
+        cf_samples, fm_samples = refinement_function(cf_fm_candidates,
+                                                     fs,
+                                                     info, 
+                                                     **kwargs)
+    elif callable(refinement_method):
+        # could cause issues with inbuilt functions apparently?
+        cf_samples, fm_samples = refinement_method(cf_fm_candidates,
+                                                         fs,
+                                                         info, 
+                                                         **kwargs)
+    else:
+        raise ValueError('Unable to parse refinement method -  please check input:')
+
+    return cf_samples, fm_samples
 
 def segment_by_peak_percentage(call, fs, **kwargs):
     '''This is ideal for calls with one clear CF section with the CF 
@@ -131,8 +187,13 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     fm_samples = fm_re_cf > 0 
     cf_samples = cf_re_fm > 0
 
+    fm_samples = suppress_background_noise(fm_samples, call, **kwargs)
+    cf_samples = suppress_background_noise(cf_samples, call, **kwargs)
+
     info = {'fm_re_cf': fm_re_cf,
-            'cf_re_fm':cf_re_fm}
+            'cf_re_fm':cf_re_fm,
+            'cf_dbrms':cf_dbrms,
+            'fm_dbrms':fm_dbrms}
 
     return cf_samples, fm_samples, info 
 
@@ -141,7 +202,7 @@ def segment_by_pwvd(call, fs, **kwargs):
     '''This method is technically more accurate in segmenting CF and FM portions
     of a sound. The Pseudo-Wigner-Ville Distribution of the input signal 
     is generated. 
-    
+
     Parameters
     ----------
     call : np.array
@@ -149,7 +210,7 @@ def segment_by_pwvd(call, fs, **kwargs):
     fmrate_threshold : float >=0
         The threshold rate of frequency modulation in kHz/ms. Beyond this value a segment
         of audio is considered a frequency modulated region. 
-        Defaults to 0.5 kHz/ms
+        Defaults to 0.2 kHz/ms
 
     
     Returns
@@ -170,24 +231,129 @@ def segment_by_pwvd(call, fs, **kwargs):
     or noise. Some basic tweaking of the optional parameters may be required. 
 
     
-    
     See Also
     --------
     get_pwvd_frequency_profile
     
+    Example
+    -------
+    Let's create a two component call with a CF and an FM part in it 
+    >>> from measure_horseshoe_bat_calls.simulate_calls import make_tone, make_fm_chirp, silence
+    >>> fs = 22100
+    >>> tone = make_tone(5000, 0.01, fs)
+    >>> sweep = make_fm_chirp(1000, 6000, 0.005, fs)
+    >>> gap = silence(0.005, fs)
+    >>> full_call = np.concatenate((tone, gap, sweep))
+    >>> # reduce rms calculation window size because of low sampling rate!
+    >>> cf, fm, info = segment_by_pwvd(full_call, 
+                                           fs,
+                                            window_size=50,
+                                            background_noise=-40,
+                                            sample_every=0.1*10**-3)
+
     '''
-    fmrate_threshold = kwargs.get('fmrate_threshold', 0.5) # kHz/ms
-    
+    fmrate_threshold = kwargs.get('fmrate_threshold', 0.2) # kHz/ms
+
     clean_frequency_profile, info = get_pwvd_frequency_profile(call, fs, **kwargs)
-    
-    fmrate = calculate_fm_rate(clean_frequency_profile, fs, **kwargs)
-    
+
+    fmrate, fitted_freq_profile = whole_audio_fmrate(clean_frequency_profile, 
+                                                         fs, 
+                                                         **kwargs)
+
     info['fmrate'] = fmrate
-    
-    cf_samples = fmrate > fmrate_threshold
-    fm_samples = fmrate <= fmrate_threshold
-    
+    info['cleaned_fp'] = clean_frequency_profile
+    info['fitted_fp'] = fitted_freq_profile
+
+    fm_samples = fmrate > fmrate_threshold
+    cf_samples = fmrate <= fmrate_threshold
+
+    fm_samples = suppress_background_noise(fm_samples, call, **kwargs)
+    cf_samples = suppress_background_noise(cf_samples, call, **kwargs)
+
     return cf_samples, fm_samples, info
+
+def whole_audio_fmrate(whole_freq_profile, fs, **kwargs):
+    '''
+    When a recording has multiple components to it, there are silences
+    in between. These silences/background noise portions are assigned
+    a value of 0 Hz. 
+    
+    When a 'whole audio' fm rate is naively calculated by taking the diff
+    of the whole frequency profile, there will be sudden jumps in the fm-rate
+    due to the silent parts with 0Hz and the sound segments with non-zero 
+    segments. Despite these spikes being very short, they then propagate their
+    influence due to the median filtering that is later down downstream. This
+    essentially causes an increase of false positive FM segments because of the
+    apparent high fmrate. 
+    
+    To overcome the issues caused by the sudden zero to non-zero transitions 
+    in frequency values, this function handles each non-zero sound segment
+    separately, and calculates the fmrate over each sound segment independently.
+
+    Parameters
+    -----------
+    whole_freq_profile : np.array
+        Array with sample-level frequency values of the same size as the 
+        audio. 
+    fs : float>0
+    
+    Returns
+    -------
+    fmrate : np.array
+        The rate of frequency modulation in kHz/ms. Same size as `whole_freq_profile`
+        Regions in `whole_freq_profile` with 0 frequency are set to 0kHz/ms.
+    fitted_frequency_profile : np.aray
+        The downsampled, smoothed version of `whole_freq_profile`, of the same size. 
+    
+    Attention
+    ---------
+    The `fmrate` *must* be processed further downstream! 
+    In the whole-audio `fmrate` array, all samples that were 0 frequency 
+    in the original `whole_freq_profile` are set to 0 kHz/ms!!!
+    
+    
+    
+    See Also
+    --------
+    calculate_fm_rate
+    
+    
+    Example
+    -------
+    Let's make a synthetic multi-component sound with 2 FMs and 1 CF component.
+    
+    >>> fs = 22100
+    >>> onems = int(0.001*fs)
+    >>> sweep1 = np.linspace(1000,2000,onems) # fmrate of 1kHz/ms
+    >>> tone = np.tile(3000, 2*onems) # CF part
+    >>> sweep2 = np.linspace(4000,10000,3*onems) # 2kHz/ms
+    >>> gap = np.zeros(10)
+    >>> freq_profile = np.concatenate((sweep1, gap, tone, gap, sweep2))
+    >>> fmrate, fit_freq_profile = whole_audio_fmrate(freq_profile, fs)
+    
+    '''
+    
+    sound_segments, num_segments = ndimage.label(whole_freq_profile.flatten()>0)
+    location_segments = ndimage.find_objects(sound_segments)
+
+    whole_fmrate = np.zeros(whole_freq_profile.size)
+    fitted_frequency_profile = whole_freq_profile.copy()
+
+    if num_segments <1 :
+        raise ValueError('No non-zero frequency segments detected!')
+    
+    for index, location in enumerate(location_segments):
+        segment_frequency_profile = whole_freq_profile[location]
+        fmrate, fitted_freq_profile = calculate_fm_rate(segment_frequency_profile, 
+                                                                    fs, **kwargs)
+        whole_fmrate[location] = fmrate
+        fitted_frequency_profile[location] = fitted_freq_profile
+    
+    return whole_fmrate, fitted_frequency_profile
+    
+
+
+
 
 def segment_by_inst_frequency(call, fs, **kwargs):
     
@@ -200,10 +366,10 @@ def segment_by_inst_frequency(call, fs, **kwargs):
 def calculate_fm_rate(frequency_profile, fs, **kwargs):
     '''A frequency profile is generally oversampled. This means that 
     there will be many repeated values and sometimes minor drops in 
-    frequency over time. This leads to more apparent FM than is actually
+    frequency over time. This leads to a higher FM rate than is actually
     there when a sample-wise diff is performed. 
     
-    This method downsamples the frequency profile, fits a quadratic polynomial 
+    This method downsamples the frequency profile, fits a polynomial 
     to it and then gets the smoothened frequency profile with unique values. 
     
     The sample-level FM rate can now be calculated reliably. 
@@ -213,24 +379,47 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
     frequency_profile : np.array
         Array of same size as the original audio. Each sample has 
         the estimated instantaneous frequency in Hz. 
-    fs : sampling rate
+    fs : float>0
+        Sampling rate in Hz
     
+    Returns
+    -------
+    fm_rate : np.array
+        Same size as frequency_profile. The rate of frequency modulation in 
+        kHz/ms
     
+    See Also
+    --------
+    fit_polynomial_on_downsampled_version
     '''
-    sample_every = kwargs.get('sample_every', 0.001)
-    interpolation_kind = kwargs.get('interpolation_kind', 2)
+    
     medianfilter_length = kwargs.get('medianfilter_length', 0.25*10**-3)
+    medianfilter_samples = calc_proper_kernel_size(medianfilter_length, fs)
+    
+    fitted = fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs)
+
+    fm_rate_hz_per_sec = np.abs(np.gradient(fitted))
+    median_filtered = flts.percentile_filter(fm_rate_hz_per_sec, 50, 
+                                             medianfilter_samples)
+    fm_rate =10**-6*(median_filtered/(1/fs))
+    return fm_rate, fitted
+
+def fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs):
+    '''
+    '''
+    sample_every = kwargs.get('sample_every', 0.5*10**-3) #seconds
+    interpolation_kind = kwargs.get('interpolation_kind', 1) # polynomial order
     ds_factor = int(fs*sample_every)
+    
     full_x = np.arange(frequency_profile.size)
-    partX = np.unique(np.concatenate((full_x[:2], full_x[3::ds_factor], full_x[-2:]))).flatten()
+    partX = np.concatenate((full_x[:2], full_x[3::ds_factor], 
+                                      full_x[-2:])).flatten()
+    partX = np.unique(partX).flatten()
     partY = frequency_profile[partX]
+    
     fit = interpolate.interp1d(partX, partY, kind=interpolation_kind)
     fitted = fit(np.arange(frequency_profile.size))                           
-    fm_rate_hz_per_sec = np.abs(np.gradient(fitted))
-    median_filtered = flts.percentile_filter(fm_rate_hz_per_sec, 50, int(fs*medianfilter_length))
-    fm_rate =10**-6*(median_filtered/(1/fs))
-    return fm_rate
-
+    return fitted 
     
 
 def refine_candidate_regions():
@@ -709,6 +898,10 @@ def calc_proper_kernel_size(durn, fs):
     samples = int(durn*fs)
     if np.remainder(samples,2)==0:
         samples -= 1
+    if samples < 3:
+        msg_part1 = 'The given kernel length of %3f seconds and sampling rate of'%durn
+        msg_part2 = ' %f leads to a kernel of < 3 samples length. Increase kernel length!'%fs
+        raise ValueError(msg_part1+msg_part2)
     return samples
 
 def resize_by_adding_one_sample(input_signal, original_signal, **kwargs):

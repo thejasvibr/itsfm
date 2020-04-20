@@ -35,6 +35,9 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery-dataframe.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
@@ -83,8 +86,46 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_segmenting_real_sounds.html">Analysing real recordings</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_peak_percentage.html">The peak-percentage method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_peak_percentage.html#how-does-it-work">How does it work?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gallery_dir/plot_peak_percentage.html#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_choosing_correct_max_acc.html">Setting the correct <cite>max_acc</cite> value</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_choosing_correct_max_acc.html#an-example-frequency-profile">An example frequency profile</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_pwvd.html">Segmenting CF and FM using the PWVD method</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_pwvd.html#how-does-it-work">How does it work?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gallery_dir/plot_pwvd.html#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_segmenting_accurately.html">Segmenting real-world sounds correctly with synthetic sounds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_segmenting_accurately.html#synthetic-calls-to-the-rescue">Synthetic calls to the rescue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_segmenting_accurately.html#generating-a-classical-cf-fm-bat-call">Generating a ‘classical’ CF-FM bat call</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_segmenting_accurately.html#a-multi-component-bird-call">A multi-component bird call</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gallery_dir/plot_segmenting_accurately.html#let-there-be-noise">Let there be Noise</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gallery_dir/plot_custom_measurements.html">Inbuilt and custom measurements on CF and FM segments</a></li>
+</ul>
+
             
           
         </div>
@@ -149,25 +190,30 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#B"><strong>B</strong></a>
+ <a href="#A"><strong>A</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
- | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
- | <a href="#T"><strong>T</strong></a>
- | <a href="#V"><strong>V</strong></a>
- | <a href="#W"><strong>W</strong></a>
  
 </div>
-<h2 id="B">B</h2>
+<h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.BackgroundSegmentationError">BackgroundSegmentationError</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.anomaly_extrapolation">anomaly_extrapolation() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.anomaly_interpolation">anomaly_interpolation() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
+</li>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.assign_cffm_regionids">assign_cffm_regionids() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -175,19 +221,31 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.calc_proper_kernel_size">calc_proper_kernel_size() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.calculate_fm_rate">calculate_fm_rate() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.CFIdentificationError">CFIdentificationError</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.combine_and_order_regions">combine_and_order_regions() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_background_segmentation">check_call_background_segmentation() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.common_measurements">common_measurements() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.check_call_parts_segmentation">check_call_parts_segmentation() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.detect_local_potholes">detect_local_potholes() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.check_segment_cf_and_fm">check_segment_cf_and_fm() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.duration">duration() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.exterpolate_over_anomalies">exterpolate_over_anomalies() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -195,7 +253,11 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.FMIdentificationError">FMIdentificationError</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.find_non_forbidden_index">find_non_forbidden_index() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.find_regions">find_regions() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -203,19 +265,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_cf_region">get_cf_region() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.get_fftsize">get_fftsize() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_fm_regions">get_fm_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_fm_snippets">get_fm_snippets() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.get_terminal_frequency">get_terminal_frequency() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.get_thresholds_re_max">get_thresholds_re_max() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.get_all_spikeish_indices">get_all_spikeish_indices() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -223,27 +273,7 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_cf_ish_regions">identify_cf_ish_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_maximum_contiguous_regions">identify_maximum_contiguous_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.identify_valid_regions">identify_valid_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.IncorrectThreshold">IncorrectThreshold</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="L">L</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.batch_processing.load_raw_audio">load_raw_audio() (in module measure_horseshoe_bat_calls.batch_processing)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.low_and_highpass_around_threshold">low_and_highpass_around_threshold() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.identify_pothole_samples">identify_pothole_samples() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -259,31 +289,35 @@
 </li>
       <li><a href="index.html#measure_horseshoe_bat_calls.simulate_calls.make_FM_with_joint">make_FM_with_joint() (in module measure_horseshoe_bat_calls.simulate_calls)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.make_one_CFcall">make_one_CFcall() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.make_overview_figure">make_overview_figure() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.make_specgram">make_specgram() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.simulate_calls.make_one_CFcall">make_one_CFcall() (in module measure_horseshoe_bat_calls.simulate_calls)</a>
 </li>
       <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.measure_hbc_call">measure_hbc_call() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#module-measure_horseshoe_bat_calls.batch_processing">measure_horseshoe_bat_calls.batch_processing (module)</a>
-</li>
       <li><a href="index.html#module-measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call">measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call (module)</a>
 </li>
-      <li><a href="index.html#module-measure_horseshoe_bat_calls.pwvd.quantify_frequency_modulation">measure_horseshoe_bat_calls.pwvd.quantify_frequency_modulation (module)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#module-measure_horseshoe_bat_calls.measurement_functions">measure_horseshoe_bat_calls.measurement_functions (module)</a>
 </li>
-      <li><a href="index.html#module-measure_horseshoe_bat_calls.segment_horseshoebat_call">measure_horseshoe_bat_calls.segment_horseshoebat_call (module)</a>
+      <li><a href="index.html#module-measure_horseshoe_bat_calls.signal_cleaning">measure_horseshoe_bat_calls.signal_cleaning (module)</a>
 </li>
       <li><a href="index.html#module-measure_horseshoe_bat_calls.simulate_calls">measure_horseshoe_bat_calls.simulate_calls (module)</a>
 </li>
-      <li><a href="index.html#module-measure_horseshoe_bat_calls.user_interface">measure_horseshoe_bat_calls.user_interface (module)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.measure_peak_amplitude">measure_peak_amplitude() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
 </li>
-      <li><a href="index.html#module-measure_horseshoe_bat_calls.view_horseshoebat_call">measure_horseshoe_bat_calls.view_horseshoebat_call (module)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.measure_peak_frequency">measure_peak_frequency() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.median_filter">median_filter() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.measure_rms">measure_rms() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
+</li>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.measure_terminal_frequency">measure_terminal_frequency() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.onepass_identify_potholes">onepass_identify_potholes() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -291,11 +325,11 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.batch_processing.parse_batchfile_row">parse_batchfile_row() (in module measure_horseshoe_bat_calls.batch_processing)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.parse_cffm_segments">parse_cffm_segments() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.pre_process_for_segmentation">pre_process_for_segmentation() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.perform_segment_measurements">perform_segment_measurements() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -303,13 +337,7 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.refine_candidate_regions">refine_candidate_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.resize_by_adding_one_sample">resize_by_adding_one_sample() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.batch_processing.run_from_batchfile">run_from_batchfile() (in module measure_horseshoe_bat_calls.batch_processing)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.remove_bursts">remove_bursts() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -317,49 +345,21 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.batch_processing.save_measurements_to_file">save_measurements_to_file() (in module measure_horseshoe_bat_calls.batch_processing)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.segments_above_min_duration">segments_above_min_duration() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.user_interface.save_overview_graphs">save_overview_graphs() (in module measure_horseshoe_bat_calls.user_interface)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.smooth_over_potholes">smooth_over_potholes() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.user_interface.segment_and_measure_call">segment_and_measure_call() (in module measure_horseshoe_bat_calls.user_interface)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_peak_percentage">segment_by_peak_percentage() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.start">start() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_by_pwvd">segment_by_pwvd() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.measurement_functions.stop">stop() (in module measure_horseshoe_bat_calls.measurement_functions)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_from_background">segment_call_from_background() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.suppress_background_noise">suppress_background_noise() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_call_into_cf_fm">segment_call_into_cf_fm() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.suppress_frequency_spikes">suppress_frequency_spikes() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.segment_horseshoebat_call.segment_cf_regions">segment_cf_regions() (in module measure_horseshoe_bat_calls.segment_horseshoebat_call)</a>
-</li>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.show_all_call_parts">show_all_call_parts() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="T">T</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.batch_processing.to_separate_from_background">to_separate_from_background() (in module measure_horseshoe_bat_calls.batch_processing)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="V">V</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.view_horseshoebat_call.visualise_call">visualise_call() (in module measure_horseshoe_bat_calls.view_horseshoebat_call)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="W">W</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="index.html#measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call.which_fm_type">which_fm_type() (in module measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call)</a>
+      <li><a href="index.html#measure_horseshoe_bat_calls.signal_cleaning.suppress_to_zero">suppress_to_zero() (in module measure_horseshoe_bat_calls.signal_cleaning)</a>
 </li>
   </ul></td>
 </tr></table>

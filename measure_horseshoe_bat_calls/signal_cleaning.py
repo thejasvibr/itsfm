@@ -1,13 +1,142 @@
 # -*- coding: utf-8 -*-
-"""Handles cleaning of noisy signals.
+"""
+Signal Cleaning Module
+~~~~~~~~~~~~~~~~~~~~~~
+This module handles the identification and cleaning of  noise in signals. A 'noisy' signal 
+is one that has spikes in it or sudden variations in a continuous looking 
+function. Most of these functions are built to detect and handle sudden
+spikes in the frequency profile estimates of a sound. 
 
 
 """
 import numpy as np 
-from scipy import ndimage
+from scipy import ndimage, stats
 from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust
 from measure_horseshoe_bat_calls.signal_processing import median_filter, resize_by_adding_one_sample
 from measure_horseshoe_bat_calls.signal_processing import dB
+
+
+def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
+    ''' 
+    Ex(tra)+(in)ter-polates --> Exterpolates over  anomalous regions. Anomalous
+    regions are either 'edge' or 'island' types. The 'edge' anomalies are those which are 
+    at the extreme ends of the signal. The 'island' anomalies are regions with 
+    non-anomalous regions on the left and right. 
+   
+    An 'edge' anomalous region is handled by running a linear regression on the 
+    neighbouring non-anomalous region, and using the slope to extrapolate over
+    the edge anomaly. 
+    
+    An 'island' anomaly is handled by interpolating between the end values of the 
+    neighbouring non-anomalous regions. 
+   
+    Parameters
+    ----------
+    X : np.array
+    fs : float>0
+        Sampling rate in Hz
+    anomalous : np.array
+        Boolean array of same size as X
+        True indicates an anomalous sample. 
+    extrap_window : float>0
+        The duration of the extrapolation window in seconds.
+        Defaults to 0.5*10^-3s
+
+    Returns
+    -------
+    smooth_X : np.array
+        Same size as X, with the anomalous regions 
+    
+    Notes
+    -----
+    Only extrapolation by linear regression is supported currently. The `extrap_window`
+    parameter is important especially if there is a high rate of frequency modulation
+    towards the edges of the sound. When there is a high freq. mod. at the edges it
+    is better to set the `extrap_window` small. However, setting it too small also
+    means that the extrapolation may not be as nice anymore. 
+
+    Example
+    -------
+    
+    `not up to date!!!`
+    
+    See Also
+    --------
+    find_closest_normal_region
+
+    '''
+    smooth_X = X.copy()
+    extrap_window = kwargs.get('extrap_window', 0.5*10**-3)
+    ref_region_length = int(extrap_window*fs)
+    
+    anomalous_broader = ndimage.filters.percentile_filter(anomalous, 100, 
+                                                              ref_region_length)
+    
+    anomalous_labelled, num_regions = ndimage.label(anomalous_broader)
+    if num_regions == 0:
+        return smooth_X
+
+    anomalous_regions = ndimage.find_objects(anomalous_labelled)
+    
+    for each_region in anomalous_regions:
+        region_type = anomaly_type(each_region, X)
+        if region_type == 'edge':
+            smooth_X[each_region] = anomaly_extrapolation(each_region, X, 
+                                                            ref_region_length)
+        elif region_type == 'island':
+            smooth_X[each_region] = anomaly_interpolation(each_region, X)
+    return smooth_X
+
+
+def anomaly_extrapolation(region, X, num_samples):
+    '''
+    Takes X values next to the region and fits a linear regression 
+    into the region
+    
+    Notes
+    ------
+    This function covers 90% of cases...if there is an anomaly right next
+    to an edge anomaly with <num_samples distance -- of course things will
+    go whack.
+    '''
+    start, stop = region[0].start, region[0].stop
+    x = np.arange(start,stop)
+
+    try:
+        ref_x = range(stop, stop+num_samples)
+        ref_range = X[ref_x]
+    except:
+        ref_x = range(start-num_samples, start)
+        ref_range = X[ref_x]
+
+    m, c,rv, pv, stderr = stats.linregress(ref_x, ref_range)
+    extrapolated = m*x + c 
+    return extrapolated
+
+def anomaly_interpolation(region, X):
+    '''
+    Interpolates X values bet
+    '''
+    start, stop = region[0].start, region[0].stop
+    left_point = start-1
+    full_span = np.linspace(X[left_point],X[stop],stop-left_point+1)
+    return full_span[1:-1]
+
+def anomaly_type(region, X):
+    start, stop = region[0].start, region[0].stop
+    
+    at_left_edge = start==0
+    at_right_edge = stop==X.size
+    
+    if np.logical_and(at_left_edge, at_right_edge):
+        raise ValueError('The anomaly spans the whole array - please check again')
+    at_either_edge = np.logical_or(at_left_edge, at_right_edge)        
+    
+    if at_either_edge:
+        return 'edge'
+    else:
+        return 'island'
+
 
 
 def smooth_over_potholes(X, fs, **kwargs):
@@ -42,7 +171,6 @@ def smooth_over_potholes(X, fs, **kwargs):
     See Also
     --------
     identify_pothole_samples
-    find_non_forbidden_index
     
     '''
     kwargs['max_stepsize'] = kwargs.get('max_stepsize', 50)
@@ -113,8 +241,10 @@ def identify_pothole_samples(X, fs,  **kwargs):
     --------
     detect_local_potholes
     '''
+    # forward pass
     left2right_pothole_candidates, _ = onepass_identify_potholes(X, fs,
                                                                  **kwargs)
+    # backward pass
     right2left_pothole_candidates, _ = onepass_identify_potholes(X[::-1], fs,
                                                               **kwargs)
     pothole_candidates = np.logical_and(left2right_pothole_candidates>0,
@@ -269,13 +399,13 @@ def segments_above_min_duration(satisfies_condition, min_samples):
     return above_min_duration
 
 
-
 def suppress_background_noise(main_signal, input_audio, **kwargs):
     '''
     '''
     background_noise = kwargs.get('background_noise', -40) # dBrms
     signal_dBrms = dB(moving_rms_edge_robust(input_audio, **kwargs))
-    bg_noise_suppressed = suppress_to_zero(main_signal, signal_dBrms, background_noise, 'below')
+    bg_noise_suppressed = suppress_to_zero(main_signal, signal_dBrms,
+                                           background_noise, 'below')
     return bg_noise_suppressed
 
 

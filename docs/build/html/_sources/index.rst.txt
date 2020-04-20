@@ -3,8 +3,6 @@
 measure horseshoe bat call : Documentation
 =======================================================
 
-.. include:: ../README.rst
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -17,13 +15,18 @@ The package assumes that any given sound could have a set of three elements
 * Frequency Modulated (FM) :  an element with a varying frequency
 * Gap : a silence between two elements that is neither a CF nor an FM. 
 
+
+.. include:: gallery_dir/index.rst
+
+
 Any input audio goes through the following steps:
 
-#. Time frequency localisation within audio: either one of STFT, WignerVille, instantaneous frequency 
+#. Time frequency localisation within audio: either one of Pseudo Wigner-Ville, instantaneous frequency 
 #. FM rate calculation : regions with modulation below the set limit are considered CF, and those above the FM rate are considered FM. 
 #. Rough candidate region assignment into CF and FM regions 
 #. Refined sample-level assignment into CF,FM and Gap regions based on user-input constraints (max number of elements, presence/absence of gaps, etc)
 #. Segmentation of assigned elements and measurements of various parameters (peak frequency, energy, duration,...)
+
 
 High-level API
 ~~~~~~~~~~~~~~
@@ -48,6 +51,9 @@ Call background and call-part segmentation: part 2
 .. automodule:: measure_horseshoe_bat_calls.pwvd.quantify_frequency_modulation
 	:members:
 
+.. automodule:: measure_horseshoe_bat_calls.measurement_functions
+	:members:
+
 Call-parts measurements
 ~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call
@@ -61,6 +67,11 @@ Call segmentation and measurements visualisation
 Checking accuracy
 ~~~~~~~~~~~~~~~~~
 .. automodule:: measure_horseshoe_bat_calls.simulate_calls
+	:members:
+
+Signal Cleaning
+~~~~~~~~~~~~~~~
+.. automodule:: measure_horseshoe_bat_calls.signal_cleaning
 	:members:
 
 Indices and tables

@@ -71,7 +71,6 @@ def segment_and_measure_call(main_call, fs,
     segment_from_background : boolean
         Whether to segment the call in the main_call audio. 
         Defaults to False.
-    
 
     Keyword Arguments
     -----------------
@@ -83,27 +82,63 @@ def segment_and_measure_call(main_call, fs,
     segmentation_outputs : tuple
         The outputs of segment_call_into_cf_fm in a tuple
     call_parts : dictionary
-        Dictionary with 'cf' and 'fm' entries and corresponding 
-        audio. 
-    measurements : dictionary
+        Dictionary with numbered entries. If a sound has the following
+        order of Cf and FM: FM-CF-FM, then the keys will be 
+        'fm1','cf1','fm2'. The numbering is according to the chronological 
+        order. 
+    measurements : pd.DataFrame
         All the measurements from the FM and CF parts. 
-        For details see measure_a_horseshoe_bat_call
+
     backg_segmentation_info : dictionary
         Contains the output from segment_call_from_background + a copy of 
         main_call, the raw un-segmented audio with background. The objects are
         accessed with the following keys:
         'raw_audio', 'call_mask', 'call_backg_info'.
 
+    Example
+    -------
+    Let's simulate a call to demonstrate how the measurement+segmentation
+    works. 
+    
+    >>> import scipy.signal  as signal 
+    >>> from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
+    >>> call_properties = {'cf':(80000, 0.01), 'upfm':(70000, 0.002),
+                           'downfm':(50000, 0.002)}
+    >>> fs = 500000
+    >>> call, profile = make_cffm_call(call_properties, fs)
+    >>> call *= signal.tukey(call.size, 0.1)
+    >>> plt.figure()
+    >>> plot1 = plt.subplot(211)
+    >>> plt.plot(profile)
+    >>> #segment the CF and FM parts with the default 'peak percentage' method. 
+    >>> segm_out, call_parts, measures, _ = segment_and_measure_call(call,
+                                                                    fs,
+                                                                    segment_method='peak_percentage',
+                                                                    peak_percentage=0.999,
+                                                                    window_size=int(fs*0.5*10**-3))
+    >>> print(measures)
+
+    Now segment with frequency tracking implemented with the Pseudo Wigner Ville
+    Distribution, and the set the fmrate threshold to 10 kHz/ms
+    
+    >>> segm_out, call_parts, measures, _ = segment_and_measure_call(call,
+                                                                     fs,
+                                                                     segment_method='pwvd',
+                                                                     fmrate_threshold=10,
+                                                                     medianfilter_length=0.5*10**-3,
+                                                                     )
+    >>> plt.subplot(212, sharex=plot1)
+    >>> plt.plot(segm_out[-1]['fmrate'])
+    >>> print(measures)
+
+    See Also
+    --------
+    measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call
+
     '''
     backg_segmentation_info = {}
     if segment_from_background:
-        raw_audio = main_call.copy()
-        call_portion, call_backg_info = segment_call_from_background(raw_audio, 
-                                                              fs, **kwargs)
-        main_call = main_call[call_portion]
-        backg_segmentation_info['raw_audio'] = raw_audio
-        backg_segmentation_info['call_mask'] = call_portion
-        backg_segmentation_info['call_backg_info'] = call_backg_info
+        raise NotImplementedError('background segmentation is not yet implemented!')
 
     cf, fm, info = segment_call_into_cf_fm(main_call, fs, 
                                                            **kwargs)

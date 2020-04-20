@@ -37,3 +37,4 @@ def do_nothing(cfm_candidates, fs, info, **kwargs):
     '''
     '''
     return cfm_candidates[0], cfm_candidates[1]
+

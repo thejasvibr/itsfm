@@ -14,8 +14,7 @@ Measurement function parameters
 
     #. the full audio, a np.array
     #. the sampling rate, a float>0
-    #. the `segment`, a tuple with two objects in it. A `segment` tuple has
-       its unique identifying string,and a slice object which defines the span
+    #. the `segment`, a slice object which defines the span
        of the segment. For instance ('fm1', slice(0,100))
 
 What needs to be returned:
@@ -71,7 +70,7 @@ def duration(audio, fs, segment ,**kwargs):
     durn = (segment.stop-segment.start)/float(fs)
     return {'duration':durn}
 
-def peak_frequency(audio, fs, segment ,**kwargs):
+def measure_peak_frequency(audio, fs, segment ,**kwargs):
     '''
     
     See Also
@@ -81,7 +80,7 @@ def peak_frequency(audio, fs, segment ,**kwargs):
     peak_freq, freq_res = get_peak_frequency(audio[segment], fs)
     return {'peak_frequency':peak_freq, 'peak_freq_resolution':freq_res}
 
-def terminal_frequency(audio, fs, segment,**kwargs):
+def measure_terminal_frequency(audio, fs, segment,**kwargs):
     '''
     
     See Also

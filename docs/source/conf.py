@@ -31,7 +31,8 @@ release = '1.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon',
-				'sphinx.ext.viewcode','recommonmark','sphinx.ext.mathjax']
+				'sphinx.ext.viewcode','recommonmark','sphinx.ext.mathjax',
+				'sphinx_gallery.gen_gallery']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -73,4 +74,16 @@ autodoc_member_order = 'bysource'
 
 # Add a logo
 html_logo = 'measure_CF_calls_logo_v1.0.png'
+
+# sphinx gallery
+sphinx_gallery_conf = {
+     'examples_dirs': '..\..\examples',   # path to your example scripts
+     'gallery_dirs': 'gallery_dir',  # path to where to save gallery generated output
+	 'image_scrapers': ('matplotlib'),
+	 'reference_url': {
+         # The module you locally document uses None
+        'sphinx_gallery': None,
+		'show_memory': True,
+    }
+						}
 

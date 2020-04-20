@@ -4,6 +4,7 @@ used by both measure and segment modules.
 
 
 """
+from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_negative
 import numpy as np 
 import scipy.signal as signal 
 
@@ -208,7 +209,7 @@ def moving_rms_edge_robust(X, **kwargs):
     '''
 
     forward_run = moving_rms(X, **kwargs)
-    backward_run = np.flip(moving_rms(np.flip(X), **kwargs))
+    backward_run = moving_rms(np.flip(X), **kwargs)
     consensus = form_consensus_moving_rms(forward_run, backward_run)
     return consensus
 
@@ -216,12 +217,8 @@ def moving_rms_edge_robust(X, **kwargs):
 def form_consensus_moving_rms(forward, backward):
     '''
     '''
-    half_samples = int(forward.size/2.0)
-    
-    consensus_rms = np.concatenate((forward[:half_samples], 
-                                    backward[half_samples:]))
-
-    return consensus_rms
+    consensus_rms = np.column_stack((forward, backward[::-1]))
+    return np.nanmean(consensus_rms, 1)
 
 
 def median_filter(input_signal, fs, **kwargs):
@@ -294,5 +291,48 @@ def check_signal_sizes(input_signal, original_signal):
     if int(original_signal.size) - int(input_signal.size) >= 2:
         raise ValueError('The original signal is >= 2 samples longer than the input signal.')
 
+
+def get_terminal_frequency(audio, fs, **kwargs):
+    '''Gives the -XdB frequency from the peak. 
+
+    The power spectrum is calculated and smoothened over 3 frequency bands to remove
+    complex comb-like structures. 
+    
+    Then the lowest frequency below XdB from the peak is returned. 
+
+    Parameters
+    ----------
+    audio : np.array
+    fs : float>0
+        Sampling rate in Hz
+    terminal_frequency_threshold : float, optional
+        The terminal frequency is calculated based on finding the level of the peak frequency
+        and choosing the lowest frequency which is -10 dB (20log10) below the peak level. 
+        Defaults to -10 dB
+
+    Returns 
+    ---------
+    terminal_frequency       
+    threshold 
+
+    Notes
+    -----
+    Careful about setting threshold too low - it might lead to output of terminal
+    frequencies that are actually in the noise, and not part of the signal itself. 
+    '''
+    threshold = kwargs.get('terminal_frequency_threshold', -10)
+    make_sure_its_negative(threshold, variable='terminal frequency threshold')
+    
+    power_spectrum, freqs  = get_power_spectrum(audio, fs)
+    # smooth the power spectrum over 3 frequency bands to remove 'comb'-iness in the spectrum
+    smooth_spectrum = np.convolve(10**(power_spectrum/20.0), np.ones(3)/3,'same')
+    smooth_power_spectrum = dB(abs(smooth_spectrum))
+
+    peak = np.max(smooth_power_spectrum)
+    geq_threshold = smooth_power_spectrum >= peak + threshold
+    all_frequencies_above_threshold = freqs[geq_threshold]
+
+    terminal_frequency = np.min(all_frequencies_above_threshold)
+    return terminal_frequency, threshold
 
 
