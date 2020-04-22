@@ -17,7 +17,6 @@ setup(name='measure_horseshoe_bat_calls',
         'scipy','matplotlib', 'scikit-image', 'tftb','tqdm'],
      zip_safe=False,
 	 include_package_data=True,
-	 package_data={'':['data/*.WAV']},
      classifiers=[
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Sound/Audio :: Analysis',

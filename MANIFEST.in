@@ -1,7 +1,7 @@
 include *.png
-include figuring_out/real_data/*.WAV
 include *.wav
 include *.rst
 include *.md
 include *.ipynb
 include *.csv
+include measure_horseshoe_bat_calls/data/*.WAV
