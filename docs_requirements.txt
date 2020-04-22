@@ -1,0 +1,11 @@
+
+numpy>1.15
+pandas
+soundfile
+peakutils
+scipy
+matplotlib
+PyWavelets
+tqdm
+sphinx==2.4.4
+sphinx-gallery==0.6.1
