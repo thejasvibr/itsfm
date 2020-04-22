@@ -7,7 +7,6 @@ Created on Fri Mar 27 15:45:51 2020
 """
 import glob
 import os 
-import scipy.signal as signal 
 try:
 	import soundfile as sf
 except:
@@ -15,7 +14,8 @@ except:
 	import scipy.io.wavfile as wav
 
 folder_with_audio_files, file_name =os.path.split(os.path.abspath(__file__))
-all_wav_files = glob.glob(folder_with_audio_files+'\*.WAV')
+search_path = os.path.join(folder_with_audio_files,'*.WAV')
+all_wav_files = glob.glob(search_path)
 example_calls = []
 
 for each in all_wav_files:
