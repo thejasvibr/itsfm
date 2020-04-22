@@ -4,4 +4,5 @@ include *.rst
 include *.md
 include *.ipynb
 include *.csv
+include measure_horseshoe_bat_calls/*.csv
 include measure_horseshoe_bat_calls/data/*.WAV
