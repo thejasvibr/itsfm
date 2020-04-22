@@ -1,6 +1,6 @@
 
 
-measure horseshoe bat call : Documentation
+<NAMETOBEDECIDED> : Documentation
 ==========================================
 
 The <NAMETOBEDECIDED> package identifies regions of sound with and without frequency modulation, 

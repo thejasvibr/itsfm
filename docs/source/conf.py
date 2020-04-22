@@ -77,7 +77,7 @@ html_logo = 'measure_CF_calls_logo_v1.0.png'
 
 # sphinx gallery
 sphinx_gallery_conf = {
-     'examples_dirs': '..\..\examples',   # path to your example scripts
+     'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'gallery_dir',  # path to where to save gallery generated output
 	 'image_scrapers': ('matplotlib'),
 	 'reference_url': {
