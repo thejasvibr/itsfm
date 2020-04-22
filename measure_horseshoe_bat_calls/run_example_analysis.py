@@ -14,7 +14,10 @@ import  measure_horseshoe_bat_calls.data as calls
 import measure_horseshoe_bat_calls.view_horseshoebat_call as view
 
 folder, file_path = os.path.split(__file__)
+
+print(folder)
 people_file_path = os.path.join(folder, 'data_contributors.csv')
+print(people_file_path)
 
 contributors = pd.read_csv(people_file_path)['people']
 
