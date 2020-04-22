@@ -116,9 +116,12 @@ def plot_accelaration_profile(X,fs):
     '''
     acc_profile = accelaration(X,fs)
     t = np.linspace(0,X.size/fs, X.size)
+    plt.figure()
+    A = plt.subplot(111)
     plt.plot(t, acc_profile)
     plt.ylabel('Frequency accelaration, $\\frac{kHz}{ms^{2}}$')
     plt.xlabel('Time, s')
+    return A
 
 
 def plot_movingdbrms(X,fs,**kwargs):

@@ -1,6 +1,6 @@
 """
 Segmenting CF and FM using the PWVD method
-==========================
+==========================================
 The 'PWVD' method stands for the Pseudo Wigner-Ville Distribution. It is a class
 of time-frequency representations that can be used to be gain very high spectro-
 temporal resolution of a sound [1,2]. 
@@ -79,34 +79,34 @@ info.keys()
 # %%
 #  To illustrate how exactly the method works, let's check out the output from the `info` dictionary. 
 
-plt.figure()
-plt.plot(info['cf_dbrms'], label='CF emphasised')
-plt.plot(info['fm_dbrms'],  label='FM emphasised')
-plt.ylabel('Signal level, dB rms')
-plt.legend()
+#plt.figure()
+#plt.plot(info['cf_dbrms'], label='CF emphasised')
+#plt.plot(info['fm_dbrms'],  label='FM emphasised')
+#plt.ylabel('Signal level, dB rms')
+#plt.legend()
 
 # %%
 # You can see the FM dBrms peaks towards the end and the start, while the CF peaks at the middle. The peak percentage method 
 # relies on subtracting the two from each other to see which parts of the call the FM and CF are dominant. We thus get this 
 # from the previous dBrms profiles
 
-plt.figure()
-plt.plot(info['cf_re_fm'], label='relative CF')
-plt.plot(info['fm_re_cf'], label='relative FM')
-plt.legend()
-plt.ylabel('CF/FM relative level')
+#plt.figure()
+#plt.plot(info['cf_re_fm'], label='relative CF')
+#plt.plot(info['fm_re_cf'], label='relative FM')
+#plt.legend()
+#plt.ylabel('CF/FM relative level')
 
 # %%
 # And thus, we can see that wherever the relative FM/CF is >0, we can safely assign it to a segment of that type. 
 # Compare the relative levels and the final segmented values below. 
-
-plt.figure()
-plt.subplot(211) 
-plt.plot(cf, label='segmented CF')
-plt.plot(fm, label='segmented FM')
-plt.legend()
-plt.subplot(212)
-plt.plot(info['cf_re_fm'], label='relative CF')
-plt.plot(info['fm_re_cf'], label='relative FM')
-plt.legend()
-plt.ylabel('CF/FM relative level')
+#
+#plt.figure()
+#plt.subplot(211) 
+#plt.plot(cf, label='segmented CF')
+#plt.plot(fm, label='segmented FM')
+#plt.legend()
+#plt.subplot(212)
+#plt.plot(info['cf_re_fm'], label='relative CF')
+#plt.plot(info['fm_re_cf'], label='relative FM')
+#plt.legend()
+#plt.ylabel('CF/FM relative level')

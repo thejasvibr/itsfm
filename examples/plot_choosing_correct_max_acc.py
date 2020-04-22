@@ -1,6 +1,7 @@
 """
 Setting the correct `max_acc` value
 ===================================
+
 Some of the methods in the <INSERTNAME> package estimate the instantaneous
 frequency at sample-level resolution. Most methods will suffer from edge effects
 which cause the estimated instantaneous frequency to spike especially at the start and end of
@@ -13,10 +14,12 @@ using the nearest non-anomalous regions.
 
 An example frequency profile
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Let's create an example sound, and use the PWVD method to track the instantaneous
+
+Let's create an example sound, and use the PWVD method to track the instantaneous 
 frequency over time. 
 
 """
+
 import numpy as np 
 from measure_horseshoe_bat_calls.frequency_tracking import generate_pwvd_frequency_profile, frequency_spike_detection
 from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp
