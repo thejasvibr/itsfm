@@ -80,10 +80,7 @@ sphinx_gallery_conf = {
      'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'gallery_dir',  # path to where to save gallery generated output
 	 'image_scrapers': ('matplotlib'),
-	 'reference_url': {
-         # The module you locally document uses None
-        'sphinx_gallery': None,
-		'show_memory': True,
-    }
+	 'reference_url': {'sphinx_gallery': None},
+	 'show_memory': True,
 						}
 
