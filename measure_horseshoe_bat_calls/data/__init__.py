@@ -14,7 +14,7 @@ except:
 	print('There was an issue importing the soundfile library - please resolve this! Using alternate package (scipy)..')
 	import scipy.io.wavfile as wav
 
-folder_with_audio_files, file_name = os.path.split(__file__)
+folder_with_audio_files, file_name =os.path.split(os.path.abspath(__file__))
 all_wav_files = glob.glob(folder_with_audio_files+'\*.WAV')
 example_calls = []
 

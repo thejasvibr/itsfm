@@ -5,8 +5,8 @@ The <INSERTNEWNAME> package has many example recordings of bat calls thanks to
 the generous contributions of bioacousticians around the world:
 """
 
-#from measure_horseshoe_bat_calls.run_example_analysis import contributors
-#print(contributors)
+from measure_horseshoe_bat_calls.run_example_analysis import contributors
+print(contributors)
 
 # %% Let's load the example data from the `data` module of the package
 
