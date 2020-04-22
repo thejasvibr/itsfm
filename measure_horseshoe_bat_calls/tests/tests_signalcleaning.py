@@ -5,7 +5,7 @@ Created on Thu Apr 16 08:43:47 2020
 @author: tbeleyur
 """
 import unittest
-import numpy as np 
+import numpy as np
 from measure_horseshoe_bat_calls.signal_cleaning import *
 
 class CheckSmoothOverPothole(unittest.TestCase):
@@ -106,10 +106,87 @@ class DetectLocalPotholes(unittest.TestCase):
         all_below = np.invert(output)
         self.assertTrue(np.all(all_below))
         
-        
+class TestAnomalyExtrapolation(unittest.TestCase):
     
+    def setUp(self):
+        self.actual = np.linspace(1,10,10)
+        self.weird_region = [slice(0,3)]
+        self.fs = 1
+    def test_basic(self):
+        self.extrapolated = np.zeros(self.actual.size)
+        self.extrapolated[3:] = self.actual[3:]
+
+        extrap =anomaly_extrapolation(self.weird_region, self.actual,3)
+        self.extrapolated[self.weird_region[0]] = extrap
         
+        output_match = np.array_equal(self.extrapolated, self.actual)
+        self.assertTrue(output_match)
+
+class TestAnomalyInterpolation(unittest.TestCase):
     
+    def setUp(self):
+        self.actual = np.linspace(1,10,10)
+        self.weird_region = [slice(4,7)]
+        self.fs = 1
+    
+    def test_basic(self):
+        self.interpolated = np.zeros(self.actual.size)
+        self.interpolated[:self.weird_region[0].start] = self.actual[:self.weird_region[0].start]
+        self.interpolated[self.weird_region[0].stop:] = self.actual[self.weird_region[0].stop:]
+        
+        intp_values = anomaly_interpolation(self.weird_region, self.actual)
+        
+        self.interpolated[self.weird_region[0]] = intp_values
+        
+        same_output = np.array_equal(self.interpolated, self.actual)
+        self.assertTrue(same_output)
+        
+
+class TestAnomalyType(unittest.TestCase):
+    
+    def setUp(self):
+        self.input = np.linspace(0,100,100)
+    
+    def test_edge(self):
+        edge_region = [slice(0,10)]
+        anom_type = anomaly_type(edge_region, self.input)
+        self.assertEqual(anom_type, 'edge')
+    
+    def test_2edge(self):
+        edge_region = [slice(99,100)]
+        anom_type = anomaly_type(edge_region, self.input)
+        self.assertEqual(anom_type, 'edge')
+    
+    def test_island(self):
+        edge_region = [slice(2,5)]
+        anom_type = anomaly_type(edge_region, self.input)
+        self.assertEqual(anom_type, 'island')
+    
+    def test_island2(self):
+        edge_region = [slice(2,99)]
+        anom_type = anomaly_type(edge_region, self.input)
+        self.assertEqual(anom_type, 'island')
+        
+        
+class TestExterpolateOverAnomalies(unittest.TestCase):
+    
+    def setUp(self):
+        self.element = np.linspace(0,10,5000)
+        self.input = np.concatenate((self.element[::-1], self.element))
+        self.fs = 2000
+        self.anomalous = np.concatenate((np.zeros(10, dtype='bool'),
+                                         np.ones(4980, dtype='bool'),
+                                         np.zeros(10, dtype='bool'))
+                                        )
+
+    def test_check_outputsize(self):
+        extp = exterpolate_over_anomalies(self.input, self.fs, self.anomalous)
+        self.assertEqual(extp.size, self.input.size)
+
+    def test_check_correct_exterpolation(self):
+        self.anomalous[30:40] = False
+        extp = exterpolate_over_anomalies(self.input, self.fs, self.anomalous)
+        same_output = np.array_equal(extp, self.input)
 
 if __name__  == '__main__':
     unittest.main()

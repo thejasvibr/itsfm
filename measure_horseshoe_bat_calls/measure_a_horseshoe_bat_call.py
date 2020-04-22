@@ -47,7 +47,7 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
     -------
     Create a call with fs and make fake CF and FM segments
     
-    >>> np.random.seed(111) # to ensure the same random numbers are generated    
+   
     >>> fs = 1.0    
     >>> call = np.random.normal(0,1,100)    
     >>> cf = np.concatenate((np.tile(0, 50), np.tile(1,50))).astype('bool')    
@@ -62,7 +62,7 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
     And here's an example with some custom functions.The default measurements
     will appear in addition to the custom measurements.
     
-    >>> from measure_horseshoe_bat_calls.measurement_functions import measure_peak_amplitude, peak_frequency
+    >>> from measure_horseshoe_bat_calls.measurement_functions import measure_peak_amplitude, measure_peak_frequency
     >>> custom_measures = [peak_frequency, measure_peak_amplitude]    
     >>> sound_segments, measures = measure_hbc_call(call, fs,
                                                         cf, fm, 

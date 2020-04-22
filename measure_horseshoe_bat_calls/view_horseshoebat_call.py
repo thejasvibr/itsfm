@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 
 from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
+from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 from measure_horseshoe_bat_calls.frequency_tracking import accelaration
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
@@ -87,6 +88,14 @@ def show_all_call_parts(only_call, call_parts, fs, **kwargs):
         except:
             pass
 
+def plot_cffm_segmentation(cf,fm,X,fs, **kwargs):
+    w,s = visualise_call(X,fs, **kwargs)
+    w.plot(make_x_time(cf, fs), cf*np.max(np.abs(X)),'k')
+    w.plot(make_x_time(fm, fs), fm*np.max(np.abs(X)), 'r')
+    s.plot(make_x_time(cf, fs), cf*fs*0.5, 'k',label='CF')
+    s.plot(make_x_time(fm, fs), fm*fs*0.5, 'r',label='FM')
+    plt.legend()
+    return w,s
 
 def plot_accelaration_profile(X,fs):
     '''
@@ -111,6 +120,13 @@ def plot_accelaration_profile(X,fs):
     plt.ylabel('Frequency accelaration, $\\frac{kHz}{ms^{2}}$')
     plt.xlabel('Time, s')
 
+
+def plot_movingdbrms(X,fs,**kwargs):
+    '''
+    '''
+    m_dbrms = dB(moving_rms_edge_robust(X, **kwargs))
+    plt.plot(make_x_time(m_dbrms, fs), m_dbrms)
+    
 
 def visualise_call(audio, fs, **kwargs):
     '''

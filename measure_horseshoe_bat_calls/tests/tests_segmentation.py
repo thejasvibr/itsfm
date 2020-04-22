@@ -36,7 +36,8 @@ class TestSegmentationMethods(unittest.TestCase):
 
     def test_inst_freq_working(self):
         method = 'inst_freq'
-        cf_candidates, fm_candidates, info = perform_segmentation[method](self.call,
+        with self.assertRaises(NotImplementedError):
+            cf_candidates, fm_candidates, info = perform_segmentation[method](self.call,
                                                                   self.fs,
                                                                   **self.kwargs
                                                                     )
@@ -140,17 +141,12 @@ class NoiseSuppressionCFFMSamples(unittest.TestCase):
         '''
         '''
         noise_suppressed = suppress_background_noise(self.cf_candidate, self.audio,
-                                      background_noise=self.noise_level_dB)
+                                      signal_level=self.noise_level_dB)
         
         expected_match = np.array_equal(noise_suppressed, self.expected)
-        plt.plot(noise_suppressed)
         plt.plot(self.expected)
         self.assertTrue(expected_match)
         
-        
-
-
-
 
 
 if __name__ == '__main__':

@@ -93,6 +93,22 @@ def anomaly_extrapolation(region, X, num_samples):
     Takes X values next to the region and fits a linear regression 
     into the region
     
+    Parameters
+    ----------
+    region : object tuple
+        A slice type object which is the output from scipy.ndimage.find_objects
+        This is a slice inside a list/tuple.
+    X : np.array
+        The original array over which the extrapolation is to be performed
+    num_samples : int>0
+        The number of samples next to the region to be used to fit the data
+        for extrapolation into the region. 
+
+    Returns
+    -------
+    extrapolated : np.array
+        The values corresponding to the extrapolated region. 
+    
     Notes
     ------
     This function covers 90% of cases...if there is an anomaly right next
@@ -115,7 +131,20 @@ def anomaly_extrapolation(region, X, num_samples):
 
 def anomaly_interpolation(region, X):
     '''
-    Interpolates X values bet
+    Interpolates X values using values of X adjacent to the 
+    region. 
+    
+    Parameters
+    ----------
+    region : object tuple
+        Output from scipy.ndimage.find_objects
+    X : np.array
+    
+    Returns
+    -------
+    full_span : np.array
+        The values of interpolated X, of same size as the 
+        region length. 
     '''
     start, stop = region[0].start, region[0].stop
     left_point = start-1
@@ -402,10 +431,10 @@ def segments_above_min_duration(satisfies_condition, min_samples):
 def suppress_background_noise(main_signal, input_audio, **kwargs):
     '''
     '''
-    background_noise = kwargs.get('background_noise', -40) # dBrms
+    signal_level = kwargs.get('signal_level', -20) # dBrms
     signal_dBrms = dB(moving_rms_edge_robust(input_audio, **kwargs))
     bg_noise_suppressed = suppress_to_zero(main_signal, signal_dBrms,
-                                           background_noise, 'below')
+                                           signal_level, 'below')
     return bg_noise_suppressed
 
 

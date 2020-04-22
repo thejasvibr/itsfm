@@ -47,7 +47,8 @@ class CheckMeasurementsWork(unittest.TestCase):
     def test_custom_functions(self):
         sound_segments, measures = measure_hbc_call(self.call, self.fs,
                                                 self.cf, self.fm,
-                                                measurements=[measure_peak_amplitude, peak_frequency])
+                                                measurements=[measure_peak_amplitude,
+                                                              measure_peak_frequency])
     
     def a_custom_measure_function(self,x,y,z,**kwargs):
         custom_key = kwargs.get('custom_key', 1000)
@@ -63,7 +64,7 @@ class CheckMeasurementsWork(unittest.TestCase):
     def test_custom_terminal_freq(self):
         sound_segments, measures = measure_hbc_call(self.call, self.fs,
                                                 self.cf, self.fm,
-                                                measurements=[terminal_frequency],
+                                                measurements=[measure_terminal_frequency],
                                                 terminal_frequency_threshold=-20)
 
 

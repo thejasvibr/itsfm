@@ -53,6 +53,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     ----------
     input_signal : np.array
     fs  : float
+
     
     Notes
     -----
@@ -64,48 +65,81 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     primarily for memory and speed considerations.
 
 
+    Example
+    -------
+    
+    Create a chirp in the middle of a somewhat silent recording
+    
+    >>> import matplotlib.pyplot as plt
+    >>> from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_movingdbrms
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call, make_x_time
+    >>> fs = 44100
+    >>> start_f, end_f = 1000, 10000
+    >>> chirp = make_fm_chirp(start_f, end_f, 0.01, fs)  
+    >>> rec = np.random.normal(0,10**(-50/20), 22100)
+    >>> chirp_start, chirp_end = 10000, 10000 + chirp.size
+    >>> rec[chirp_start:chirp_end] += chirp
+    >>> rec /= np.max(abs(rec))
+    >>> actual_fp = np.zeros(rec.size)
+    >>> actual_fp[chirp_start:chirp_end] = np.linspace(start_f, end_f, chirp.size)
+    
+    Check out the dB rms profile of the recording to figure out where the
+    noise floor is 
+    
+    >>> plot_movingdbrms(rec, fs)
+    
+    >>> clean_fp, info = get_pwvd_frequency_profile(rec, fs,
+                                                         signal_level=-9,
+                                                         extrap_window=10**-3,
+                                                         max_acc = 0.6)
+    >>> plt.plot(clean_fp, label='obtained')
+    >>> plt.plot(actual_fp, label='actual')
+    >>> plt.legend()
+    
+    Now, let's overlay the obtained frequency profile onto a spectrogram to 
+    check once more how well the dominant frequency has been tracked. 
+
+    >>> w,s = visualise_call(rec, fs, fft_size=128)
+    >>> s.plot(make_x_time(clean_fp, fs), clean_fp)
+
     See Also
     --------
-    signal_cleaning.exterpolate_over_anomalies
-
+    measure_horseshoe_bat_calls.signal_cleaning.exterpolate_over_anomalies
+    find_above_noise_regions
     '''
-
-    above_noise_regions, moving_dbrms = find_above_noise_regions(input_signal, fs, **kwargs)
+    above_noise_regions, moving_dbrms = find_geq_signallevel(input_signal, fs, **kwargs)
 
     full_fp = np.zeros(input_signal.size)
+    all_raw_fps = []
+    all_freq_acc_profiles = []
     for region in above_noise_regions:    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
                                                                   fs, **kwargs)
-        
-        
-        
-        full_fp[region] = raw_fp
-    
-    despiked = clean_up_spikes(noise_supp_fp, fs, **kwargs)
-    
-    
-    
-    info = {'raw_fp' : raw_fp,
-            'noise_supp_fp' : noise_suppressed,
-            'despiked' : despiked,
-            'no_bursts_fp':cleaned_profile
-            }
-     
-    pothole_covered_profile, _ = smooth_over_potholes(cleaned_profile, fs, **kwargs)
-    
-    return pothole_covered_profile, info
+        weird_parts, accelaration_profile = frequency_spike_detection(raw_fp, fs, **kwargs)
+        cleaned_fp = exterpolate_over_anomalies(raw_fp, fs, weird_parts, **kwargs)
+        full_fp[region] = cleaned_fp
+        all_raw_fps.append(raw_fp)
+        all_freq_acc_profiles.append(accelaration_profile)
 
-def find_above_noise_regions(X, fs, **kwargs):
+    info = {'raw_fp' : all_raw_fps,
+            'above_noise': above_noise_regions,
+            'moving_dbrms':moving_dbrms,
+            'acc_profile': all_freq_acc_profiles}
+    return full_fp, info
+
+def find_geq_signallevel(X, fs, **kwargs):
     '''
+    Find regions greater or equal to signal level
     '''
-    background_noise = kwargs.get('background_noise', -40)
-    signal_level = dB(moving_rms_edge_robust(X, **kwargs))
+    signal_level = kwargs.get('signal_level', -20)
+    rec_level = dB(moving_rms_edge_robust(X, **kwargs))
     
-    ids_above_noise, num_regions = ndimage.label(signal_level>background_noise)
+    ids_above_noise, num_regions = ndimage.label(rec_level>signal_level)
     if num_regions <1:
-        raise ValueError('No regions above noise level found!')
+        raise ValueError('No regions above signal level found!')
 
-    return ndimage.find_objects(ids_above_noise), signal_level
+    return ndimage.find_objects(ids_above_noise), rec_level
     
     
 
@@ -164,50 +198,6 @@ def clean_up_spikes(whole_freqeuncy_profile, fs, **kwargs):
                                            fs, **kwargs)
         de_spiked[segment] = smoothed
     return de_spiked
-
-def get_frequency_profile_through_pwvd(input_signal, fs, **kwargs):
-    '''Generate the sample-resolution frequency profile of the input signal. 
-
-    Parameters
-    ----------
-    input_signal : np.array
-    fs : float
-        Sampling rate in Hz. 
-    
-    Returns
-    -------
-    raw_freq_profile, noise_suppressed_freq_profile, cleaned_frequency_profile : np.array
-    The instantaneous frequency over the input signal. All output arrays are the same size as the input_signal:
-
-        * raw_freq_profile : the raw frequency estimate across samples
-
-        * noise_suppressed_freq_profile : regions of the input signal below the threshold dB rms are set to zero frequency.
-
-        * cleaned_frequency_profile : the noise_suppressed frequency profile is further
-            checked for any abrupt frequency transitions and corrected/filtered.
-
-    Notes
-    -----
-    This method can take a few seconds or more to finish running and is memory intensive.
-    It may also raise a MemoryError if the input signal is very long. To overcome memory
-    issues either try downsampling the signal to reduce the overall number of 
-    samples.
-
-    See Also
-    --------
-    generate_pwvd_frequency_profile
-    suppress_background_noise
-    remove_bursts
-    '''    
-
-    
-    # get rid of the silent parts of the audio
-    
-    # remove any small frequency spikes that still remain based on duration
-    cleaned_frequency_profile = remove_bursts(noise_suppressed_freq_profile, fs, **kwargs)
-    return raw_freq_profile, noise_suppressed_freq_profile, cleaned_frequency_profile
-
-
 
 def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates the raw instantaneous frequency estimate at each sample. 
@@ -394,7 +384,7 @@ def get_first_region_above_threshold(input_signal,**kwargs):
         return None
 
 
-def frequency_spike_detection(X, fs, max_acc = 0.5):
+def frequency_spike_detection(X, fs, **kwargs):
     '''Detects spikes in the frequency profile by 
     monitoring the accelration profile through the sound. 
     
@@ -403,7 +393,7 @@ def frequency_spike_detection(X, fs, max_acc = 0.5):
     X : np.array
         A frequency profile with sample-level estimates of frequency in Hz
     fs : float>0
-    max_acc : float>0
+    max_acc : float>0, optional
         Maximum acceleration in the frequency profile. 
         Defaults to 0.5kHz/ms^2
     
@@ -412,6 +402,7 @@ def frequency_spike_detection(X, fs, max_acc = 0.5):
     anomalous : np.array
         Boolean 
     '''
+    max_acc = kwargs.get('max_acc', 0.5) # kHz/ms^2
     freq_accelaration = accelaration(X,fs)
     anomalous = freq_accelaration>max_acc
     return anomalous, freq_accelaration

@@ -96,8 +96,107 @@ def add_noise(sound, dBrms):
     sound += np.random.normal(0,10**(dBrms/20.0),sound.size)
     return sound
 
-def make_call_frequency_profile(call_properties, fs, **kwargs):
+
+
+def make_call_zoo(**kwargs):
     '''
+    Makes a range of test sounds with known properties across a range of 
+    the sampling rate.
+
+    The sound durations 
+    
+    Parameters
+    ----------
+    fs : float>0, optinoal 
+    freq_range : np.array, optional
+    gap : float>0, optional 
+    sweep_types : list with strings, optional 
+    make_birdish : boolean, optional 
+    
+    Returns 
+    -------
+    freq_profile, audio : np.array
+
+    '''
+    fs = kwargs.get('fs', 44100)
+    sound_durns = kwargs.get('sound_durns', np.array([0.003, 0.01, 0.1]))
+    freq_range = kwargs.get('freq_range',  np.array([0.1, 0.25, 0.45]))
+    gap = kwargs.get('gap', 0.01)*0.5
+
+    gap_sound = silence(gap, fs)
+
+    audio = []
+    audio_fp = []
+
+    for tone_f in freq_range*fs:
+        for durn in sound_durns:
+            tone_fp = np.tile(tone_f, int(fs*durn))
+            actual_tone = make_tone(tone_f, durn, fs)
+            
+            audio_fp.append(sandwich_between(gap_sound, tone_fp))
+            audio.append( sandwich_between(gap_sound, actual_tone))
+
+    sweep_types = kwargs.get('sweep_types', ['linear','log','hyperbolic'])
+    
+    chirp_durn = np.min(sound_durns)
+    t = np.linspace(0, chirp_durn, int(fs*chirp_durn))
+    start_f, end_f = np.min(freq_range)*fs, np.max(freq_range)*fs
+    for shape in sweep_types:
+        chirp = make_fm_chirp(start_f, end_f, chirp_durn,fs,
+                                                  shape)
+        chirp_fp = make_sweep_fp([start_f, end_f], t, shape)
+        
+        audio.append(sandwich_between(gap_sound, chirp))
+        audio_fp.append(sandwich_between(gap_sound, chirp_fp))
+    
+    
+    
+    
+    if kwargs.get('make_birdish', True):
+    
+        
+        cf = np.tile(np.mean(freq_range)*fs, 2*t.size)    
+        upfm1 = np.linspace(np.min(freq_range)*fs, cf[0], cf.size)
+        upfm2 = np.linspace(cf[-1], np.max(freq_range)*fs, cf.size)
+        
+        birdish_fp = np.concatenate((upfm1, cf, upfm2))
+        birdish_cs_fp = np.cumsum(birdish_fp)
+        t_bird = np.linspace(0, birdish_fp.size/float(fs), birdish_cs_fp.size)
+        birdish_sound = np.sin(2*np.pi*birdish_cs_fp*t_bird)
+        birdish_sound[:10] *= signal.hann(20)[:10]
+        birdish_sound[-10:] *= signal.hann(20)[-10:]
+        
+        audio.append(sandwich_between(gap_sound, birdish_sound))
+        audio_fp.append(sandwich_between(gap_sound, birdish_fp))
+    
+    return np.concatenate((audio_fp)).flatten(), np.concatenate((audio)).flatten()
+        
+        
+def sandwich_between(bread, cheese):
+    
+    return np.concatenate((bread, cheese, bread))
+    
+
+def make_sweep_fp(freqs, t, sweep_type):
+    '''
+    making the sweep frequency profile of the scipy.signal.chirp types
+    '''
+    f0,f1 = freqs
+    t1 = t[-1]
+
+    if sweep_type=='hyperbolic':
+        f_t = f0*f1*t1 / ((f0 - f1)*t + f1*t1)
+    elif sweep_type=='log':
+        f_t = f0 * (f1/f0)**(t/t1)
+    elif sweep_type=='linear':
+        f_t = f0 + (f1 - f0) * t / t1
+    else:
+        raise NotImplementedError('The sweep type "%s" has not been implemented in the simulated calls..please check again'%sweep_type)
+    return f_t
+
+def make_call_frequency_profile(call_properties, fs, **kwargs):
+    ''' 
+    Makes the call frequency profile for a CF-FM call.
     
     Parameters
     ----------

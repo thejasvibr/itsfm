@@ -56,6 +56,39 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
         Post-processing information depending on 
         the methods used. 
 
+    Example
+    -------
+    Create a chirp in the middle of a somewhat silent recording
+    
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np 
+    >>> from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp, make_tone
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_movingdbrms
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call, make_x_time
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_cffm_segmentation
+    >>> fs = 44100
+    >>> start_f, end_f = 1000, 10000
+    >>> chirp = make_fm_chirp(start_f, end_f, 0.01, fs)  
+    >>> tone_freq = 11000
+    >>> tone = make_tone(tone_freq, 0.01, fs)
+    >>> tone_start = 30000; tone_end = tone_start+tone.size
+    >>> rec = np.random.normal(0,10**(-50/20), 44100)
+    >>> chirp_start, chirp_end = 10000, 10000 + chirp.size
+    >>> rec[chirp_start:chirp_end] += chirp
+    >>> rec[tone_start:tone_end] += tone
+    >>> rec /= np.max(abs(rec))
+    >>> actual_fp = np.zeros(rec.size)
+    >>> actual_fp[chirp_start:chirp_end] = np.linspace(start_f, end_f, chirp.size)
+    >>> actual_fp[tone_start:tone_end] = np.tile(tone_freq, tone.size)
+    
+    Track the frequency of the recording and segment it according to frequency
+    modulation
+
+    >>> cf, fm, info = segment_call_into_cf_fm(rec, fs, signal_level=-10,
+                                                   method='pwvd',)
+    
+    View the output and plot the segmentation results over it:
+    >>> plot_cffm_segmentation(cf, fm, rec, fs)
 
     See Also
     ----------
@@ -239,6 +272,8 @@ def segment_by_pwvd(call, fs, **kwargs):
     -------
     Let's create a two component call with a CF and an FM part in it 
     >>> from measure_horseshoe_bat_calls.simulate_calls import make_tone, make_fm_chirp, silence
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_cffm_segmentation    
+    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import make_x_time
     >>> fs = 22100
     >>> tone = make_tone(5000, 0.01, fs)
     >>> sweep = make_fm_chirp(1000, 6000, 0.005, fs)
@@ -247,10 +282,12 @@ def segment_by_pwvd(call, fs, **kwargs):
     >>> # reduce rms calculation window size because of low sampling rate!
     >>> cf, fm, info = segment_by_pwvd(full_call, 
                                            fs,
-                                            window_size=50,
-                                            background_noise=-40,
-                                            sample_every=0.1*10**-3)
-
+                                            window_size=10,
+                                            signal_level=-12,
+                                            sample_every=1*10**-3,
+                                            extrap_length=0.1*10**-3)
+    >>> w,s = plot_cffm_segmentation(cf, fm, full_call, fs)
+    >>> s.plot(make_x_time(cf,fs), info['fitted_fp'])
     '''
     fmrate_threshold = kwargs.get('fmrate_threshold', 0.2) # kHz/ms
 

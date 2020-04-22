@@ -17,6 +17,15 @@ class PWVDTracking(unittest.TestCase):
         self.assertEqual(freqs.size, input_signal.size)
 
 
+class GeneratePWVDProfile(unittest.TestCase):
+    def setUp(self):
+        self.test_signal = np.random.normal(0,1,10000)
+        self.fs = 2000
+
+    def test_Works(self):
+        get_pwvd_frequency_profile(self.test_signal, self.fs)
+
+
 
 
 
