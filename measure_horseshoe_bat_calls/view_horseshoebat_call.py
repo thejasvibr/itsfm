@@ -9,7 +9,7 @@ import numpy as np
 from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
 from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
-from measure_horseshoe_bat_calls.frequency_tracking import accelaration
+from measure_horseshoe_bat_calls.frequency_tracking import accelaration, speed
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
 def check_call_background_segmentation(whole_call, fs, main_call_mask, 
@@ -97,6 +97,18 @@ def plot_cffm_segmentation(cf,fm,X,fs, **kwargs):
     plt.legend()
     return w,s
 
+
+def plot_fmrate_profile(X,fs):
+    speed_profile = speed(X,fs)
+    t = np.linspace(0,X.size/fs, X.size)
+    plt.figure()
+    A = plt.subplot(111)
+    plt.plot(t, speed_profile)
+    plt.ylabel('Frequency modulation rate, $\\frac{kHz}{ms}$')
+    plt.xlabel('Time, s')
+    return A
+
+
 def plot_accelaration_profile(X,fs):
     '''
     Plots the frequency acclearation profile of a frequency
@@ -152,6 +164,7 @@ def visualise_call(audio, fs, **kwargs):
     a1 = plt.subplot(212, sharex=a0)
     make_specgram(audio, fs, **kwargs)
     
+    plt.tight_layout()
     return a0, a1
 
 def make_specgram(audio, fs, **kwargs):

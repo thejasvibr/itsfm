@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 Even though the spectrogram is one of the most dominant time-frequency 
 representation, there are whole class of alternate representations. This
 module has the code which tracks the dominant frequency in a sound using 
@@ -13,12 +12,9 @@ method to represent a signal on the time-frequency axis[1]. This time-frequency
 representation is implemented in the `get_pwvd_frequency_profile`. 
 
 
-See Also
---------
-get_pwvd_frequency_profile
-
 References
 ----------
+
 [1] Cohen, L. (1995). Time-frequency analysis (Vol. 778). Prentice hall.
 
 """
@@ -35,12 +31,12 @@ from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust
 
 def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates a clean frequency profile through the PWVD. 
-    The order of frequency profile processing is as follows
+    The order of frequency profile processing is as follows:
 
-    #. Split input signal into regions that are above the 
-        background noise. This speeds up the whole process
-        of pwvd tracking multiple sounds, and ignores the
-        background samples. 
+    #. Split input signal into regions that are above the
+       background noise. This speeds up the whole process
+       of pwvd tracking multiple sounds, and ignores the
+       background samples. 
 
     #. Generate PWVD for each above-noise region.
     
@@ -349,10 +345,17 @@ def get_midpoint_of_a_region(region_object):
     return mid_point
 
 def accelaration(X, fs):
-    '''Calculates the accelrateion of a frequency profile in kHz/ms^2
+    '''Calculates the absolute accelrateion of a frequency profile in kHz/ms^2
     '''
-    velocity = 10**-6*np.abs(np.gradient(X))/(1.0/fs)
-    return np.abs(np.gradient(velocity))
+    speed_X = speed(X,fs)
+    return np.abs(np.gradient(speed_X))
+
+def speed(X,fs):
+    '''Calculates the abs speed of the frequency profile in kHz/ms
+    '''
+    speed = 10**-6*np.abs(np.gradient(X))/(1.0/fs)
+    return speed
+    
 
 def get_first_region_above_threshold(input_signal,**kwargs):
     '''Takes in a 1D signal expecting a few peaks in it above the percentil threshold. 
@@ -363,7 +366,7 @@ def get_first_region_above_threshold(input_signal,**kwargs):
     input_signal :np.array
     percentile : 0<float<100, optional 
         The percentile threshold used to set the threshold. 
-        Defaults to 98.5
+        Defaults to 99.5
     
     Returns
     -------

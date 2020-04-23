@@ -85,7 +85,7 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     modulation
 
     >>> cf, fm, info = segment_call_into_cf_fm(rec, fs, signal_level=-10,
-                                                   method='pwvd',)
+                                                   segment_method='pwvd',)
     
     View the output and plot the segmentation results over it:
     >>> plot_cffm_segmentation(cf, fm, rec, fs)
@@ -430,8 +430,11 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
     fit_polynomial_on_downsampled_version
     '''
     
-    medianfilter_length = kwargs.get('medianfilter_length', 0.25*10**-3)
-    medianfilter_samples = calc_proper_kernel_size(medianfilter_length, fs)
+    medianfilter_length = kwargs.get('medianfilter_length', 0.1*10**-3)
+    try:
+        medianfilter_samples = calc_proper_kernel_size(medianfilter_length, fs)
+    except:
+        raise ValueError('The current medianfilter_length of %fs is too short, increase it a bit more'%medianfilter_length)
     
     fitted = fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs)
 

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Signal Cleaning Module
-~~~~~~~~~~~~~~~~~~~~~~
 This module handles the identification and cleaning of  noise in signals. A 'noisy' signal 
 is one that has spikes in it or sudden variations in a continuous looking 
 function. Most of these functions are built to detect and handle sudden

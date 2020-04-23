@@ -18,7 +18,7 @@ Measurement function parameters
        of the segment. For instance ('fm1', slice(0,100))
 
 What needs to be returned:
------------------
+--------------------------
 
     A measurement function must return a dictionary with >1 keys that are strings
     and items that can be easily incorporated into a Pandas DataFrame and viewed on
