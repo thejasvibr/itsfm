@@ -5,7 +5,6 @@ The primary logic of this
 """
 import warnings
 import numpy as np 
-import pywt
 import scipy.interpolate as interpolate 
 from scipy import ndimage
 import scipy.ndimage.filters as flts
