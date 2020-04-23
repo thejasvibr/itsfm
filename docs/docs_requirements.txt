@@ -4,6 +4,7 @@ pandas
 soundfile
 peakutils
 scipy
+scikit-image
 matplotlib
 tqdm
 sphinx==2.4.4
