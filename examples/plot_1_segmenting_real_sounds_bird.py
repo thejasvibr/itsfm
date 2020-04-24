@@ -18,7 +18,8 @@ import scipy.signal as signal
 import measure_horseshoe_bat_calls as mhbc
 from measure_horseshoe_bat_calls.data import example_calls, all_wav_files,folder_with_audio_files
 #
-audio, fs = example_calls[77] # load the relevant example audio
+index = np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])[0]
+audio, fs = example_calls[index] # load the relevant example audio
 
 
 #
