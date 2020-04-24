@@ -205,8 +205,8 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     References
     ----------
     [1] Schoeppler, D., Schnitzler, H. U., & Denzinger, A. (2018). 
-    Precise Doppler shift compensation in the hipposiderid bat, 
-    Hipposideros armiger. Scientific Reports, 8(1), 1-11.     
+        Precise Doppler shift compensation in the hipposiderid bat, 
+        Hipposideros armiger. Scientific Reports, 8(1), 1-11.     
 
     See Also
     --------

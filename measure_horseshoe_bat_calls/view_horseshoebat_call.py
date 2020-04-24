@@ -101,12 +101,10 @@ def plot_cffm_segmentation(cf,fm,X,fs, **kwargs):
 def plot_fmrate_profile(X,fs):
     speed_profile = speed(X,fs)
     t = np.linspace(0,X.size/fs, X.size)
-    plt.figure()
-    A = plt.subplot(111)
     plt.plot(t, speed_profile)
     plt.ylabel('Frequency modulation rate, $\\frac{kHz}{ms}$')
     plt.xlabel('Time, s')
-    return A
+    
 
 
 def plot_accelaration_profile(X,fs):

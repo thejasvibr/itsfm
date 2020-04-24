@@ -23,6 +23,7 @@ import scipy.ndimage as ndimage
 import scipy.signal as signal 
 import skimage.filters as filters
 from tftb.processing import PseudoWignerVilleDistribution
+from tqdm import tqdm
 import measure_horseshoe_bat_calls.signal_cleaning 
 from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
 from measure_horseshoe_bat_calls.signal_cleaning import exterpolate_over_anomalies
@@ -64,7 +65,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     Example
     -------
     
-    Create a chirp in the middle of a somewhat silent recording
+    Create two chirps in the middle of a somewhat silent recording
     
     >>> import matplotlib.pyplot as plt
     >>> from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp
@@ -74,11 +75,14 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     >>> start_f, end_f = 1000, 10000
     >>> chirp = make_fm_chirp(start_f, end_f, 0.01, fs)  
     >>> rec = np.random.normal(0,10**(-50/20), 22100)
-    >>> chirp_start, chirp_end = 10000, 10000 + chirp.size
+    >>> chirp1_start, chirp1_end = 10000, 10000 + chirp.size
+    >>> chirp2_start, chirp2_end = np.array([chirp1_start, chirp1_end])+int(fs*0.05)
     >>> rec[chirp_start:chirp_end] += chirp
+    >>> rec[chirp2_start:chirp2_end] += chirp
     >>> rec /= np.max(abs(rec))
     >>> actual_fp = np.zeros(rec.size)
-    >>> actual_fp[chirp_start:chirp_end] = np.linspace(start_f, end_f, chirp.size)
+    >>> actual_fp[chirp1_start:chirp1_end] = np.linspace(start_f, end_f, chirp.size)
+    >>> actual_fp[chirp2_start:chirp2_end] = np.linspace(start_f, end_f, chirp.size)
     
     Check out the dB rms profile of the recording to figure out where the
     noise floor is 
@@ -92,7 +96,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     >>> plt.plot(clean_fp, label='obtained')
     >>> plt.plot(actual_fp, label='actual')
     >>> plt.legend()
-    
+
     Now, let's overlay the obtained frequency profile onto a spectrogram to 
     check once more how well the dominant frequency has been tracked. 
 
@@ -109,7 +113,8 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     full_fp = np.zeros(input_signal.size)
     all_raw_fps = []
     all_freq_acc_profiles = []
-    for region in above_noise_regions:    
+    #print('generating PWVD frequency profile....')
+    for region in tqdm(above_noise_regions, total=len(above_noise_regions)):    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
                                                                   fs, **kwargs)
         weird_parts, accelaration_profile = frequency_spike_detection(raw_fp, fs, **kwargs)
