@@ -3,6 +3,7 @@ include *.wav
 include *.csv
 include measure_horseshoe_bat_calls/*.csv
 include measure_horseshoe_bat_calls/data/*.WAV
+include measure_horseshoe_bat_calls/data/*.wav
 include docs/*.png
 include docs/*.bat
 include docs/*.txt
