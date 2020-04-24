@@ -14,6 +14,7 @@ Warning
 This page is still under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
 Do not be surprised by dramatic changes.
 
+
 .. include:: gallery_dir/index.rst
 
 What the package `does`:
@@ -55,10 +56,9 @@ What the package could do with (future feature ideas):
 Why is everything in this codebase a function? Have you heard of classes?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is the author's first Python package, and the author admits it may not 
-be the most elegant implementation. The author's previous experience of 
-working with classes (while being inexperienced)) may have had left some bad memories :P.
-However the author also admits that many things in the package might have been less cumbersome
-with the use of classes. 
+be the most elegant implementation. The author's previous experience (or lack thereof)  
+working with classes may have left some bad memories :P.However the author also admits
+ that many things in the package might have been less cumbersome with the use of classes. 
 
 Where to get help
 ~~~~~~~~~~~~~~~~~
@@ -70,8 +70,7 @@ within a week.
 
 I found a bug and/or have fixed something
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Please raise an issue or pull request on Github,
-
+Please raise an issue or pull request on Github 
 
 License
 ~~~~~~~

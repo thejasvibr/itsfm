@@ -1,6 +1,6 @@
 """
 Analysing real recordings : a horseshoe bat call
-================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The <INSERTNEWNAME> package has many example recordings of bat calls thanks to
 the generous contributions of bioacousticians around the world:
 """
@@ -15,7 +15,7 @@ from measure_horseshoe_bat_calls.data import example_calls
 
 # %% 
 # Separating the constant frequency (CF) and frequency-modulated parts of a call
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Here, let's take an example *R. mehelyi/euryale(?)* call recording. These
 # bats emit what are called 'CF-FM'  calls. This is what it looks like. 
 
@@ -45,7 +45,7 @@ measurements
 
 # %% 
 # Verifying the CF-FM segmentations
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Here, let's see where the calls are in time and how they match the spectrogram output
 cf, fm, info = seg_out
 
@@ -59,7 +59,7 @@ mhbc.plot_cffm_segmentation(cf, fm, audio, fs, fft_size=128)
 
 # %%
 # The underlying frequency profile of a sound
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # The CF and FM parts of a call in the 'pwvd' method is based on actually
 # tracking the instantaneous frequency of the call with high temporal 
 # resolution. With this profile, the rate of frequency change, or modulation
@@ -77,7 +77,7 @@ mhbc.time_plot(info['fitted_fp'], fs) # the 'fitted fp' is used to calculate the
 
 # %% 
 # Performing measurements on the CF and FM parts of a call
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # We were just able to get some measurements on the Cf and FM 
 # parts of the call. What if we want *more* information, eg. the 
 # rms, and peak frequency of each CF and FM call part? This is 
@@ -132,7 +132,7 @@ seg_out, call_parts, custom_measurements, backg = outputs
 
 custom_measurements
 
-# % 
+# %%
 # Of course, needless to say, you can also mix and match inbuilt with 
 # custom defined measurement functions. 
 
