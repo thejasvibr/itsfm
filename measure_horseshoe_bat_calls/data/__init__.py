@@ -18,8 +18,8 @@ except:
     import scipy.io.wavfile as wav
 
 folder_with_audio_files, file_name =os.path.split(os.path.abspath(__file__))
-search_path = os.path.join(folder_with_audio_files,'*.WAV')
-all_wav_files = glob.glob(search_path)
+search_path = os.path.join(folder_with_audio_files)
+all_wav_files = glob.glob(search_path+'/*.WAV') + glob.glob(search_path+'/*.wav')
 example_calls = []
 
 def has_positive_and_negative(X):
