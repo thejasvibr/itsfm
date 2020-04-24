@@ -23,7 +23,6 @@ import scipy.ndimage as ndimage
 import scipy.signal as signal 
 import skimage.filters as filters
 from tftb.processing import PseudoWignerVilleDistribution
-from tqdm import tqdm
 import measure_horseshoe_bat_calls.signal_cleaning 
 from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
 from measure_horseshoe_bat_calls.signal_cleaning import exterpolate_over_anomalies
@@ -114,7 +113,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     all_raw_fps = []
     all_freq_acc_profiles = []
     #print('generating PWVD frequency profile....')
-    for region in tqdm(above_noise_regions, total=len(above_noise_regions)):    
+    for region in above_noise_regions:    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
                                                                   fs, **kwargs)
         weird_parts, accelaration_profile = frequency_spike_detection(raw_fp, fs, **kwargs)

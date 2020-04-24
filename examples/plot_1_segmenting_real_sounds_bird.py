@@ -58,7 +58,9 @@ output = mhbc.segment_and_measure_call(audio, fs, segment_method='pwvd',
 #
 seg_out, call_parts, measurements, _ = output
 cf,fm,info = seg_out
-#
+
+# %% 
+# And let's look at the measurements
 measurements
 
 # %% 
@@ -101,10 +103,13 @@ output = mhbc.segment_and_measure_call(audio, fs, segment_method='pwvd',
                                        extrap_window=5*10**-3,
                                        fmrate_threshold=5*10**-3
                                        )
-#
+
 seg_out, call_parts, measurements, _ = output
 cf,fm,info = seg_out
-#
+
+
+# %% 
+# And let's look at the measurements
 measurements
 
 # %% 

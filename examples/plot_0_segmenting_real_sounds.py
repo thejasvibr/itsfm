@@ -108,7 +108,7 @@ detailed_measurements
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # If the inbuilt measurement functions are not enough - then you may 
 # want to write your own. See the documentation for what a measurement
-# function must look like by :code:`help(mhbc.measurement_function). 
+# function must look like by typing `help(mhbc.measurement_function)`. 
 
 def peak_to_peak(whole_audio, fs, segment, **kwargs):
     '''
@@ -155,6 +155,7 @@ mixed_measurements
 # Choosing the right parameters for the recordings
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TO BE COMPLETED!! 
+#
 # How do we know what settings to choose. The main important settins (for most recordings)
 # are the `signal_level`, `fmrate_threshold` (while using the 'pwvd' segment method), and
 # in some cases the `extrap_window`. 
