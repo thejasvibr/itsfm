@@ -1,6 +1,6 @@
 """
 Inbuilt and custom measurements on CF and FM segments
-===================================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 By default, a baic set of information/measurements is given for each
 recognised CF/FM segment in the input audio, its start, stop and duration. 
 

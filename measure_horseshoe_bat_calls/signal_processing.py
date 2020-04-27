@@ -2,7 +2,6 @@
 """Module with signal processing functions in it 
 used by both measure and segment modules.
 
-
 """
 from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_negative
 import numpy as np 

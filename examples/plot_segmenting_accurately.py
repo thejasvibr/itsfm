@@ -1,6 +1,6 @@
 """
 Segmenting real-world sounds correctly with synthetic sounds
-============================================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It's easy to figure out if a sound is being correcly segmented if the 
 signal at hand is well defined, and repeatable, like in many technological/
 engineering applications. However, in bioacoustics, or 
@@ -19,7 +19,7 @@ How to segment a sound into CF and FM segments in an accurate
 way?
 
 Synthetic calls to the rescue
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Synthetic calls are sounds that we know to have specific properties 
 and can be used to test if a parameter set/ segmentation method
 is capable of correctly segmenting our real-world sounds and 
@@ -33,7 +33,7 @@ work well for your real-world sound (bat, bird, cat, <insert sound source of cho
 
 
 Generating a 'classical' CF-FM bat call
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 """
 
 import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ w,s = visualise_call(cffm_call, fs, fft_size=128)
 
 # %%
 # A multi-component bird call
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>
 # 
 # Let's make a sound with two FMs and CFs, and gaps in between
 
@@ -85,7 +85,7 @@ w, s = visualise_call(synth_birdcall, fs, fft_size=64)
 
 # %% 
 # Let there be Noise
-# ~~~~~~~~~~~~~~~~~~
+# >>>>>>>>>>>>>>>>>>
 #
 # Any kind of field recording *will* have some form of noise. Each of the 
 # the segmentation methods is differently susceptible to noise, and it's

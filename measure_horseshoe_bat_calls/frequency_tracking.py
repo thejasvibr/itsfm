@@ -6,14 +6,14 @@ module has the code which tracks the dominant frequency in a sound using
 non-spectrogram methods. 
 
 The Pseudo Wigner Ville Distribution
-------------------------------------
+....................................
 The Pseudo Wigner Ville Distribution is an accurate but not so well known 
 method to represent a signal on the time-frequency axis[1]. This time-frequency
 representation is implemented in the `get_pwvd_frequency_profile`. 
 
 
 References
-----------
+
 
 [1] Cohen, L. (1995). Time-frequency analysis (Vol. 778). Prentice hall.
 

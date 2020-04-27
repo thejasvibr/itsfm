@@ -1,5 +1,5 @@
 <NAMETOBEDECIDED> : Documentation
-==================================
+=================================
 
 The <NAMETOBEDECIDED> package identifies regions of sound with and without frequency modulation, 
 and allows custom measurements to be made on them. The sounds could be bird, bat, whale, artifical 
@@ -15,8 +15,6 @@ This page is still under construction, and is likely to change fairly regularly 
 Do not be surprised by dramatic changes.
 
 
-.. include:: gallery_dir/index.rst
-
 What the package `does`:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -30,7 +28,7 @@ What the package `does not`:
 
 #. Perform any kind of pattern detection/classification. The frequency profile of a sound is generated using 
    a percentile based threshold on each slice of the underlying Pseudo Wigner-Ville distribution. 
-#. Handle complex and reverberant sounds well. Sounds that are multi-component, ie, with multiple harmonics or 
+#. Handle complex and reverberant sounds. Sounds that are multi-component, ie, with multiple harmonics or 
    with variation in intensity of harmonics across the recording won't fare very well. 
 #. Separate overlapping sounds
 
@@ -38,6 +36,8 @@ Installation
 ~~~~~~~~~~~~
 This is a pre-PyPi version of the package. The easiest way to install the package is to head to this `page <https://github.com/thejasvibr/measure_horseshoe_bat_calls.git>`_, and 
 download/clone the repository. Go into the downloaded folder and type :command:`python setup.py install`.
+
+.. include:: gallery_dir/index.rst
 
 
 What the package could do with (future feature ideas):
@@ -66,7 +66,6 @@ Hopefully this web page has enough information. Please check the examples to see
 if the same error messages haven't come up already. If something's not clear or 
 there's something not covered do write to me : thejasvib@gmail.com. I'll try to answer
 within a week. 
-
 
 I found a bug and/or have fixed something
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,11 +96,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-API References
-##############
+API Reference
+~~~~~~~~~~~~~
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
   
    userinterface	
    segmentation

@@ -1,6 +1,6 @@
 """
 The peak-percentage method
-==========================
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The peak percentage method works if the constant frequency portion of a sound segment 
 is the highest frequency. For instance, in CF-FM bat calls, the calls typically have 
@@ -11,7 +11,7 @@ it differs because it is implemented completely in the time-domain.
 
 
 How does it work?
-~~~~~~~~~~~~~~~~~
+>>>>>>>>>>>>>>>>>
 A constant frequency segment in any sound leads to a peak in the power spectrum. The same audio 
 is high-passed and low-passed at a threshold frequency that's very close (eg. 99% of the peak frequency)
  and just below the peak frequency. This creates two versions of the same sound, one with an emphasis on the CF, and one with the emphasis on 
@@ -19,7 +19,7 @@ the FM. By comparing the two sounds, the segmentation proceeds to detect CF and 
 
 
 References
-----------
+
 [1]Schoeppler, D., Schnitzler, H. U., & Denzinger, A. (2018). Precise Doppler shift compensation in the hipposiderid bat, 
    Hipposideros armiger. Scientific reports, 8(1), 1-11.
 

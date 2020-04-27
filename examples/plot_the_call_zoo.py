@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Finding the right parameter setting with the call zoo
-=====================================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The 'call zoo' is an inbuilt collection of sounds which were made for testing 
 the package. It has a variety of sounds to assess the accuracy of the 
 segmentation and measuring capabilities of the pacakge. 
@@ -37,7 +37,7 @@ plot_cffm_segmentation(cf, fm, call_zoo, fs);
 
 # %%
 # Fixing 'wide' sound selections
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # A valid sound is 'recognised' when a region of the audio has an rms :math:`\geq` the `signal_level`
 # parameter. The rms over the audio is calcualted by running a moving window. the size of the window
 # and the threshold signal leve will thus decide how accurate the 'width' of the sound element selection is.

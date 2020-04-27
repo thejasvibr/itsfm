@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Analysing real sounds : bird calls
-==================================
+Bird song example
+^^^^^^^^^^^^^^^^^
 Here we'll use the recordings of a common bird, the great tit (*Parus major*). 
 The recording is an excerpt of a bigger recording made by Jarek Matusiak 
 (Xeno Canto, XC235125) - give it a listen `here <https://www.xeno-canto.org/235125>`_.
 
 Note
-^^^^
+>>>>
 As of version 0.1.0, this recording is also a very good example of how
 multi-harmonic sounds can't be tracked very well! 
 """
@@ -32,7 +32,7 @@ s.set_ylim(0,10000)
 
 # %%
 # Setting the correct signal level
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # The frequency profile of a sound is calculated only for those chunks of the
 # audio that are above a threshold dBrms, called the `signal_level`.
 # Make a moving dBrms plot to see which a sensible signal threshold to set
@@ -80,7 +80,7 @@ mhbc.time_plot(info['fitted_fp'], fs)
 
 # %%
 # Setting a non-default FM rate
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # The segmentation of sounds into FM and CF regions happens
 # by looking at the FM rate over the sound. Whenever a region 
 # crosses the FM rate threshold, it is considered an FM region. 
