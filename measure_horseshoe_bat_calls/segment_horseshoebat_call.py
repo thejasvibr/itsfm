@@ -396,9 +396,6 @@ def whole_audio_fmrate(whole_freq_profile, fs, **kwargs):
         fitted_frequency_profile[location] = fitted_freq_profile
     
     return whole_fmrate, fitted_frequency_profile
-    
-
-
 
 
 def segment_by_inst_frequency(call, fs, **kwargs):

@@ -39,6 +39,8 @@ download/clone the repository. Go into the downloaded folder and type :command:`
 
 .. include:: gallery_dir/index.rst
 
+.. include:: gallery_detailed/index.rst
+
 
 What the package could do with (future feature ideas):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,7 +60,8 @@ Why is everything in this codebase a function? Have you heard of classes?
 This is the author's first Python package, and the author admits it may not 
 be the most elegant implementation. The author's previous experience (or lack thereof)  
 working with classes may have left some bad memories :P.However the author also admits
- that many things in the package might have been less cumbersome with the use of classes. 
+ that many things in the package might have been less cumbersome with the use of classes, 
+and plans to implement it in due time.  
 
 Where to get help
 ~~~~~~~~~~~~~~~~~

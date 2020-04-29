@@ -78,8 +78,8 @@ html_logo = '../measure_CF_calls_logo_v1.0.png'
 # sphinx gallery
 from sphinx_gallery.sorting import FileNameSortKey
 sphinx_gallery_conf = {
-     'examples_dirs': '../../examples',   # path to your example scripts
-     'gallery_dirs': 'gallery_dir',  # path to where to save gallery generated output
+     'examples_dirs': ['../../examples', '../../examples_detailed'],   # path to your example scripts
+     'gallery_dirs': ['gallery_dir', 'gallery_detailed'],  # path to where to save gallery generated output
 	 'image_scrapers': ('matplotlib'),
 	 'within_subsection_order': FileNameSortKey,
 						}

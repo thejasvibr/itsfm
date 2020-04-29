@@ -178,7 +178,7 @@ def make_specgram(audio, fs, **kwargs):
                                NFFT=fft_size,
                                noverlap=n_overlap,
                                vmin=vmin, 
-                               cmap=cmap)
+                               cmap=cmap);
     plt.ylabel('Frequency, Hz')
     plt.xlabel('Time, s')
     return specgram
