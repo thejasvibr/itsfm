@@ -12,6 +12,7 @@ from scipy import ndimage, stats
 from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust
 from measure_horseshoe_bat_calls.signal_processing import median_filter, resize_by_adding_one_sample
 from measure_horseshoe_bat_calls.signal_processing import dB
+from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 
 
 def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
@@ -187,17 +188,18 @@ def smooth_over_potholes(X, fs, **kwargs):
         Defaults to 50. 
     pothole_inspection_window : float>0, optional
         The length of the moving window that's used to discover potholes.
-
+        Defaults to 0.25 ms
     Returns
     -------
     pothole_covered
-    pothol
+    pothole_regions
     
     
     -=
     See Also
     --------
     identify_pothole_samples
+    pothole_inspection_window
     
     '''
     kwargs['max_stepsize'] = kwargs.get('max_stepsize', 50)
@@ -486,3 +488,93 @@ def suppress_to_zero(target_signal, basis_signal, threshold, mode='below'):
     cleaned_signal = np.copy(target_signal)
     cleaned_signal[to_suppress.flatten()] = 0 
     return cleaned_signal
+
+
+def clip_tfr(tfr, **kwargs):
+    '''
+    Parameters
+    ----------
+    tfr : np.array
+        2D array with the time-frequency representation of choice
+        (pwvd, fft etc). The tfr must have real-valued non-negative
+        values as the clip range is defined in dB. 
+    tfr_cliprange: float >0, optional
+        The maximum dynamic range in dB which will be used to 
+        track the instantaneous frequency. Defaults to 
+        None. See `Notes` for more details
+    
+    Returns
+    -------
+    clipped_tfr : np.array
+        A 2d array of same shape as `tfr`, with values 
+        clipped between [max, max x 10^(tfr_range/20)]
+    Notes
+    -----
+    The `tfr_cliprange` is used to remove the presence of 
+    background noise, faint harmonics or revernberations/echoes
+    in the audio. This of course all assumes that the main 
+    signal itself is sufficiently intense in the first place. 
+    
+    After the PWVD time-frequency represenation is made, 
+    values below X dB of the maximum value are 'clipped' to 
+    the same minimum value. eg. if the pwvd had values of 
+    [0.1, 0.9, 0.3, 1, 0.001, 0.0006] and the tfr_cliprange is
+    set to  6dB, then the output of the clipping will be 
+    [0.5, 0.9, 0.3, 1, 0.5, 0.5].  This step essentially eliminates
+    any variation in the array, thus allowing a clear 
+    tracking of the highest component in it. 
+    '''
+    tfr_cliprange = kwargs.get('tfr_cliprange')
+    if tfr_cliprange is None:
+        return tfr
+    else:
+        make_sure_its_positive(tfr_cliprange, variable='tfr_cliprange')
+        max_value = np.max(tfr)
+        clip_value = max_value*10**(-tfr_cliprange/20.0)
+        
+        clipped_tfr = tfr.copy()
+        clipped_tfr[clipped_tfr<clip_value] = clip_value
+        
+        return clipped_tfr
+        
+
+def conditionally_set_to(X, conditional, bool_state):
+    '''Inverts the samples in X where the conditional is True. 
+    Parameters
+    ----------
+    X : np.array
+        Boolean
+    conditional : np.array
+        Boolean
+    bool_state : [True, False]
+    
+    Returns
+    -------
+    cond_set_X : np.array
+        conditionally set X
+    
+    Notes
+    -----
+    this function is useful if you want to 'suppress' a few samples
+    conditionally based ont he values of the same samples 
+    on another array. 
+    
+    Example
+    -------
+    >>> x = np.array([True, True, False, False, True])
+    >>> y = np.array([0,0,10,10,10])
+    Imagine x is some kind of detection array, while y is the 
+    signal-to-noise ratio at each of the sample points. Of course, 
+    you'd like to discard all the predictions from low SNR measurements.
+    Let's say you want to keep only those entries in X where y is >1.
+    >>> x_cond = conditionally_set_to(x, y<10, False)
+    >>> x_cond
+    
+    np.array([False, False, False, False, True ])
+    '''
+    if sum(conditional)==0:
+        return X
+    else:
+        cond_set_X = X.copy()
+        cond_set_X[conditional] = bool_state
+        return cond_set_X

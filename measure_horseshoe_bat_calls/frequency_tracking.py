@@ -26,8 +26,8 @@ from tftb.processing import PseudoWignerVilleDistribution
 import measure_horseshoe_bat_calls.signal_cleaning 
 from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
 from measure_horseshoe_bat_calls.signal_cleaning import exterpolate_over_anomalies
+from measure_horseshoe_bat_calls.signal_cleaning import clip_tfr, smooth_over_potholes
 from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
-
 
 def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates a clean frequency profile through the PWVD. 
@@ -104,28 +104,27 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
 
     See Also
     --------
-    measure_horseshoe_bat_calls.signal_cleaning.exterpolate_over_anomalies
+    measure_horseshoe_bat_calls.signal_cleaning.smooth_over_potholes
     find_above_noise_regions
     '''
+    info = {}
     above_noise_regions, moving_dbrms = find_geq_signallevel(input_signal, fs, **kwargs)
 
     full_fp = np.zeros(input_signal.size)
-    all_raw_fps = []
-    all_freq_acc_profiles = []
+    full_raw_fp = np.zeros(input_signal.size)
+    
     #print('generating PWVD frequency profile....')
     for region in above_noise_regions:    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
                                                                   fs, **kwargs)
-        weird_parts, accelaration_profile = frequency_spike_detection(raw_fp, fs, **kwargs)
-        cleaned_fp = exterpolate_over_anomalies(raw_fp, fs, weird_parts, **kwargs)
+        full_raw_fp[region] = raw_fp
+        cleaned_fp, potholes = smooth_over_potholes(raw_fp, fs, **kwargs)
         full_fp[region] = cleaned_fp
-        all_raw_fps.append(raw_fp)
-        all_freq_acc_profiles.append(accelaration_profile)
 
-    info = {'raw_fp' : all_raw_fps,
-            'above_noise': above_noise_regions,
-            'moving_dbrms':moving_dbrms,
-            'acc_profile': all_freq_acc_profiles}
+    info['moving_dbrms'] = moving_dbrms
+    info['geq_signal_level'] = above_noise_regions
+    info['raw_fp'] = full_raw_fp
+
     return full_fp, info
 
 def find_geq_signallevel(X, fs, **kwargs):
@@ -221,6 +220,11 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
         input_signal. The zero-padding prevents 0's and spikes
         at the start and end of the signal. Defaults to
         the equivalent samples for 1ms. 
+    tfr_cliprange: float >0, optional
+        The clip range in dB.
+        Clips all values in the abs(pwvd) time-frequency
+        representation to between max and max*10*(-tfr_cliprange/20.0).
+        Defaults to None, which does not alter the pwvd transform in anyway. 
 
     Returns
     -------
@@ -228,6 +232,14 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
         Both outputs are the same size as input_signal. 
         raw_frequency_profile is the inst. frequency in Hz. 
         frequency_indx is the row index of the PWVD array. 
+        
+    
+    
+    See Also 
+    --------
+    pwvd_transform
+    track_peak_frequency_over_time
+    measure_horseshoe_bat_calls.signal_cleaning.clip_tfr
 
     '''
     pwvd_filter = kwargs.get('pwvd_filter', False)
@@ -235,21 +247,25 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     filter_dims = (pwvd_filter_size, pwvd_filter_size)
 
 
-    time_freq_course = np.abs(pwvd_transform(input_signal, fs, 
+    time_freq_rep = np.abs(pwvd_transform(input_signal, fs, 
                                              **kwargs))
+    clipped_tfr = clip_tfr(time_freq_rep, **kwargs)
+    
     if pwvd_filter:
         print('....A 2D median filter kernel is being applied to the PWVD...')
-        median_filtered_tf = filters.median_filter(time_freq_course, size=filter_dims)
+        median_filtered_tf = filters.median_filter(clipped_tfr, size=filter_dims)
         print('..done with PWVD filtering..')
         raw_frequency_profile, frequency_indx = track_peak_frequency_over_time(input_signal, fs,
                                                                            median_filtered_tf,
                                                                           **kwargs)
     else:
         raw_frequency_profile, frequency_indx = track_peak_frequency_over_time(input_signal, fs,
-                                                                           time_freq_course,
+                                                                           clipped_tfr,
                                                                           **kwargs)       
     return raw_frequency_profile, frequency_indx
-
+    
+    
+    
 
 
 def pwvd_transform(input_signal, fs, **kwargs):

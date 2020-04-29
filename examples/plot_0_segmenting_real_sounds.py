@@ -19,8 +19,8 @@ from measure_horseshoe_bat_calls.data import example_calls
 # Here, let's take an example *R. mehelyi/euryale(?)* call recording. These
 # bats emit what are called 'CF-FM'  calls. This is what it looks like. 
 
-first_call = example_calls[10]
-audio, fs = first_call[0], first_call[1]
+example = example_calls[10] # all example calls are tuples with the audio and sampling rate
+audio, fs = example[0], example[1] # unpack the tuple into separate objects
 w,s = mhbc.visualise_call(audio,fs, fft_size=128)
 
 # set the ylim of the spectrogram narrow to check out the call in more detail
@@ -29,14 +29,13 @@ s.set_ylim(60000, 125000)
 # %%
 # Now, let's segment and get some basic measurements from this call. Ignore the 
 # actual parameter settings for now. We'll ease into it later !
-
 outputs = mhbc.segment_and_measure_call(audio, fs, 
                                         segment_method='pwvd',
                                         signal_level=-45,
                                         fmrate_threshold=1.0,
                                         extrap_window=25*10**-6)
 
-seg_out, call_parts, measurements, backg = outputs
+seg_out, call_parts, measurements, backg = outputs # unpack the output into its parts
 
 # %% 
 # Let's take a look at how long the different parts of the call are. 

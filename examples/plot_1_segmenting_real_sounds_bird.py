@@ -113,7 +113,7 @@ output = mhbc.segment_and_measure_call(audio, fs, segment_method='pwvd',
                                        signal_level=-34,
                                        window_size=int(fs*0.005),
                                        pwvd_window=0.010,
-                                       sample_every=0.015, 
+                                       sample_every=0.005, 
                                        medianfilter_size=0.010,
                                        extrap_window=5*10**-3,
                                        fmrate_threshold=5*10**-3

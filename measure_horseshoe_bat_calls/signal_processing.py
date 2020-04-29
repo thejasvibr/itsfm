@@ -215,9 +215,15 @@ def moving_rms_edge_robust(X, **kwargs):
 
 def form_consensus_moving_rms(forward, backward):
     '''
+    Parameters
+    ----------
+    forward, backward : np.array
+        Two arrays of the same dimensions. 
+    
+    Compares and returns the consensus maximum value at each sample.
     '''
     consensus_rms = np.column_stack((forward, backward[::-1]))
-    return np.nanmean(consensus_rms, 1)
+    return np.nanmax(consensus_rms, 1)
 
 
 def median_filter(input_signal, fs, **kwargs):

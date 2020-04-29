@@ -14,6 +14,7 @@ from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 from measure_horseshoe_bat_calls.frequency_tracking import get_pwvd_frequency_profile
 import measure_horseshoe_bat_calls.refine_cfm_regions as refine_cfm
 from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise
+from measure_horseshoe_bat_calls.signal_cleaning import conditionally_set_to
 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''Function which identifies regions into CF and FM based on the following   process. 
@@ -300,13 +301,22 @@ def segment_by_pwvd(call, fs, **kwargs):
     info['cleaned_fp'] = clean_frequency_profile
     info['fitted_fp'] = fitted_freq_profile
 
-    fm_samples = fmrate > fmrate_threshold
-    cf_samples = fmrate <= fmrate_threshold
+    fm_candidates = fmrate > fmrate_threshold
+    fm_samples = conditionally_set_to(fm_candidates, 
+                                      fitted_freq_profile==0,
+                                      False)
+    
+    cf_candidates = fmrate <= fmrate_threshold
+    cf_samples = conditionally_set_to(cf_candidates,
+                                      fitted_freq_profile==0, False)
 
     fm_samples = suppress_background_noise(fm_samples, call, **kwargs)
     cf_samples = suppress_background_noise(cf_samples, call, **kwargs)
 
     return cf_samples, fm_samples, info
+   
+
+
 
 def whole_audio_fmrate(whole_freq_profile, fs, **kwargs):
     '''

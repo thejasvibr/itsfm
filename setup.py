@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
 import measure_horseshoe_bat_calls as mhbc
 
+ # link to test upload and fresh install on Test PyPi https://packaging.python.org/guides/using-testpypi/
+ 
 version_number = mhbc.__version__
 
 setup(name='measure_horseshoe_bat_calls',

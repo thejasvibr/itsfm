@@ -1,4 +1,4 @@
-<NAMETOBEDECIDED> : Documentation
+<insertname> : Documentation
 =================================
 
 The <NAMETOBEDECIDED> package identifies regions of sound with and without frequency modulation, 

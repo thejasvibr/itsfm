@@ -188,6 +188,52 @@ class TestExterpolateOverAnomalies(unittest.TestCase):
         extp = exterpolate_over_anomalies(self.input, self.fs, self.anomalous)
         same_output = np.array_equal(extp, self.input)
 
+
+class TestClipTFR(unittest.TestCase):
+    
+    def setUp(self):
+        self.tfr = np.ones((10,10))
+        
+    
+    def test_lower_half_clipped(self):
+        self.tfr[5:,:] *= 0.4
+        
+        clipped = clip_tfr(self.tfr, tfr_cliprange=6)
+        
+        tfr_exp = self.tfr.copy()
+        tfr_exp[5:,:] = 10**(-6/20.0)
+        match = np.allclose(tfr_exp, clipped)    
+        
+        self.assertTrue(match)
+    def test_None_cliprange(self):
+        '''when no cliprange is given the input tfr is
+        returned as it is '''
+        
+        output = clip_tfr(self.tfr)
+        match = np.array_equal(output, self.tfr)
+        self.assertTrue(match)
+    
+class TestConditionallyInvert(unittest.TestCase):
+    
+    def setUp(self):
+        self.x = np.array([True, True, False, False, True])
+        self.y = np.array([0,0,10,10,10])
+    
+    def test_simple(self):
+        cond_inv = conditionally_set_to(self.x, self.y<10, False)
+        exp = np.array([False, False, False, False, True])
+        match = np.array_equal(exp, cond_inv)
+        self.assertTrue(match)
+    
+    def test_no_True(self):
+        cond_inv = conditionally_set_to(self.x, self.y>100, False)
+        exp = self.x.copy()
+        match = np.array_equal(exp, cond_inv)
+        self.assertTrue(match)
+        
+    
+
+
 if __name__  == '__main__':
     unittest.main()
         
