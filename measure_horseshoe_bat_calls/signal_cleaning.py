@@ -83,14 +83,156 @@ def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
             smooth_X[each_region] = anomaly_extrapolation(each_region, X, 
                                                             ref_region_length)
         elif region_type == 'island':
-            smooth_X[each_region] = anomaly_interpolation(each_region, X)
+            smooth_X[each_region] = fix_island_anomaly(X, fs, each_region,
+                                                       ref_region_length, 
+                                                       **kwargs)
     return smooth_X
 
+def fix_island_anomaly(X, fs, anomaly, ref_region_length, **kwargs):
+    '''
+    First tries to interpolate between the edges of the anomaly at hand. 
+    If the interpolation leads to a very drastic slope, a 'sensible' extrapolation 
+    is attempted using parts of the non-anomalous signal. 
+    
+    Parameters
+    ----------
+    X : np.array
+    fs : float>0
+    anomaly : tuple slice
+        scipy.ndimage.find_objects output
+        (slice(start,stop,None),)
+    ref_region_length : int>0
+        The number of samples to be used as a reference region in 
+        case of extrapolation
+    max_fmrate : float>0, optional
+        The maximum fm rate to be tolerated while interpolating in kHz/ms
+        Defaults to 100 kHz/ms.
+    
+    Returns
+    -------
+    interpolated : np.array
+        Array of same size as anomaly. 
+    '''
+    max_fmrate = kwargs.get('max_fmrate', 100)
+    trial_fix = anomaly_interpolation(anomaly, X)
+    fmrate_trialfix = calc_coarse_fmrate(trial_fix, fs)
+    if fmrate_trialfix <= max_fmrate:
+        return trial_fix
+    else:
+        return extrapolate_sensibly(X, fs, anomaly, ref_region_length, **kwargs)
+        
+def extrapolate_sensibly(X, fs, anomaly, ref_region_length, **kwargs):
+    '''
+    Function called when `fix_island_anomaly` detects direct interpolation
+    will lead to unrealistic slopes. This function is called when there's
+    a big difference in values across an anomalous region and an
+    extrapolation must be performed which will not alter the signal drastically. 
+    
+    The method tries out the following:
+        #. Look left and right of the anomaly to see which region 
+           has higher frequency content.
+        #. Extrapolate in the high-to-low frequency direction. 
+    
+    This basically means that if the local inspection window around anomaly has
+    a sweep between 20-10kHZ on the left and a 0Hz region on the right - the 
+    anomaly will be extrapolated with the slope from the sweep region because it
+    has higher frequency content. 
+    
+    Example
+    -------
+    >>> freq_profile = [np.zeros(10), np.arange(15,30,5)*1000]
+    >>> fs = 1.0
+    >>> x = np.concatenate(freq_profile)[::-1]
+    >>> anom = (slice(2, 5, None),)
+    >>> 
+    >>> plt.plot(x, label='noisy frequency profile')
+    >>> anom_x = np.zeros(x.size, dtype='bool')
+    >>> anom_x[anom[0]] = True
+    >>> plt.plot(anom_x*8000, label='identified anomaly')
+    >>> extrap_out = extrapolate_sensibly(x, fs, anom, 4)
+    >>> sensibly_extrap = x.copy()
+    >>> sensibly_extrap[anom_x] = extrap_out
+    >>> plt.plot(sensibly_extrap, label='extrapolated')
+    >>> plt.legend()
+    '''
 
-def anomaly_extrapolation(region, X, num_samples):
+    left_and_right_of_X = get_neighbouring_regions(X, anomaly, ref_region_length)
+    left_median, right_median = map(np.median, left_and_right_of_X)
+    
+    start, stop = anomaly[0].start, anomaly[0].stop
+    anom_size = stop-start  
+    if left_median > right_median:
+        relevant_region = anomaly
+        extrap_chunk = anomaly_extrapolation(relevant_region, X[:stop],
+                                                             ref_region_length,
+                                                             **kwargs)
+        
+    else:
+        relevant_region = (slice(0,anom_size,None),)
+        extrap_chunk = anomaly_extrapolation(relevant_region, 
+                                             X[start:],
+                                             ref_region_length, **kwargs)
+    
+    return extrap_chunk
+    
+
+def get_neighbouring_regions(X, target, region_size):
+    '''
+    Takes out samples of `region_size` on either size of the target. 
+    
+    Parameters
+    ----------
+    X: np.array
+    target : slice
+        ndimage.find_objects type slice
+    region_size : int >0
+    
+    Returns
+    -------
+    left_and_right : list
+    '''
+    start = target[0].start
+    stop = target[0].stop
+
+    before_start = start-region_size
+    if before_start < 0 :
+        left_of_X = X[:start]
+    else:
+        left_of_X = X[before_start:start]
+  
+    try:
+        right_of_X = X[stop:stop+region_size]
+    except:
+        right_of_X = X[stop:]
+    return [left_of_X, right_of_X]
+
+def calc_coarse_fmrate(X,fs,**kwargs):
+    '''
+    Calculates slope by subtracting the difference between 1st and 
+    last sample and dividing it by the length of the array. 
+    The output is then converted to units of kHz/ms. 
+    
+    Parameters
+    ----------
+    X : np.array
+        Frequency profile with values in Hz. 
+    fs : float>0
+    
+    '''
+    diff = X[-1] - X[0]
+    length = X.size/fs
+    return  np.abs((diff/length)*10**-6)
+    
+    
+    
+
+
+def anomaly_extrapolation(region, X, num_samples, **kwargs):
     '''
     Takes X values next to the region and fits a linear regression 
-    into the region
+    into the region. This is only suitable for cases where the 
+    anomalous region is at an 'edge' - either one of its samples
+    is 0 or the last sample of X. 
     
     Parameters
     ----------
@@ -110,25 +252,45 @@ def anomaly_extrapolation(region, X, num_samples):
     
     Notes
     ------
-    This function covers 90% of cases...if there is an anomaly right next
+    1. This function covers 90% of cases...if there is an anomaly right next
     to an edge anomaly with <num_samples distance -- of course things will
     go whack.
+    
+    Warning
+    -------
+    A mod on this function also allows extrapolation to occur if there
+    are < num_samples next to the anomaly - this might make the function
+    a bit lax in terms of the extrapolations it produces.
+    
     '''
     start, stop = region[0].start, region[0].stop
     x = np.arange(start,stop)
-
-    try:
-        ref_x = range(stop, stop+num_samples)
-        ref_range = X[ref_x]
-    except:
-        ref_x = range(start-num_samples, start)
-        ref_range = X[ref_x]
-
-    m, c,rv, pv, stderr = stats.linregress(ref_x, ref_range)
+    if start == 0:
+        try:
+            ref_x = range(stop, stop+num_samples)
+            ref_values = X[ref_x]
+        except:
+            ref_x = range(stop, X.size)
+            ref_values = X[stop:]
+        
+    elif stop==X.size:
+        try:
+            if start-num_samples <0:
+                raise ValueError()
+            else:
+                ref_x = range(start-num_samples, start)
+                ref_values = X[ref_x]
+        except:
+            ref_x = range(start)
+            ref_values = X[ref_x]
+    else:
+        print(start, stop, x, 'anomaly x', X.size)
+        raise NotImplementedError('the handling of none-edge case is not yet doen')
+    m, c,rv, pv, stderr = stats.linregress(ref_x, ref_values)
     extrapolated = m*x + c 
     return extrapolated
 
-def anomaly_interpolation(region, X):
+def anomaly_interpolation(region, X, **kwargs):
     '''
     Interpolates X values using values of X adjacent to the 
     region. 
@@ -170,14 +332,14 @@ def anomaly_type(region, X):
 def smooth_over_potholes(X, fs, **kwargs):
     '''
     A signal can show drastic changes in its value because of measurement errors.
-    These drastic variations in signal can cause the creation of [potholes](https://en.wikipedia.org/wiki/Pothole)
-    (holes in a road). This method tries to 'level' out the pothole by re-setting the samples of the 
+    These drastic variations in signal are called `potholes <https://en.wikipedia.org/wiki/Pothole>`_
+    (uneven parts of a road). This method tries to 'level' out the pothole by re-setting the samples of the 
     pothole. A linear interpolation is done from the start of a pothole till its end using the closest 
     non-pothole samples. 
     
     A pothole is identified by a region of the signal with drastic changes in slope. A moving window
-    calculates the slopes between the focal sample and the Nth sample after it to estimate if 
-    the values move gradually or not. 
+    calculates N slopes between the focal sample and the Nth sample after it to estimate if 
+    the Nth sample could be part of a pothole or not. 
 
     Parameters
     ----------
@@ -188,19 +350,18 @@ def smooth_over_potholes(X, fs, **kwargs):
         Defaults to 50. 
     pothole_inspection_window : float>0, optional
         The length of the moving window that's used to discover potholes.
-        Defaults to 0.25 ms
+        See identify_pothole_samples for default value.
+
     Returns
     -------
     pothole_covered
     pothole_regions
-    
-    
-    -=
+
     See Also
     --------
     identify_pothole_samples
     pothole_inspection_window
-    
+
     '''
     kwargs['max_stepsize'] = kwargs.get('max_stepsize', 50)
     potholes = identify_pothole_samples(X, fs, **kwargs)

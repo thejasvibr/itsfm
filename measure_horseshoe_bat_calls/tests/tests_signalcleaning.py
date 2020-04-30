@@ -231,10 +231,75 @@ class TestConditionallyInvert(unittest.TestCase):
         match = np.array_equal(exp, cond_inv)
         self.assertTrue(match)
         
+class TestGetLeftRightOfX(unittest.TestCase):
     
+    def setUp(self):
+        self.x = np.linspace(0,20,21)
+        self.target = (slice(3,5,None),)
+        self.ref_region = 10 
+        
+    
+    def test_simple(self):
+        left_right = get_neighbouring_regions(self.x, self.target, self.ref_region)
+        exp_left_right = [np.arange(3), np.arange(5,15)]
+        match = np.array_equal(np.concatenate(exp_left_right), 
+                               np.concatenate(left_right))
+        self.assertTrue(match)
+                               
+        
+        
+    def test_nextsimple(self):
+        self.target = [slice(10,12,None)]
+        self.ref_region = 3 
+        left_right = get_neighbouring_regions(self.x, self.target, self.ref_region)
+        exp_left_right = [np.arange(7,10), np.arange(12,15)]
+        match = np.array_equal(np.concatenate(exp_left_right), 
+                               np.concatenate(left_right))
+        self.assertTrue(match)
+        
+class TestFixIslandAnomaly(unittest.TestCase):
+    
+    def setUp(self):
+        self.fs = 250000
+        parts = [np.zeros(5), np.arange(102,110)*1000]
+        self.X = np.concatenate(parts)
+        self.ref_size = 3
+        self.anomaly = (slice(3,6,None),)
+        self.anomaly_size = self.anomaly[0].stop - self.anomaly[0].start
+        
+    def test_call_start(self):
+        output = fix_island_anomaly(self.X, self.fs, self.anomaly,
+                           self.ref_size)
+        exp = np.arange(100,103)*1000
+        match = np.array_equal(exp, output)
+        self.assertTrue(match, exp)
+    
+    
+    def test_call_end(self):
+        self.X = self.X[::-1]
+        self.anomaly = (slice(6,10,None),)
+        output = fix_island_anomaly(self.X, self.fs, self.anomaly,
+                           self.ref_size)
+        
+        exp = np.arange(103,99,-1)*1000
+        match = np.array_equal(exp, output)
+        self.assertTrue(match, exp)
+    
+    def test_size_matches(self):
+        output = fix_island_anomaly(self.X, self.fs, self.anomaly,
+                           self.ref_size)
+        self.assertEqual(self.anomaly_size, output.size)
+        
+        
+    
+    
+    
+        
+        
+        
+        
 
 
 if __name__  == '__main__':
     unittest.main()
         
-
