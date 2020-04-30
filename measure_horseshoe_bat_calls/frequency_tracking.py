@@ -112,18 +112,24 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
 
     full_fp = np.zeros(input_signal.size)
     full_raw_fp = np.zeros(input_signal.size)
-    
+    acc_profile = np.zeros(input_signal.size)
     #print('generating PWVD frequency profile....')
     for region in above_noise_regions:    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
                                                                   fs, **kwargs)
+        weird_parts, accelaration_profile = frequency_spike_detection(raw_fp, fs, **kwargs)
+        cleaned_fp = exterpolate_over_anomalies(raw_fp, fs, weird_parts, **kwargs)
         full_raw_fp[region] = raw_fp
-        cleaned_fp, potholes = smooth_over_potholes(raw_fp, fs, **kwargs)
+        cleaned_fp = exterpolate_over_anomalies(raw_fp, fs, weird_parts,
+                                                **kwargs)
+        acc_profile[region] = accelaration_profile
+
         full_fp[region] = cleaned_fp
 
     info['moving_dbrms'] = moving_dbrms
     info['geq_signal_level'] = above_noise_regions
     info['raw_fp'] = full_raw_fp
+    info['acc_profile'] = acc_profile
 
     return full_fp, info
 
@@ -425,7 +431,7 @@ def frequency_spike_detection(X, fs, **kwargs):
     anomalous : np.array
         Boolean 
     '''
-    max_acc = kwargs.get('max_acc', 0.5) # kHz/ms^2
+    max_acc = kwargs.get('max_acc', 1.0) # kHz/ms^2
     freq_accelaration = accelaration(X,fs)
     anomalous = freq_accelaration>max_acc
     return anomalous, freq_accelaration
