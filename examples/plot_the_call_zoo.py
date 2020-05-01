@@ -8,24 +8,27 @@ segmentation and measuring capabilities of the pacakge.
 """
 
 import matplotlib.pyplot as plt
-from itsfm.view_horseshoebat_call import *
+import itsfm
 from itsfm.simulate_calls import make_call_zoo, add_noise
-from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
+from itsfm.segment import segment_call_into_cf_fm
 
-fs=22100
+fs=30000
 
 freq_profile, call_zoo = make_call_zoo(fs=fs, gap=0.1)
 add_noise(call_zoo, -40)
 
-plt.figure()
-plt.specgram(call_zoo, Fs=fs, NFFT=128, noverlap=127);
+itsfm.visualise_sound(call_zoo, fs, fft_size=128)
+itsfm.plot_movingdbrms(call_zoo,fs, window_size=int(fs*0.001))
 
 # %%
 # Now, let's run the segmentation on this sound 
-
-cf, fm, info = segment_call_into_cf_fm(call_zoo, fs, method='pwvd')
-
-plot_cffm_segmentation(cf, fm, call_zoo, fs);
+segment_parameters = {'window_size' : int(fs*0.001),
+                      'segment_method':'pwvd',
+                      'signal_level': -30,
+                      'sample_every':0.25*10**-3}
+segment_out = segment_call_into_cf_fm(call_zoo, fs, **segment_parameters)
+cf, fm, info = segment_out 
+itsfm.visualise_cffm_segmentation(cf,fm,call_zoo,fs, fft_size=128)
 
 # %%
 # Now, the results show that some sounds are being recognised, but a closer 
@@ -34,23 +37,3 @@ plot_cffm_segmentation(cf, fm, call_zoo, fs);
 # This kind of apparent errors typically come from a bad match between the recordings properties and the
 # default parameter values in place. The 'issues' can be sorted out most of the time 
 # by playing around with the parameter values. 
-
-# %%
-# Fixing 'wide' sound selections
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# A valid sound is 'recognised' when a region of the audio has an rms :math:`\geq` the `signal_level`
-# parameter. The rms over the audio is calcualted by running a moving window. the size of the window
-# and the threshold signal leve will thus decide how accurate the 'width' of the sound element selection is.
-# 
-# We know in our recordings that the signal level is actually pretty high, and so, let's increase the 
-# signal level to see if things get better. The :code:`signal_level` is in dB rms with reference value of 1. 
-
-cf, fm, info = segment_call_into_cf_fm(call_zoo, fs, method='pwvd',
-                                       signal_level=-15,
-                                       window_size=50)
-plot_cffm_segmentation(cf, fm, call_zoo, fs);
-
-## Oops, now we've set the 
-
-plot_movingdbrms(call_zoo,fs)
-

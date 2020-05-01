@@ -456,8 +456,10 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
 def fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs):
     '''
     '''
-    sample_every = kwargs.get('sample_every', fraction_duration(frequency_profile,
-                                                                fs, 0.01) ) #seconds
+    sample_every = kwargs.get('sample_every') #seconds
+    if sample_every is None:
+        sample_every = fraction_duration(frequency_profile,fs, 0.01)
+
     interpolation_kind = kwargs.get('interpolation_kind', 1) # polynomial order
     ds_factor = int(fs*sample_every)
     

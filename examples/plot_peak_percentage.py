@@ -30,9 +30,10 @@ References
 
 import matplotlib.pyplot as plt
 import scipy.signal as signal 
+import itsfm
 from itsfm.simulate_calls import make_cffm_call
-from itsfm.view_horseshoebat_call import visualise_call
-from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm 
+from itsfm.segment import segment_call_into_cf_fm 
+
 fs = 44100 
 call_props = {'cf':(8000, 0.01), 
 			 'upfm':(2000,0.002),
@@ -41,7 +42,7 @@ call_props = {'cf':(8000, 0.01),
 cffm_call, freq_profile = make_cffm_call(call_props, fs)
 cffm_call *= signal.tukey(cffm_call.size, 0.1)
 
-w,s = visualise_call(cffm_call, fs, fft_size=64)
+w,s = itsfm.visualise_sound(cffm_call, fs, fft_size=64)
 
 # %% 
 # Now, let's proceed to run the peak-percentage based segmentation. 
@@ -89,3 +90,8 @@ plt.plot(info['cf_re_fm'], label='relative CF')
 plt.plot(info['fm_re_cf'], label='relative FM')
 plt.legend()
 plt.ylabel('CF/FM relative level')
+
+# %% 
+# This method thus allows us to handle the separation of FM and CF very elegantly
+# with just two parameters -  `signal_level` and `peak_percentage`. 
+
