@@ -1,9 +1,11 @@
-<insertname> : Documentation
-=================================
+itsfm : Identify, Track and Segment sound (by) Frequency (and its) Modulation
+=================================================================================
+The `itsfm` package identifies regions of sound with and without frequency modulation, 
+and allows custom measurements to be made on them. It's all in the name. Each of the 
+task behind the identification, tracking and segmenting of a sound can be done independently.
 
-The <NAMETOBEDECIDED> package identifies regions of sound with and without frequency modulation, 
-and allows custom measurements to be made on them. The sounds could be bird, bat, whale, artifical 
-sounds - it should hopefully work :P. 
+The sounds could be bird, bat, whale, artifical sounds - it should hopefully work,
+however be aware that this is an alpha version package at the moment. 
 
 The basic workflow involves the tracking of a sounds frequency over time, and then calculating the 
 rate of frequency modulation (FM), which is then used to decide which parts of a sound are frequency
@@ -34,7 +36,7 @@ What the package `does not`:
 
 Installation
 ~~~~~~~~~~~~
-This is a pre-PyPi version of the package. The easiest way to install the package is to head to this `page <https://github.com/thejasvibr/measure_horseshoe_bat_calls.git>`_, and 
+This is a pre-PyPi version of the package. The easiest way to install the package is to head to this `page <https://github.com/thejasvibr/itsfm.git>`_, and 
 download/clone the repository. Go into the downloaded folder and type :command:`python setup.py install`.
 
 .. include:: gallery_dir/index.rst

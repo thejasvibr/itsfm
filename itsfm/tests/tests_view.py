@@ -5,9 +5,9 @@ Tests for the view module
 @author: tbeleyur
 """
 import unittest
-from measure_horseshoe_bat_calls.view_horseshoebat_call import itsFMInspector
-from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
-from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
+from itsfm.view_horseshoebat_call import itsFMInspector
+from itsfm.simulate_calls import make_cffm_call
+from itsfm.user_interface import segment_and_measure_call
 
 class TestInspector(unittest.TestCase):
     

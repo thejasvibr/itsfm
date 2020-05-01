@@ -9,12 +9,12 @@ import scipy.interpolate as interpolate
 from scipy import ndimage
 import scipy.ndimage.filters as flts
 import scipy.signal as signal 
-from measure_horseshoe_bat_calls.signal_processing import *
-from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
-from measure_horseshoe_bat_calls.frequency_tracking import get_pwvd_frequency_profile
-import measure_horseshoe_bat_calls.refine_cfm_regions as refine_cfm
-from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise
-from measure_horseshoe_bat_calls.signal_cleaning import conditionally_set_to
+from itsfm.signal_processing import *
+from itsfm.sanity_checks import make_sure_its_positive
+from itsfm.frequency_tracking import get_pwvd_frequency_profile
+import itsfm.refine_cfm_regions as refine_cfm
+from itsfm.signal_cleaning import suppress_background_noise
+from itsfm.signal_cleaning import conditionally_set_to
 
 def segment_call_into_cf_fm(call, fs, **kwargs):
     '''Function which identifies regions into CF and FM based on the following   process. 
@@ -62,10 +62,10 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np 
-    >>> from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp, make_tone
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_movingdbrms
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call, make_x_time
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_cffm_segmentation
+    >>> from itsfm.simulate_calls import make_fm_chirp, make_tone
+    >>> from itsfm.view_horseshoebat_call import plot_movingdbrms
+    >>> from itsfm.view_horseshoebat_call import visualise_call, make_x_time
+    >>> from itsfm.view_horseshoebat_call import plot_cffm_segmentation
     >>> fs = 44100
     >>> start_f, end_f = 1000, 10000
     >>> chirp = make_fm_chirp(start_f, end_f, 0.01, fs)  
@@ -95,7 +95,7 @@ def segment_call_into_cf_fm(call, fs, **kwargs):
     segment_by_peak_percentage
     segment_by_pwvd
     segment_by_inst_frequency
-    measure_horseshoe_bat_calls.refine_cfm_regions 
+    itsfm.refine_cfm_regions 
     refine_cf_fm_candidates
 
     Notes
@@ -271,9 +271,9 @@ def segment_by_pwvd(call, fs, **kwargs):
     Example
     -------
     Let's create a two component call with a CF and an FM part in it 
-    >>> from measure_horseshoe_bat_calls.simulate_calls import make_tone, make_fm_chirp, silence
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_cffm_segmentation    
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import make_x_time
+    >>> from itsfm.simulate_calls import make_tone, make_fm_chirp, silence
+    >>> from itsfm.view_horseshoebat_call import plot_cffm_segmentation    
+    >>> from itsfm.view_horseshoebat_call import make_x_time
     >>> fs = 22100
     >>> tone = make_tone(5000, 0.01, fs)
     >>> sweep = make_fm_chirp(1000, 6000, 0.005, fs)

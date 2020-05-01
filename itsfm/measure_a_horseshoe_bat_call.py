@@ -5,9 +5,9 @@ inbuilt or user-defined functions.
 
 
 """
-from measure_horseshoe_bat_calls.signal_processing import *
-from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_negative
-import measure_horseshoe_bat_calls.measurement_functions as measurefuncs
+from itsfm.signal_processing import *
+from itsfm.sanity_checks import make_sure_its_negative
+import itsfm.measurement_functions as measurefuncs
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -37,7 +37,7 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
     
     See Also
     --------
-    measure_horseshoe_bat_calls.measurement_functions
+    itsfm.measurement_functions
 
     Example 
     -------
@@ -58,7 +58,7 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
     And here's an example with some custom functions.The default measurements
     will appear in addition to the custom measurements.
     
-    >>> from measure_horseshoe_bat_calls.measurement_functions import measure_peak_amplitude, measure_peak_frequency
+    >>> from itsfm.measurement_functions import measure_peak_amplitude, measure_peak_frequency
     >>> custom_measures = [peak_frequency, measure_peak_amplitude]    
     >>> sound_segments, measures = measure_hbc_call(call, fs,
                                                         cf, fm, 
@@ -157,7 +157,7 @@ def perform_segment_measurements(full_sound, fs,
     but, it may be important for some other functions. 
     
     >>> fs = 1 # Hz    
-    >>> from measure_horseshoe_bat_calls.measurement_functions import measure_rms, measure_peak    
+    >>> from itsfm.measurement_functions import measure_rms, measure_peak    
     >>> results = perform_segment_measurements(audio, fs, relevant_region, 
                                                    [measure_rms, measure_peak])    
     '''

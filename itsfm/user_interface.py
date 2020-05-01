@@ -10,9 +10,9 @@ Let's take a look at an example where we [TO BE COMPLETED!!!]
 .. code-block:: python
 
     import scipy.signal as signal 
-    from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
-    from measure_horseshoe_bat_calls.view_horseshoebat_call import *
-    from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
+    from itsfm.user_interface import segment_and_measure_call
+    from itsfm.view_horseshoebat_call import *
+    from itsfm.simulate_calls import make_cffm_call
 
     # create synthetic call 
     call_parameters = {'cf':(100000, 0.01),
@@ -50,11 +50,11 @@ Let's take a look at an example where we [TO BE COMPLETED!!!]
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
-import measure_horseshoe_bat_calls.segment_horseshoebat_call 
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_from_background
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm
-from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import measure_hbc_call
-from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import parse_cffm_segments
+import itsfm.segment_horseshoebat_call 
+from itsfm.segment_horseshoebat_call import segment_call_from_background
+from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
+from itsfm.measure_a_horseshoe_bat_call import measure_hbc_call
+from itsfm.measure_a_horseshoe_bat_call import parse_cffm_segments
 
 def segment_and_measure_call(main_call, fs,
                              segment_from_background=False, 
@@ -95,7 +95,7 @@ def segment_and_measure_call(main_call, fs,
     works. 
     
     >>> import scipy.signal  as signal 
-    >>> from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
+    >>> from itsfm.simulate_calls import make_cffm_call
     >>> call_properties = {'cf':(80000, 0.01), 'upfm':(70000, 0.002),
                            'downfm':(50000, 0.002)}
     >>> fs = 500000
@@ -127,7 +127,7 @@ def segment_and_measure_call(main_call, fs,
 
     See Also
     --------
-    measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call
+    itsfm.measure_a_horseshoe_bat_call
 
     '''
     cf, fm, info = segment_call_into_cf_fm(main_call, fs, 

@@ -5,8 +5,8 @@
 """
 
 import unittest
-from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import *
-from measure_horseshoe_bat_calls.measurement_functions import *
+from itsfm.measure_a_horseshoe_bat_call import *
+from itsfm.measurement_functions import *
 
 class ParseCFFM(unittest.TestCase):
     '''

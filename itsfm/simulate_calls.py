@@ -11,8 +11,8 @@ The code snippet below recreates the call with the above parameters
 
 .. code-block:: python
 
-    from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call
-    from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
+    from itsfm.view_horseshoebat_call import visualise_call
+    from itsfm.simulate_calls import make_cffm_call
 
     call_parameters = {'cf':(100000, 0.01),
                         'upfm':(80000, 0.002),

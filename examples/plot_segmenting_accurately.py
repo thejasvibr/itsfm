@@ -39,10 +39,10 @@ Generating a 'classical' CF-FM bat call
 import matplotlib.pyplot as plt
 import numpy as np 
 import scipy.signal as signal 
-from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call,make_tone, make_fm_chirp, silence 
-from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm 
-from measure_horseshoe_bat_calls.signal_processing import dB, rms
+from itsfm.simulate_calls import make_cffm_call,make_tone, make_fm_chirp, silence 
+from itsfm.view_horseshoebat_call import visualise_call
+from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm 
+from itsfm.signal_processing import dB, rms
 
 fs = 96000
 call_props = {'cf':(40000, 0.01), 

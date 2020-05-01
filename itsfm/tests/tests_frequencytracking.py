@@ -5,7 +5,7 @@ Created on Sat Apr 18 21:42:54 2020
 @author: tbeleyur
 """
 import unittest
-from measure_horseshoe_bat_calls.frequency_tracking import *
+from itsfm.frequency_tracking import *
 
 class PWVDTracking(unittest.TestCase):
     

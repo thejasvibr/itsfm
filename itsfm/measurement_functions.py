@@ -35,7 +35,7 @@ If the output key of one measurement function is the same as the
 other, it will get overwritten in the final dictionary!
 
 """
-from measure_horseshoe_bat_calls.signal_processing import *
+from itsfm.signal_processing import *
 
 
 def measure_rms(audio, fs, segment ,**kwargs):
@@ -43,7 +43,7 @@ def measure_rms(audio, fs, segment ,**kwargs):
     
     See Also
     --------
-    measure_horseshoe_bat_calls.signal_processing.rms
+    itsfm.signal_processing.rms
     '''
     return {'rms': rms(audio[segment])}
 
@@ -75,7 +75,7 @@ def measure_peak_frequency(audio, fs, segment ,**kwargs):
     
     See Also
     --------
-    measure_horseshoe_bat_calls.signal_processing.get_peak_frequency
+    itsfm.signal_processing.get_peak_frequency
     '''
     peak_freq, freq_res = get_peak_frequency(audio[segment], fs)
     return {'peak_frequency':peak_freq, 'peak_freq_resolution':freq_res}
@@ -85,7 +85,7 @@ def measure_terminal_frequency(audio, fs, segment,**kwargs):
     
     See Also
     --------
-    measure_horseshoe_bat_calls.get_terminal_frequency
+    itsfm.get_terminal_frequency
     '''
     terminal_freq, threshold = get_terminal_frequency(audio, fs, **kwargs)
     return {'terminal_frequency':terminal_freq,

@@ -9,10 +9,10 @@ spikes in the frequency profile estimates of a sound.
 """
 import numpy as np 
 from scipy import ndimage, stats
-from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust
-from measure_horseshoe_bat_calls.signal_processing import median_filter, resize_by_adding_one_sample
-from measure_horseshoe_bat_calls.signal_processing import dB
-from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
+from itsfm.signal_processing import moving_rms_edge_robust
+from itsfm.signal_processing import median_filter, resize_by_adding_one_sample
+from itsfm.signal_processing import dB
+from itsfm.sanity_checks import make_sure_its_positive
 
 
 def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):

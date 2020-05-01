@@ -11,13 +11,13 @@ import os
 import pandas as pd
 import soundfile as sf
 from tqdm import tqdm
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_from_background
-from measure_horseshoe_bat_calls.view_horseshoebat_call import check_call_background_segmentation
-from measure_horseshoe_bat_calls.view_horseshoebat_call import make_overview_figure
-from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
-from measure_horseshoe_bat_calls.user_interface import save_overview_graphs
-from measure_horseshoe_bat_calls.sanity_checks import check_preexisting_file
+from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
+from itsfm.segment_horseshoebat_call import segment_call_from_background
+from itsfm.view_horseshoebat_call import check_call_background_segmentation
+from itsfm.view_horseshoebat_call import make_overview_figure
+from itsfm.user_interface import segment_and_measure_call
+from itsfm.user_interface import save_overview_graphs
+from itsfm.sanity_checks import check_preexisting_file
 
 # keyword arguments for cf-fm segmentation
 cf_fm_keywords = ['peak_percentage', 

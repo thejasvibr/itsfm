@@ -10,8 +10,8 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import  measure_horseshoe_bat_calls.data as calls
-import measure_horseshoe_bat_calls.view_horseshoebat_call as view
+import  itsfm.data as calls
+import itsfm.view_horseshoebat_call as view
 
 folder, file_path = os.path.split(os.path.abspath(__file__))
 

@@ -23,11 +23,11 @@ import scipy.ndimage as ndimage
 import scipy.signal as signal 
 import skimage.filters as filters
 from tftb.processing import PseudoWignerVilleDistribution
-import measure_horseshoe_bat_calls.signal_cleaning 
-from measure_horseshoe_bat_calls.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
-from measure_horseshoe_bat_calls.signal_cleaning import exterpolate_over_anomalies
-from measure_horseshoe_bat_calls.signal_cleaning import clip_tfr, smooth_over_potholes
-from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
+import itsfm.signal_cleaning 
+from itsfm.signal_cleaning import suppress_background_noise, remove_bursts, smooth_over_potholes
+from itsfm.signal_cleaning import exterpolate_over_anomalies
+from itsfm.signal_cleaning import clip_tfr, smooth_over_potholes
+from itsfm.signal_processing import moving_rms_edge_robust, dB
 
 def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates a clean frequency profile through the PWVD. 
@@ -67,9 +67,9 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     Create two chirps in the middle of a somewhat silent recording
     
     >>> import matplotlib.pyplot as plt
-    >>> from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_movingdbrms
-    >>> from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call, make_x_time
+    >>> from itsfm.simulate_calls import make_fm_chirp
+    >>> from itsfm.view_horseshoebat_call import plot_movingdbrms
+    >>> from itsfm.view_horseshoebat_call import visualise_call, make_x_time
     >>> fs = 44100
     >>> start_f, end_f = 1000, 10000
     >>> chirp = make_fm_chirp(start_f, end_f, 0.01, fs)  
@@ -104,7 +104,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
 
     See Also
     --------
-    measure_horseshoe_bat_calls.signal_cleaning.smooth_over_potholes
+    itsfm.signal_cleaning.smooth_over_potholes
     find_above_noise_regions
     '''
     info = {}
@@ -169,7 +169,7 @@ def clean_up_spikes(whole_freqeuncy_profile, fs, **kwargs):
     Example
     -------
     Let's create a case with an FM and CF tone
-  >>> from measure_horseshoe_bat_calls.simulate_calls import make_tone, make_fm_chirp, silence
+  >>> from itsfm.simulate_calls import make_tone, make_fm_chirp, silence
     >>> fs = 22100
     >>> tone = make_tone(5000, 0.01, fs)
     >>> sweep = make_fm_chirp(1000, 6000, 0.005, fs)
@@ -248,7 +248,7 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     --------
     pwvd_transform
     track_peak_frequency_over_time
-    measure_horseshoe_bat_calls.signal_cleaning.clip_tfr
+    itsfm.signal_cleaning.clip_tfr
 
     '''
     pwvd_filter = kwargs.get('pwvd_filter', False)

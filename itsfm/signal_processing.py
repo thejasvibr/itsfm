@@ -3,7 +3,7 @@
 used by both measure and segment modules.
 
 """
-from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_negative
+from itsfm.sanity_checks import make_sure_its_negative
 import numpy as np 
 import scipy.signal as signal 
 

@@ -7,7 +7,7 @@ Created on Sat Apr 18 14:37:13 2020
 
 import unittest 
 import numpy as np 
-from measure_horseshoe_bat_calls.signal_processing import *
+from itsfm.signal_processing import *
 
 class TestFormConsensusRMS(unittest.TestCase):
     

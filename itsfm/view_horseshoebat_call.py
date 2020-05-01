@@ -13,9 +13,9 @@ There is a common pattern in the naming of viewing functions.
 import matplotlib.pyplot as plt
 import numpy as np 
 
-from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
-from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
-from measure_horseshoe_bat_calls.frequency_tracking import accelaration, speed
+from itsfm.signal_processing import get_peak_frequency
+from itsfm.signal_processing import moving_rms_edge_robust, dB
+from itsfm.frequency_tracking import accelaration, speed
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
 
 class itsFMInspector:

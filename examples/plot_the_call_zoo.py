@@ -8,9 +8,9 @@ segmentation and measuring capabilities of the pacakge.
 """
 
 import matplotlib.pyplot as plt
-from measure_horseshoe_bat_calls.view_horseshoebat_call import *
-from measure_horseshoe_bat_calls.simulate_calls import make_call_zoo, add_noise
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm
+from itsfm.view_horseshoebat_call import *
+from itsfm.simulate_calls import make_call_zoo, add_noise
+from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
 
 fs=22100
 

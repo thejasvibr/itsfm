@@ -6,10 +6,10 @@ Created on Wed Feb 12 17:53:58 2020
 @author: tbeleyur
 """
 import scipy.signal as signal 
-from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import *
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import *
-from measure_horseshoe_bat_calls.signal_processing import *
-from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call,make_FM_with_joint
+from itsfm.measure_a_horseshoe_bat_call import *
+from itsfm.segment_horseshoebat_call import *
+from itsfm.signal_processing import *
+from itsfm.simulate_calls import make_cffm_call,make_FM_with_joint
 import unittest     
 
 class TestMovingRMS(unittest.TestCase):

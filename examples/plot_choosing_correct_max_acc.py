@@ -21,10 +21,10 @@ frequency over time.
 """
 
 import numpy as np 
-from measure_horseshoe_bat_calls.frequency_tracking import generate_pwvd_frequency_profile, frequency_spike_detection
-from measure_horseshoe_bat_calls.simulate_calls import make_fm_chirp
+from itsfm.frequency_tracking import generate_pwvd_frequency_profile, frequency_spike_detection
+from itsfm.simulate_calls import make_fm_chirp
 import matplotlib.pyplot as plt
-from measure_horseshoe_bat_calls.view_horseshoebat_call import plot_accelaration_profile, time_plot
+from itsfm.view_horseshoebat_call import plot_accelaration_profile, time_plot
 
 # %%
 # Let's create a hyperbolic chirp, this is a nice example because the

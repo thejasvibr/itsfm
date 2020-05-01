@@ -5,13 +5,13 @@ The <INSERTNEWNAME> package has many example recordings of bat calls thanks to
 the generous contributions of bioacousticians around the world:
 """
 import numpy as np
-import measure_horseshoe_bat_calls as mhbc
-from measure_horseshoe_bat_calls.run_example_analysis import contributors
+import itsfm as mhbc
+from itsfm.run_example_analysis import contributors
 print(contributors)
 
 # %% Let's load the example data from the `data` module of the package
 
-from measure_horseshoe_bat_calls.data import example_calls
+from itsfm.data import example_calls
 
 # %% 
 # Separating the constant frequency (CF) and frequency-modulated parts of a call

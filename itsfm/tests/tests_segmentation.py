@@ -5,8 +5,8 @@
 """
 import matplotlib.pyplot as plt
 import unittest
-from measure_horseshoe_bat_calls.segment_horseshoebat_call import *
-from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
+from itsfm.segment_horseshoebat_call import *
+from itsfm.simulate_calls import make_cffm_call
 
 class TestSegmentationMethods(unittest.TestCase):
     '''Suite of tests that makes sure all the implemented CF-FM segmentation

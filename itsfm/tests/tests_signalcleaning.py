@@ -6,7 +6,7 @@ Created on Thu Apr 16 08:43:47 2020
 """
 import unittest
 import numpy as np
-from measure_horseshoe_bat_calls.signal_cleaning import *
+from itsfm.signal_cleaning import *
 
 class CheckSmoothOverPothole(unittest.TestCase):
     '''

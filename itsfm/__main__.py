@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """script which runs the command line stuff for 
-measure_horseshoe_bat_calls
+itsfm
 Created on Fri Mar 27 14:30:51 2020
 
 @author: tbeleyur
 """
 import argparse
 import pandas as pd
-import measure_horseshoe_bat_calls.run_example_analysis as run_eg
-import measure_horseshoe_bat_calls.batch_processing as batch
+import itsfm.run_example_analysis as run_eg
+import itsfm.batch_processing as batch
 
 #import measure_hor
 parser = argparse.ArgumentParser(description='measure some CF-FM calls!')

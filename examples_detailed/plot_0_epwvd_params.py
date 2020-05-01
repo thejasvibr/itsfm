@@ -17,8 +17,8 @@ details of course, the original documentation should hopefully be helpful.
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import numpy as np 
-import measure_horseshoe_bat_calls as mhbc
-from measure_horseshoe_bat_calls.data import example_calls
+import itsfm as mhbc
+from itsfm.data import example_calls
 
 # a chosen set of tricky calls to illustrate various points
 tricky_indices = [4,5,6,8,11,12,18,25]

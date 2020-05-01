@@ -11,9 +11,9 @@ recognised CF/FM segment in the input audio, its start, stop and duration.
 
 import matplotlib.pyplot as plt
 import scipy.signal as signal 
-from measure_horseshoe_bat_calls.simulate_calls import make_cffm_call
-from measure_horseshoe_bat_calls.view_horseshoebat_call import visualise_call
-from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
+from itsfm.simulate_calls import make_cffm_call
+from itsfm.view_horseshoebat_call import visualise_call
+from itsfm.user_interface import segment_and_measure_call
 
 # %% 
 # Lets now create a sound that's got only one CF and one FM component
@@ -59,7 +59,7 @@ print(results)
 # rms, peak-amplitude, peak frequency and terminal frequency of each segment. 
 # Let's get the peak frequency and peak amplitude for all segments
 
-from measure_horseshoe_bat_calls.measurement_functions import measure_peak_frequency, measure_peak_amplitude
+from itsfm.measurement_functions import measure_peak_frequency, measure_peak_amplitude
 
 added_measures = [measure_peak_amplitude, measure_peak_frequency]
 
@@ -78,7 +78,7 @@ print(results)
 # a particular pattern of three inputs and one output. See the `measurement_function`
 # documentation or call it through the help
 
-from measure_horseshoe_bat_calls import measurement_functions as measure_funcs
+from itsfm import measurement_functions as measure_funcs
 help(measure_funcs)
 
 # %% 
@@ -95,7 +95,7 @@ print(inspect.getsource(measure_peak_amplitude))
 # %%
 # So, now let's get the dB peak value of our audio segments
 import numpy as np 
-from measure_horseshoe_bat_calls.signal_processing import dB
+from itsfm.signal_processing import dB
 
 def measure_dBpeak(audio, fs, segment, **kwargs):
     relevant_audio = audio[segment]
