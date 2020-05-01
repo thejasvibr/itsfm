@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'measure horseshoe bat calls'
+project = 'itsFM'
 copyright = '2020, Thejasvi Beleyur'
 author = 'Thejasvi Beleyur'
 

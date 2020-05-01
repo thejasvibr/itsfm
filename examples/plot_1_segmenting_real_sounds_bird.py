@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize'] = 10000
 import numpy as np 
 import scipy.signal as signal 
-import itsfm as mhbc
+import itsfm 
 from itsfm.data import example_calls, all_wav_files,folder_with_audio_files
 #
 index = int(np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])[0])
@@ -23,7 +23,7 @@ audio, fs = example_calls[index] # load the relevant example audio
 
 
 #
-w,s = mhbc.visualise_call(audio, fs, fft_size=512)
+w,s = itsfm.visualise_sound(audio, fs, fft_size=512)
 s.set_ylim(0,10000)
 
 # %% 
@@ -39,7 +39,7 @@ s.set_ylim(0,10000)
 
 plt.figure()
 a = plt.subplot(211)
-mhbc.plot_movingdbrms(audio, fs, window_size=int(0.005*fs))
+itsfm.plot_movingdbrms(audio, fs, window_size=int(0.005*fs))
 plt.subplot(212, sharex=a)
 out = plt.specgram(audio, Fs=fs, NFFT=256, noverlap=255)
 a.grid()
@@ -48,29 +48,34 @@ a.grid()
 # With this plot, we can see that a level of -34 dB rms with a 5ms window
 # will choose the song elements well. Let's try it out. 
 
-output = mhbc.segment_and_measure_call(audio, fs, segment_method='pwvd',
-                                       signal_level=-34,
-                                       window_size=int(fs*0.005),
-                                       pwvd_window=0.010,
-                                       sample_every=0.015,
-                                       medianfilter_size=0.010,
-                                       extrap_window=2*10**-3,
-                                       )
-#
-seg_out, call_parts, measurements, _ = output
-cf,fm,info = seg_out
+non_default_params = {
+                    'segment_method':'pwvd',
+                    'signal_level':-34,
+                    'window_size':int(fs*0.005),
+                    'pwvd_window':0.010,
+                    'medianfilter_size':0.005,
+                    'sample_every':20*10**-3
+                    }
+
+output = itsfm.segment_and_measure_call(audio, fs,**non_default_params )
+
+bird_inspect = itsfm.itsFMInspector(output,audio,fs, fft_size=512)
+
+# %% 
+# First, let's check if we're actually picking up the bird signals reliable
+# with the `signal_level` we chose. 
+
+bird_inspect.visualise_geq_signallevel()
 
 # %% 
 # And let's look at the measurements
-measurements
+bird_inspect.measurements
 
 # %%
 # We see there are 9 valid sound segments picked up, and their start and stop
 # times are displayed. How have they been classified? 
 
-w,s=mhbc.plot_cffm_segmentation(cf, fm, audio, fs, fft_size=512)
-s.plot()
-mhbc.time_plot(info['fitted_fp'], fs)
+bird_inspect.visualise_cffm_segmentation()
 
 # %% 
 # Whoops, it seems like they've all been classified as CF parts. Even though
@@ -87,19 +92,14 @@ mhbc.time_plot(info['fitted_fp'], fs)
 # Let's check out the FM rate over the sound with the current parameters,
 # and then choose a more sensible, non-default `fmrate_threshold` parameter.
 
-
-plt.figure()
-a = plt.subplot(211)
-plt.specgram(audio, Fs=fs, NFFT=256, noverlap=255)
-plt.subplot(212, sharex=a)
-mhbc.plot_fmrate_profile(info['fitted_fp'], fs)
-plt.ylim(0,0.01) # reduce the ylim to show the actual data properly
+bird_inspect.visualise_fmrate()
 
 
 # %% 
-# As you can see the constant frequency and modulated parts are being tracked well, 
-# but they're not being classified properly - this is because we have to set
-# the right `fmrate_threshold`. The default if 1kHz/ms, which is a *lot* if you 
+# As you can see the constant frequency and modulated parts are being tracked pretty well, 
+# but they're not being classified properly. The CF or FM 
+# classification is based on the estimated reate of frequency modulation over the sound,
+# ,the `fmrate_threshold`. The default if 1kHz/ms, which is a *lot* if you 
 # think about it. At this rate, the bird would have gone from 20kHz to 20 Hz in about
 # 20 milliseconds, and you would have *barely* heard it. This default FM rate is set
 # to pick up FM regions in bats, and so it needs to be adjusted for other animals.
@@ -108,35 +108,29 @@ plt.ylim(0,0.01) # reduce the ylim to show the actual data properly
 # The fm segments in the great tits song correspond to an FM rate of >= 0.005 kHz/ms.
 # Remember that all frequency modulation rates are in kHz/ms. Let's set this as the
 # threshold and proceed to segment. 
+non_default_params['fmrate_threshold'] = 0.05 # 
 
-output = mhbc.segment_and_measure_call(audio, fs, segment_method='pwvd',
-                                       signal_level=-34,
-                                       window_size=int(fs*0.005),
-                                       pwvd_window=0.010,
-                                       sample_every=0.005, 
-                                       medianfilter_size=0.010,
-                                       extrap_window=5*10**-3,
-                                       fmrate_threshold=5*10**-3
-                                       )
+output_newrate = itsfm.segment_and_measure_call(audio, fs,
+                                        **non_default_params)
 
-
-seg_out, call_parts, measurements, _ = output
-cf,fm,info = seg_out
-
+newrate_inspect = itsfm.itsFMInspector(output_newrate, audio, fs, fft_size=512)
 
 # %% 
 # And let's look at the measurements
 
-measurements
+newrate_inspect.measurements
 
 # %% 
 # Let's check the the segmentation output again now 
-
-w,s=mhbc.plot_cffm_segmentation(cf, fm, audio, fs, fft_size=512)
-s.plot()
-mhbc.time_plot(info['fitted_fp'], fs)
+newrate_inspect.visualise_cffm_segmentation()
 
 # %% 
-# Right, the CF-FM segmentation has improved, but it's still not that great..it's a work
-# under progress. But I hope you are convinced the methods in the package can 
-# actually be used for bird song too?
+# So, it's improved, and there seem to be mainly FM regions in at the edges of 
+# the sounds. Is this real, or an artifact of the frequency profile fitting. Let's 
+# inspect the actual frequency profiles underlying the `fmrate` calcultions
+
+newrate_inspect.visualise_frequency_profiles()
+
+# %% 
+# *to be completed....*
+

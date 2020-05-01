@@ -5,9 +5,9 @@ import measure_horseshoe_bat_calls as mhbc
  
 version_number = mhbc.__version__
 
-setup(name='measure_horseshoe_bat_calls',
+setup(name='itsfm',
      version=version_number,
-     description='Measure single Cf bat calls, or sounds like it',
+     description='Identify, Track and Segment sounds by Frequency and its Modulation',
      long_description=open('README.md').read(),
      long_description_content_type="text/markdown",
      url='https://github.com/thejasvibr/measure_horseshoe_bat_calls.git',

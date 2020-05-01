@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import  itsfm.data as calls
-import itsfm.view_horseshoebat_call as view
+import itsfm.view as view
 
 folder, file_path = os.path.split(os.path.abspath(__file__))
 

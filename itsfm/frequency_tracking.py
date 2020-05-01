@@ -141,7 +141,9 @@ def find_geq_signallevel(X, fs, **kwargs):
     Find regions greater or equal to signal level
     '''
     signal_level = kwargs.get('signal_level', -20)
-    rec_level = dB(moving_rms_edge_robust(X, **kwargs))
+    winsize = kwargs.get('window_size', int(fs*0.002))
+    rec_level = dB(moving_rms_edge_robust(X, window_size=winsize))
+    
     
     ids_above_noise, num_regions = ndimage.label(rec_level>signal_level)
     if num_regions <1:

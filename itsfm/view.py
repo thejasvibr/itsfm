@@ -6,7 +6,7 @@ There is a common pattern in the naming of viewing functions.
 
     #. functions starting with 'visualise' include an overlay of 
        a particular output attribute on top of or with the 
-       the original signal. For example `visualise_call`
+       the original signal. For example `visualise_sound`
     #. functions starting with 'plot' are bare bones 
        plots with just the attribute on the y and time on the x. 
 """
@@ -58,7 +58,7 @@ class itsFMInspector:
         
         
     def visualise_audio(self):
-        w, s = visualise_call(self.whole_audio, self.fs, **self.kwargs)
+        w, s = visualise_sound(self.whole_audio, self.fs, **self.kwargs)
         return w,s 
     
     def visualise_fmrate(self):
@@ -159,7 +159,6 @@ class itsFMInspector:
     
     def _get_fp_keys(self, info_dictionary):
         fp_keys = list(filter(lambda x : '_fp' in x ,info_dictionary.keys()))
-        print(fp_keys)
         if len(fp_keys)==0:
             raise ValueError("There's no frequency profile (fp) in the output info. Check the output object or method")
         return fp_keys
@@ -185,13 +184,13 @@ def check_call_background_segmentation(whole_call, fs, main_call_mask,
     Notes
     -----
     The appearance of the two subplots can be further changes by varying the 
-    keyword arguments. For available keyword arguments see the visualise_call
+    keyword arguments. For available keyword arguments see the visualise_sound
     function. 
     '''
     peak_freq, _ = get_peak_frequency(whole_call, fs)
     horizontal_line = peak_freq*1.1
 
-    waveform, spec = visualise_call(whole_call, fs, **kwargs)
+    waveform, spec = visualise_sound(whole_call, fs, **kwargs)
     waveform.plot(make_x_time(main_call_mask, fs),
                   main_call_mask*np.max(whole_call),'k')
     waveform.plot(make_x_time(main_call_mask, fs),
@@ -241,7 +240,7 @@ def show_all_call_parts(only_call, call_parts, fs, **kwargs):
             pass
 
 def visualise_cffm_segmentation(cf,fm,X,fs, **kwargs):
-    w,s = visualise_call(X,fs, **kwargs)
+    w,s = visualise_sound(X,fs, **kwargs)
     w.plot(make_x_time(cf, fs), cf*np.max(np.abs(X)),'k')
     w.plot(make_x_time(fm, fs), fm*np.max(np.abs(X)), 'r')
     s.plot(make_x_time(cf, fs), cf*fs*0.5, 'k',label='CF')
@@ -297,7 +296,7 @@ def plot_movingdbrms(X,fs,**kwargs):
     plt.plot(make_x_time(m_dbrms, fs), m_dbrms)
     
 
-def visualise_call(audio, fs, **kwargs):
+def visualise_sound(audio, fs, **kwargs):
     '''
     Parameters
     ----------
