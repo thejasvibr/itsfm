@@ -26,12 +26,12 @@ class TestInspector(unittest.TestCase):
         'percentile' : 99.5,
         'max_acc':10}
 
-        outputs = segment_and_measure_call(synthetic_call, fs, common_parameters)
+        outputs = segment_and_measure_call(synthetic_call, fs, **common_parameters)
         
         self.viewer = itsFMInspector(outputs, synthetic_call, fs)
         
-    def test_visualise_audio(self):
-        self.viewer.visualise_call()
+    def test_visualise_audio(self): 
+        self.viewer.visualise_audio()
     def test_fmrate(self):
         self.viewer.visualise_fmrate()
     def test_acc(self):
