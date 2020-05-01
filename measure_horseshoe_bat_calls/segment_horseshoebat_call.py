@@ -289,7 +289,7 @@ def segment_by_pwvd(call, fs, **kwargs):
     >>> w,s = plot_cffm_segmentation(cf, fm, full_call, fs)
     >>> s.plot(make_x_time(cf,fs), info['fitted_fp'])
     '''
-    fmrate_threshold = kwargs.get('fmrate_threshold', 0.2) # kHz/ms
+    fmrate_threshold = kwargs.get('fmrate_threshold', 1.0) # kHz/ms
 
     clean_frequency_profile, info = get_pwvd_frequency_profile(call, fs, **kwargs)
 
@@ -424,6 +424,9 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
         the estimated instantaneous frequency in Hz. 
     fs : float>0
         Sampling rate in Hz
+    medianfilter_length : float>0, optional 
+        The median filter kernel size which is used to filter out
+        the noise in the frequency profile.
     
     Returns
     -------
@@ -436,7 +439,7 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
     fit_polynomial_on_downsampled_version
     '''
     
-    medianfilter_length = kwargs.get('medianfilter_length', 0.1*10**-3)
+    medianfilter_length = kwargs.get('medianfilter_length', 0.25*10**-3)
     try:
         medianfilter_samples = calc_proper_kernel_size(medianfilter_length, fs)
     except:
@@ -453,7 +456,8 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
 def fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs):
     '''
     '''
-    sample_every = kwargs.get('sample_every', 0.5*10**-3) #seconds
+    sample_every = kwargs.get('sample_every', fraction_duration(frequency_profile,
+                                                                fs, 0.01) ) #seconds
     interpolation_kind = kwargs.get('interpolation_kind', 1) # polynomial order
     ds_factor = int(fs*sample_every)
     
@@ -466,8 +470,30 @@ def fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs):
     fit = interpolate.interp1d(partX, partY, kind=interpolation_kind)
     fitted = fit(np.arange(frequency_profile.size))                           
     return fitted 
+  
+def fraction_duration(input_array, fs, fraction):
+    '''
+    calculates the duration that matches the 
+    required fraction of the input array's duration.
     
+    The fraction must be 0 < fraction < 1 
+    '''
+    if 0 < fraction < 1.0:
+        whole_duration = input_array.size/fs
+        duration =  whole_duration*fraction
+        check_relevant_duration(duration, fs)
+        return duration 
+    else:
+        raise ValueError(f"The fraction value:{fraction} needs to be >0 & <1")
 
+def check_relevant_duration(duration, fs):
+    '''
+    checks that the duration is more than the inter-sample duration. 
+    '''
+    if duration <= 1/fs:
+        raise ValueError(f'The suggested duration {duration} is less than\
+                         the inter-sample distance (1/fs): {1/fs}')
+    
 def refine_candidate_regions():
     '''Takes in candidate CF and FM regions and tries to satisfy the 
     constraints set by the user. 

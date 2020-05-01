@@ -2,15 +2,167 @@
 """Bunch of functions which help in visualising data 
 and results
 
+There is a common pattern in the naming of viewing functions. 
+
+    #. functions starting with 'visualise' include an overlay of 
+       a particular output attribute on top of or with the 
+       the original signal. For example `visualise_call`
+    #. functions starting with 'plot' are bare bones 
+       plots with just the attribute on the y and time on the x. 
 """
 import matplotlib.pyplot as plt
 import numpy as np 
 
 from measure_horseshoe_bat_calls.signal_processing import get_peak_frequency
 from measure_horseshoe_bat_calls.signal_processing import moving_rms_edge_robust, dB
-from measure_horseshoe_bat_calls.sanity_checks import make_sure_its_positive
 from measure_horseshoe_bat_calls.frequency_tracking import accelaration, speed
 make_x_time = lambda X, fs: np.linspace(0, X.size/float(fs), X.size)
+
+class itsFMInspector:
+    '''
+    Handles the output from measure_and_segment calls, and allows plotting
+    of the outputs. 
+    
+    Parameters
+    ----------
+    segmeasure_out : tuple
+        Tuple object containing three other objects which are the output from segment_and_measure_call
+        1. segmentation_output : tuple
+            Tuple with the `cf` boolean array, `fm` boolean array and `info` dictioanry
+        2. audio_parts : dictionary 
+            Dictionary with call part labels and values as selected audio parts as np.arrays
+        3. measurements : pd.DataFrame
+            A wide-formate dataframe with one row referring to meaurements done on one call part
+            eg. if a call has 3 parts (fm1, cf1, fm2), then there will be three columns and 
+            N columns, if N measurements have been done. 
+
+    whole_audio :  np.array
+        The audio that was analysed. 
+    
+    fs : float>0
+        Sampling rate in Hz. 
+
+    Notes
+    ----
+    * Not all `visualise` methods may be supported. It depends on the segmentation method at hand. 
+    * All `visualise` methods return one/multiple subplots that could be used and embellished further
+      for your own custom laying over.
+    
+    '''
+    def __init__(self, segmeasure_out, whole_audio, fs, **kwargs):
+        self.seg_details, self.audio_parts, self.measurements = segmeasure_out
+        self.whole_audio = whole_audio
+        self.fs = fs
+        self.kwargs = kwargs
+        self.cf, self.fm, self.info = self.seg_details 
+        
+        
+    def visualise_audio(self):
+        w, s = visualise_call(self.whole_audio, self.fs, **self.kwargs)
+        return w,s 
+    
+    def visualise_fmrate(self):
+        '''
+        Plots the spectrogram + FM rate profile in a 2 row plot
+        '''
+        try:
+            self.fmrate = self.info['fmrate']
+            plt.figure()
+            a = plt.subplot(211)
+            plt.title('FM Rate')
+            make_specgram(self.whole_audio, self.fs, **self.kwargs)
+            b = plt.subplot(212, sharex=a)
+            make_waveform(self.fmrate, self.fs)
+            plt.ylabel('FM rate, kHz/ms')
+            return a,b 
+        except:
+            raise AttributeError('No fmrate variable found in the output!')
+
+    def visualise_accelaration(self):
+        '''
+        Plots the spectrogram + accelaration of the 
+        frequency profile
+        in a 2 row plot
+        '''
+        try:
+            self.acc_profile = self.info['acc_profile']
+
+            plt.figure()
+            a = plt.subplot(211)
+            plt.title('FM Rate')
+            make_specgram(self.whole_audio, self.fs, **self.kwargs)
+            b = plt.subplot(212, sharex=a)
+            make_waveform(self.acc_profile, self.fs)
+            plt.ylabel('Accelaration, $kHz/ms^{2}$')
+            return a,b 
+        except:
+            raise AttributeError('No accelaration variable found in the output!')
+
+    def visualise_cffm_segmentation(self):
+        '''
+        '''
+        w,s = visualise_cffm_segmentation(self.cf, self.fm, 
+                                    self.whole_audio, self.fs,
+                                   **self.kwargs)
+        return w,s
+    
+    def visualise_frequency_profiles(self, fp_type='all'):
+        '''
+        Visualises either one or all of the frequency profiles that are present in the 
+        info dictionary. 
+        The function relies on picking up all keys in the info dictionary that end with '<>_fp'
+        pattern. 
+        
+        Parameters
+        ----------
+        fp_type : str/list with str's
+            Needs to correspond to a key found in the info dictionary 
+        '''
+        if fp_type=='all':
+            all_fps = self._get_fp_keys(self.info)
+        elif isinstance(fp_type, str):
+            all_fps = [fp_type]
+    
+        fig,ax = plt.subplots()
+        s = make_specgram(self.whole_audio, self.fs, **self.kwargs);
+        time_axis = make_x_time(self.whole_audio, self.fs)
+        for each_fp in all_fps:
+            plt.plot(time_axis, self.info[each_fp], label=each_fp)
+        plt.legend()
+        return ax
+    
+    def visualise_geq_signallevel(self):
+        '''
+        Some tracking/segmentation methods rely on using only
+        regions that are above a threshold, the `signal_level`
+        . A moving dB rms window is pass
+        
+        ed, and only regions above it are 
+        
+        '''
+        fig,ax = plt.subplots()
+        s = make_specgram(self.whole_audio, self.fs, **self.kwargs);
+        time_axis = make_x_time(self.whole_audio, self.fs)
+        ymin, ymax = ax.get_ylim()
+        
+        above_siglevel = np.zeros(self.whole_audio.size)
+        
+        for each in self.info['geq_signal_level']:
+            above_siglevel[each] = 1 
+        plt.plot(time_axis, above_siglevel*ymax*0.5, label='$\geq$ signal level')
+        plt.legend()
+        return ax
+        
+        
+        
+        
+    
+    def _get_fp_keys(self, info_dictionary):
+        fp_keys = list(filter(lambda x : '_fp' in x ,info_dictionary.keys()))
+        print(fp_keys)
+        if len(fp_keys)==0:
+            raise ValueError("There's no frequency profile (fp) in the output info. Check the output object or method")
+        return fp_keys
 
 def check_call_background_segmentation(whole_call, fs, main_call_mask, 
                                                    **kwargs):
@@ -88,7 +240,7 @@ def show_all_call_parts(only_call, call_parts, fs, **kwargs):
         except:
             pass
 
-def plot_cffm_segmentation(cf,fm,X,fs, **kwargs):
+def visualise_cffm_segmentation(cf,fm,X,fs, **kwargs):
     w,s = visualise_call(X,fs, **kwargs)
     w.plot(make_x_time(cf, fs), cf*np.max(np.abs(X)),'k')
     w.plot(make_x_time(fm, fs), fm*np.max(np.abs(X)), 'r')
@@ -97,6 +249,10 @@ def plot_cffm_segmentation(cf,fm,X,fs, **kwargs):
     plt.legend()
     return w,s
 
+def visualise_fmrate_profile(X, freq_profile, fs):
+    '''
+    '''
+    
 
 def plot_fmrate_profile(X,fs):
     speed_profile = speed(X,fs)

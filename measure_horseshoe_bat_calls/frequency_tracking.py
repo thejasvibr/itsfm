@@ -13,7 +13,7 @@ representation is implemented in the `get_pwvd_frequency_profile`.
 
 
 References
-
+    
 
 [1] Cohen, L. (1995). Time-frequency analysis (Vol. 778). Prentice hall.
 
@@ -33,10 +33,10 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     '''Generates a clean frequency profile through the PWVD. 
     The order of frequency profile processing is as follows:
 
-    #. Split input signal into regions that are above the
-       background noise. This speeds up the whole process
-       of pwvd tracking multiple sounds, and ignores the
-       background samples. 
+    #. Split input signal into regions that are 
+       greater or equal to the `signal_level`. This
+       speeds up the whole process of pwvd tracking
+       multiple sounds, and ignores the  fainter samples. 
 
     #. Generate PWVD for each above-noise region.
     
@@ -113,6 +113,7 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
     full_fp = np.zeros(input_signal.size)
     full_raw_fp = np.zeros(input_signal.size)
     acc_profile = np.zeros(input_signal.size)
+    spikey_regions = np.zeros(input_signal.size)
     #print('generating PWVD frequency profile....')
     for region in above_noise_regions:    
         raw_fp, frequency_index = generate_pwvd_frequency_profile(input_signal[region],
@@ -125,11 +126,13 @@ def get_pwvd_frequency_profile(input_signal, fs, **kwargs):
         acc_profile[region] = accelaration_profile
 
         full_fp[region] = cleaned_fp
+        spikey_regions[region[0]][weird_parts] = 1
 
     info['moving_dbrms'] = moving_dbrms
     info['geq_signal_level'] = above_noise_regions
     info['raw_fp'] = full_raw_fp
     info['acc_profile'] = acc_profile
+    info['spikey_regions'] = spikey_regions
 
     return full_fp, info
 

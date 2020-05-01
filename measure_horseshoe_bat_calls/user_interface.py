@@ -47,14 +47,14 @@ Let's take a look at an example where we [TO BE COMPLETED!!!]
 
 """
 
-# import matplotlib
-# import matplotlib.pyplot as plt
-# #import matplotlib.backends.backend_pdf
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.backends.backend_pdf
 import measure_horseshoe_bat_calls.segment_horseshoebat_call 
 from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_from_background
 from measure_horseshoe_bat_calls.segment_horseshoebat_call import segment_call_into_cf_fm
 from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import measure_hbc_call
-
+from measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call import parse_cffm_segments
 
 def segment_and_measure_call(main_call, fs,
                              segment_from_background=False, 
@@ -81,19 +81,13 @@ def segment_and_measure_call(main_call, fs,
     -------
     segmentation_outputs : tuple
         The outputs of segment_call_into_cf_fm in a tuple
-    call_parts : dictionary
+    call_parts_audio : dictionary
         Dictionary with numbered entries. If a sound has the following
         order of Cf and FM: FM-CF-FM, then the keys will be 
         'fm1','cf1','fm2'. The numbering is according to the chronological 
         order. 
     measurements : pd.DataFrame
         All the measurements from the FM and CF parts. 
-
-    backg_segmentation_info : dictionary
-        Contains the output from segment_call_from_background + a copy of 
-        main_call, the raw un-segmented audio with background. The objects are
-        accessed with the following keys:
-        'raw_audio', 'call_mask', 'call_backg_info'.
 
     Example
     -------
@@ -136,74 +130,75 @@ def segment_and_measure_call(main_call, fs,
     measure_horseshoe_bat_calls.measure_a_horseshoe_bat_call
 
     '''
-    backg_segmentation_info = {}
-    if segment_from_background:
-        raise NotImplementedError('background segmentation is not yet implemented!')
-
     cf, fm, info = segment_call_into_cf_fm(main_call, fs, 
                                                            **kwargs)
 
-    call_parts, measurements = measure_hbc_call(main_call, fs, cf, fm, 
+    measurements = measure_hbc_call(main_call, fs, cf, fm, 
                                                         **kwargs)
+    call_segments = parse_cffm_segments(cf,fm)
     
-    return (cf, fm, info), call_parts, measurements, backg_segmentation_info
+    call_parts_audio = {}
+    for (part_name, location) in call_segments:
+        call_parts_audio[part_name] = main_call[location]
 
-# def save_overview_graphs(all_subplots, analysis_name, file_name, index,
-#                          **kwargs):
-#     '''Saves overview graphs. 
+    return (cf, fm, info), call_parts_audio, measurements
 
-#     Parameters
-#     ----------
-#     all_subplots : list
-#         List with plt.subplot objects in them. 
-#         For each figure to be saved, one subplot object is enough.
-#     analysis_name : str
-#         The name of the analysis. If this funciton is called 
-#         through a batchfile, then it becomes the name of the 
-#         batchfile
-#     file_name : str
-#     index : int, optional
-#         A numeric identifier for each graph. This is especially relevant
-#         for analyses driven by batch files as there may be cases where the 
-#         calls are selected from the same audio file but in different parts. 
+def save_overview_graphs(all_subplots, analysis_name, file_name, index,
+                          **kwargs):
+    '''Saves overview graphs. 
 
-#     Returns
-#     -------
-#     None
+    Parameters
+    ----------
+    all_subplots : list
+        List with plt.subplot objects in them. 
+        For each figure to be saved, one subplot object is enough.
+    analysis_name : str
+        The name of the analysis. If this funciton is called 
+        through a batchfile, then it becomes the name of the 
+        batchfile
+    file_name : str
+    index : int, optional
+        A numeric identifier for each graph. This is especially relevant
+        for analyses driven by batch files as there may be cases where the 
+        calls are selected from the same audio file but in different parts. 
+
+    Returns
+    -------
+    None
     
-#     Notes
-#     -----
-#     This function has the main side effect of saving all the input figures
-#     into a pdf file with >1 pages (one page per plot) for the user to inspect 
-#     the results.
+    Notes
+    -----
+    This function has the main side effect of saving all the input figures
+    into a pdf file with >1 pages (one page per plot) for the user to inspect 
+    the results.
     
-#     Example
-#     ---------
-#     import numpy as np 
+    Example
+    ---------
+    import numpy as np 
     
-#     # 1st plot
-#     plt.figure()
-#     a = plt.subplot(211)
-#     plt.plot([1,2,3])
-#     b = plt.subplot(212)
-#     plt.plot([5,4,3])
+    # 1st plot
+    plt.figure()
+    a = plt.subplot(211)
+    plt.plot([1,2,3])
+    b = plt.subplot(212)
+    plt.plot([5,4,3])
     
-#     #2nd plot
-#     plt.figure()
-#     c = plt.subplot(121)
-#     plt.plot(np.random.normal(0,1,100))
-#     d = plt.subplot(122)
-#     plt.plot(np.random.normal(0,1,10))
+    #2nd plot
+    plt.figure()
+    c = plt.subplot(121)
+    plt.plot(np.random.normal(0,1,100))
+    d = plt.subplot(122)
+    plt.plot(np.random.normal(0,1,10))
     
-#     save_overview_graphs([a,c], 'example_plots', 'example_file',0)
-#     '''
+    save_overview_graphs([a,c], 'example_plots', 'example_file',0)
+    '''
     
-#     final_file_name = analysis_name+'_'+file_name+'_'+str(index)
+    final_file_name = analysis_name+'_'+file_name+'_'+str(index)
         
-#     # thanks to J0e3gan : https://stackoverflow.com/a/17788764
-#     pdf = matplotlib.backends.backend_pdf.PdfPages(final_file_name+".pdf")
+    # thanks to J0e3gan : https://stackoverflow.com/a/17788764
+    pdf = matplotlib.backends.backend_pdf.PdfPages(final_file_name+".pdf")
     
-#     for one_subplot in all_subplots: 
-#         pdf.savefig(one_subplot.figure)
-#     pdf.close()
+    for one_subplot in all_subplots: 
+        pdf.savefig(one_subplot.figure)
+    pdf.close()
 

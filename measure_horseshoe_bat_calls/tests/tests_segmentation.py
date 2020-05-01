@@ -14,7 +14,7 @@ class TestSegmentationMethods(unittest.TestCase):
     '''
     
     def setUp(self):
-        self.fs = 25000
+        self.fs = 50000
         call_props = {'upfm':(8000, 0.002),
                       'cf':(9000, 0.01),
                       'downfm':(6000, 0.003)}

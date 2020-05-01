@@ -42,10 +42,10 @@ class CheckMeasurementsWork(unittest.TestCase):
         self.fm = np.invert(self.cf)
     def test_simple(self):
         # Get the default measurements by not specifying any measurements explicitly
-        sound_segments, measures = measure_hbc_call(self.call, self.fs,
+        measures = measure_hbc_call(self.call, self.fs,
                                                         self.cf, self.fm)
     def test_custom_functions(self):
-        sound_segments, measures = measure_hbc_call(self.call, self.fs,
+        measures = measure_hbc_call(self.call, self.fs,
                                                 self.cf, self.fm,
                                                 measurements=[measure_peak_amplitude,
                                                               measure_peak_frequency])
@@ -55,14 +55,14 @@ class CheckMeasurementsWork(unittest.TestCase):
         return {'custom': custom_key}
     
     def test_custom_fn_withkwargs(self):
-        sound_segments, measures = measure_hbc_call(self.call, self.fs,
+        measures = measure_hbc_call(self.call, self.fs,
                                                 self.cf, self.fm,
                                                 measurements=[self.a_custom_measure_function],
                                                 custom_key='abracadabrs')
         
 
     def test_custom_terminal_freq(self):
-        sound_segments, measures = measure_hbc_call(self.call, self.fs,
+        measures = measure_hbc_call(self.call, self.fs,
                                                 self.cf, self.fm,
                                                 measurements=[measure_terminal_frequency],
                                                 terminal_frequency_threshold=-20)

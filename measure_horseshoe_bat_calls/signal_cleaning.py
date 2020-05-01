@@ -39,8 +39,8 @@ def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
         True indicates an anomalous sample. 
     extrap_window : float>0, optional
         The duration of the extrapolation window in seconds.
-        Defaults to 0.5*10^-3s
-
+        Defaults to 0.5ms 
+        
     Returns
     -------
     smooth_X : np.array

@@ -30,10 +30,6 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
 
     Returns
     --------
-    sound_segments : dictionary
-        Dictionary with keys 'cf' and 'fm'. 
-        There is only one entry for 'cf'
-        and upto two entries for 'fm'.
     measurement_values : pd.DataFrame
         A wide format dataframe with one row corresponding to all 
         the measured values for a CF or FM segment
@@ -77,19 +73,17 @@ def measure_hbc_call(call, fs, cf, fm, **kwargs):
     else:
         all_measurements = common_measurements()
     
-    sound_segments = {}
     measurement_values = []
     for segment in all_cf_fm_segments:
         segment_id, segment_indices = segment
         segment_measurements = perform_segment_measurements(call, fs,
                                                     segment,
                                                     all_measurements, **kwargs)
-        sound_segments[segment_id] = call[segment_indices]
         measurement_values.append(segment_measurements)
     
     measurement_values = pd.concat(measurement_values).reset_index(drop=True)
 
-    return sound_segments, measurement_values
+    return measurement_values
 
 def parse_cffm_segments(cf, fm):
     '''Recognises continuous stretches of Cf and FM segments, 
@@ -115,6 +109,8 @@ def parse_cffm_segments(cf, fm):
     >>> fm = np.array([0,0,0,1,1,1,0,0,0]).astype('bool')
     >>> ordered_regions = parse_cffm_segments(cf, fm)
     >>> print(ordered_regions)
+    [['cf1', slice(1, 3, None)], ['fm1', slice(3, 6, None)], 
+     ['cf2', slice(6, 8, None)]]
     '''
     cf_regions, fm_regions = find_regions(cf), find_regions(fm)
     cf_fm_regions_ordered = combine_and_order_regions(cf_regions, fm_regions)

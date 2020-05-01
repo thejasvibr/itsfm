@@ -18,11 +18,6 @@ from measure_horseshoe_bat_calls.view_horseshoebat_call import make_overview_fig
 from measure_horseshoe_bat_calls.user_interface import segment_and_measure_call
 from measure_horseshoe_bat_calls.user_interface import save_overview_graphs
 from measure_horseshoe_bat_calls.sanity_checks import check_preexisting_file
-#keyword arguments for call-background segmentation
-call_background_keywords = ['lowest_relevant_freq', 
-                            'wavelet_type',
-                            'background_threshold',
-                            'scales']
 
 # keyword arguments for cf-fm segmentation
 cf_fm_keywords = ['peak_percentage', 
