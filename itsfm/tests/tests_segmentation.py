@@ -5,7 +5,7 @@
 """
 import matplotlib.pyplot as plt
 import unittest
-from itsfm.segment_horseshoebat_call import *
+from itsfm.segment import *
 from itsfm.simulate_calls import make_cffm_call
 
 class TestSegmentationMethods(unittest.TestCase):

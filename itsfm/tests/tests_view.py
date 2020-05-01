@@ -5,7 +5,7 @@ Tests for the view module
 @author: tbeleyur
 """
 import unittest
-from itsfm.view_horseshoebat_call import itsFMInspector
+from itsfm.view import itsFMInspector
 from itsfm.simulate_calls import make_cffm_call
 from itsfm.user_interface import segment_and_measure_call
 

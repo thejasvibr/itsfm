@@ -50,11 +50,11 @@ Let's take a look at an example where we [TO BE COMPLETED!!!]
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
-import itsfm.segment_horseshoebat_call 
-from itsfm.segment_horseshoebat_call import segment_call_from_background
-from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
-from itsfm.measure_a_horseshoe_bat_call import measure_hbc_call
-from itsfm.measure_a_horseshoe_bat_call import parse_cffm_segments
+import itsfm.segment 
+from itsfm.segment import segment_call_from_background
+from itsfm.segment import segment_call_into_cf_fm
+from itsfm.measure import measure_hbc_call
+from itsfm.measure import parse_cffm_segments
 
 def segment_and_measure_call(main_call, fs,
                              segment_from_background=False, 
@@ -127,7 +127,7 @@ def segment_and_measure_call(main_call, fs,
 
     See Also
     --------
-    itsfm.measure_a_horseshoe_bat_call
+    itsfm.measure
 
     '''
     cf, fm, info = segment_call_into_cf_fm(main_call, fs, 
