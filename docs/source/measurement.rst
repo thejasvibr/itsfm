@@ -1,7 +1,7 @@
 API: Measuring sounds
 >>>>>>>>>>>>>>>>>>>>>
 
-.. automodule:: itsfm.measure_a_horseshoe_bat_call
+.. automodule:: itsfm.measure
    :members:
   
 Measurement functions
