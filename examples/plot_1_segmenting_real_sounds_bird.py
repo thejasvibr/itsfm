@@ -18,7 +18,11 @@ import scipy.signal as signal
 import itsfm 
 from itsfm.data import example_calls, all_wav_files,folder_with_audio_files
 #
-index = int(np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])[0])
+try:
+	index = int(np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])[0])
+except:
+	index = int(np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])
+
 full_audio, fs = example_calls[index] # load the relevant example audio
 
 #

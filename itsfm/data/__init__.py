@@ -59,7 +59,6 @@ def normalise_to_pm1(X):
     return X
 
 example_calls = []
-print(f'example_calls: len {len(example_calls)}')
 for each in all_wav_files:
     try:
         audio, fs_original = sf.read(each)
@@ -68,7 +67,3 @@ for each in all_wav_files:
     audio = normalise_to_pm1(audio)
     audio_and_fs = (audio, fs_original)
     example_calls.append(audio_and_fs)
-print(f'example_calls: len {len(example_calls)}')
-       
-   
-
