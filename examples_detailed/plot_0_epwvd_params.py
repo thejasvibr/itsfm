@@ -16,7 +16,6 @@ details of course, the original documentation should hopefully be helpful.
 """
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
-import numpy as np 
 import itsfm 
 from itsfm.data import example_calls
 

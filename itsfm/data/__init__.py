@@ -20,7 +20,7 @@ except:
 folder_with_audio_files, file_name =os.path.split(os.path.abspath(__file__))
 search_path = os.path.join(folder_with_audio_files)
 all_wav_files = glob.glob(search_path+'/*.WAV') + glob.glob(search_path+'/*.wav')
-example_calls = []
+
 
 def has_positive_and_negative(X):
     '''
@@ -58,6 +58,8 @@ def normalise_to_pm1(X):
         
     return X
 
+example_calls = []
+print(f'example_calls: len {len(example_calls)}')
 for each in all_wav_files:
     try:
         audio, fs_original = sf.read(each)
@@ -66,6 +68,7 @@ for each in all_wav_files:
     audio = normalise_to_pm1(audio)
     audio_and_fs = (audio, fs_original)
     example_calls.append(audio_and_fs)
+print(f'example_calls: len {len(example_calls)}')
        
    
 

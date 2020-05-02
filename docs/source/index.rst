@@ -84,7 +84,7 @@ Please raise an issue or pull request on Github
 Acknowledgements
 ~~~~~~~~~~~~~~~~
 
-The PWVD transforms in itsFM rely on the `tftb <https://tftb.readthedocs.io/en/latest/auto_examples/index.html>`_ package by Jaidev Deshpande. 
+The PWVD transforms in itsFM rely on the `tftb <https://tftb.readthedocs.io/en/latest/index.html>`_ package by Jaidev Deshpande. 
 I'd like to thank the Neetash MR, Aditya Krishna and Holger R. Goerlitz for helpful discussions that eventually lead down this path, and Diana 
 Schoeppler for discussions that inspired the peak percentage method in this package. I'd also like to thank all the people who happily sent 
 me example data and gave feedback whenever asked! 
@@ -115,7 +115,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 .. toctree::
-   :maxdepth:3
+   :maxdepth:1
 	
    api_reference
 
