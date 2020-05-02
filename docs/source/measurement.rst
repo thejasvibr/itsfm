@@ -1,5 +1,3 @@
-.. _measurement:
-
 API: Measuring sounds
 >>>>>>>>>>>>>>>>>>>>>
 

@@ -1,13 +1,13 @@
 """
-How to: troubleshoot PWVD segmentation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+'Difficult' example
+^^^^^^^^^^^^^^^^^^^
 The <insertname> package was mainly designed keeping horseshoe bat calls 
 in mind. These calls are high-frequency (>50kHz) and short (20-50ms) sounds
 which are quite unique in their structure. Many of the default parameter
 values reflect the original dataset. In fact, many of the default parameters
 don't even work for some of the example datasets themselves!
 It should be no surprise that unpredictable things happen when segmentation
- and tracking is run with default values. 
+and tracking is run with default values. 
 
 This example will guide you through understanding the various parameters
 that can be tweaked and what effect they actually have. It is not 
@@ -17,7 +17,7 @@ details of course, the original documentation should hopefully be helpful.
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import numpy as np 
-import itsfm as mhbc
+import itsfm 
 from itsfm.data import example_calls
 
 # a chosen set of tricky calls to illustrate various points
@@ -35,7 +35,7 @@ audio_examples = { index: example_calls[index] for index in tricky_indices}
 # of a user-defined `window_size`. 
 
 audio, fs = audio_examples[4]
-mhbc.visualise_call(audio, fs)
+itsfm.visualise_sound(audio, fs)
 
 # %% 
 # If we want high temporal resolution to segment out the call, we need a short
@@ -45,8 +45,8 @@ halfms_windowsize = int(fs*0.5*10**-3)
 twoms_windowsize = halfms_windowsize*4
 plt.figure()
 ax = plt.subplot(211)
-mhbc.plot_movingdbrms(audio, fs, window_size=halfms_windowsize)
-mhbc.plot_movingdbrms(audio, fs, window_size=twoms_windowsize)
+itsfm.plot_movingdbrms(audio, fs, window_size=halfms_windowsize)
+itsfm.plot_movingdbrms(audio, fs, window_size=twoms_windowsize)
 
 first_color = '#1f77b4'
 second_color = '#ff7f0e'
@@ -55,7 +55,7 @@ custom_lines = [Line2D([0],[0], color=first_color),
 ax.legend(custom_lines, ['0.5ms', '2ms'])
 plt.ylabel('Moving dB rms')
 plt.subplot(212, sharex=ax)
-_ = mhbc.make_specgram(audio, fs);
+_ = itsfm.make_specgram(audio, fs);
 
 # %% 
 # The fact that the 0.5ms moving rms profile is so 'rough' is already a bad
@@ -71,51 +71,64 @@ keywords = {'segment_method':'pwvd',
             'signal_level':-40,
             'window_size':twoms_windowsize}
 
-outputs = mhbc.segment_and_measure_call(audio, fs,**keywords)
-seg_out, call_parts, measurements, backg = outputs
+outputs = itsfm.segment_and_measure_call(audio, fs,**keywords)
+output_inspector = itsfm.itsFMInspector(outputs, audio, fs)
 
-cf, fm, info = seg_out
+output_inspector.visualise_geq_signallevel()
 
 # %% 
 # Let's check the output as it is right now
-mhbc.plot_cffm_segmentation(cf, fm, audio, fs)
+output_inspector.visualise_cffm_segmentation()
 
 # %% 
 # Inspect initial outputs
-# The CF-FM segmentation is *clearly* not correct. There's way too many CF and 
-# FM segments. Where is this coming from? Let's inspect the `info` dictionary
-# and its components. 
-info.keys()
+# The CF-FM segmentation is *clearly* not correct. There's FM component recognised
+# at all - how is this happening? The reason it's not happening is likely because
+# the :code:`fmrate` has been misspecified or the frequency profile wasn't
+# estimated correctly. Let's view the frequency profile first. 
+
+output_inspector.visualise_frequency_profiles()
 
 # %% 
-# The `info` dictionary : a peek into how it all works
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# With the 'info' dictionary, we get access to the various underlying data that `segment_and_measure_call` used
-# to come to the end point. You can check the actual region that was defined 
-# as being greater or equal to the input `signal_level` by inspecting 
-# the `geq_signal_level` which is a list of slices above the threshold. 
-#
-print(info['geq_signal_level'])
+# The cleaned frequency profile seems to somehow 'ignore' the 
+# downward FM sweep in the call. Why is this happening? The
+# 'flatness' in the cleaned frequency profile is likely 
+# coming from the spike detection. Spikes in the 
+# frequency profile are detected when the 'accelaration' of 
+# (the 2nd derivative) the frequency profile increases beyond
+# a threshold. Let's check out the accelaration profile 
 
-# assign the slice corresponding to the region above the threshold 
-above_threshold = np.zeros(audio.size,dtype='bool')
-above_threshold[info['geq_signal_level'][0]] = True
-# make a plot of the region above the threshold in the form of a binary array.
-plt.figure()
-mhbc.make_specgram(audio, fs)
-mhbc.make_waveform(above_threshold*125000, fs)
+output_inspector.visualise_accelaration()
 
 # %% 
-# The main signal has been identified correctly, even though part of the 
-# beginning of the call is not in the window. Whether you want to change the 
-# `signal_level` again or not is a matter of the exact use case!
+# The accelaration profile matches this suspicion. When a spikey 
+# region is encountered in the frequency profile in the `pwvd`
+# frequency tracking - it backs up a bit and extrapolates the 
+# slope according to what's just behind the spikey region. 
+# The 'length' of this backing up in seconds is decided by 
+# the :code:`extrap_window`, which is short for extrapolation 
+# window. Let's reduce the :code:`extrap_window` and see if 
+# the frequency is tracked better. 
+
+keywords['extrap_window'] = 50*10**-6
+outputs_refined = itsfm.segment_and_measure_call(audio, fs,**keywords)
+out_refined_inspector = itsfm.itsFMInspector(outputs_refined, audio, fs)
+out_refined_inspector.visualise_frequency_profiles()
+
+# %% 
+# So, we've managed to get a much better tracking by telling the 
+# algorithm not to 'backup' too much to infer the trend
+# the frequency profile was heading in. It's not perfect, but
+# it does recover the fact that there is an FM region. Remember this
+# issue came up because of the weird reflection of the CF part
+# that is of comparable intensity as the actual FM part itself. 
 
 # %% 
 # How the CF-FM segmentation works
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #
 # .. image:: ../_static/fmrate_workflow.png
-#    :width: 70 %
+#    :width: 66 %
 #    :align: left
 # CF-FM segmentation occurs through a multi step process. 
 # First the instantaneous frequency of the signal is estimated at a sample-level
@@ -141,17 +154,9 @@ mhbc.make_waveform(above_threshold*125000, fs)
 # wherever a 'step' rose or dropped. Thanks to the sample-wise unique values in `fitted_fp` we can now 
 # calculate the local variation in frequency modulation across the sound.
 #
-# Let's now check how well the frequency profiles have been tracked. Typically 
-# a weird segmentation is the result of poor underlying parameter choices for
-# the signal at hand. 
-raw_fp, cleaned_fp, fitted_fp = [info[key] for key in ['raw_fp', 'cleaned_fp', 'fitted_fp']]
+# Let's now check the frequency profiles once more
 
-plt.figure()
-mhbc.make_specgram(audio, fs)
-plt.plot(mhbc.make_x_time(raw_fp, fs), raw_fp, label='raw fp')
-plt.plot(mhbc.make_x_time(cleaned_fp, fs), cleaned_fp, label='cleaned fp')
-plt.plot(mhbc.make_x_time(fitted_fp, fs), fitted_fp, label='fitted fp')
-plt.legend()
+out_refined_inspector.visualise_frequency_profiles()
 
 # %% 
 # The raw and cleaned frequency profiles are very similar, though the 'cleanliness'
@@ -161,8 +166,9 @@ plt.legend()
 # This is because of the downsampling that happens to estimate the `fmrate`. 
 # The rise time is a direct indicator of the downsampling factor, which samples
 # the `cleaned_fp` at periodic intervals, and is thus called `sample_every`. The
-# `sample_every` parameter defaults to 0.5ms. If the frequency profiles broadly match
-# the actual call as seen coarsely on a spectrogram - where is the issue here?
+# `sample_every` parameter defaults to 1% of the input signal duration. If the
+# frequency profiles broadly match the actual call as seen coarsely on a spectrogram.
+
 
 # %% 
 # Step 2: Check the `fmrate` profile
@@ -171,109 +177,63 @@ plt.legend()
 # they show. The `fmrate` is a np.array with the estimated frequency modulation
 # rate in **kHz/ms**. Yes, pay attention to the units, *it's not kHz/s, but kHz/ms*!
 # Let's take a look at the FM rate profile for this sound. 
-fmrate = info['fmrate']
 
-plt.figure()
-plt.subplot(311)
-plt.title('FM rate')
-out = mhbc.make_specgram(audio, fs);
-plt.xticks([])
-plt.xlabel('')
-plt.subplot(312)
-mhbc.make_waveform(fmrate, fs)
-plt.xticks([])
-plt.xlabel('')
-plt.ylabel('FM rate, kHz/ms')
-ax2=plt.subplot(313)
-plt.title('CF-FM segmentation')
-mhbc.make_waveform(cf, fs)
-mhbc.make_waveform(fm, fs)
-plt.ylabel('CF/FM')
-ax2.legend(custom_lines, ['CF', 'FM'])
+out_refined_inspector.visualise_fmrate()
+
+# %% 
+# Let's compare this fmrate profile with the final CF-FM segmentation. 
+
+out_refined_inspector.visualise_cffm_segmentation()
 
 # %%
 # Something's odd -- even though the FM rate seems to be close to zero
-# in the middle, parts of it are still being classified as FM!! What's happening. 
+# near the actual FM parts, parts of it are still being classified as FM!! What's happening. 
 # Let's take a closer look at the FM rate profile, but zoom in so the y-axis is
-# more limited. Let's also overlay the CF/FM outputs over this plot. 
+# more limited. Let's also overlay the CF-FM segmentation results 
+# over this. 
+seg_out, call_parts, msmts = outputs_refined 
+cf, fm, info = seg_out 
 
-plt.figure()
-plt.subplot(211)
-mhbc.make_waveform(fmrate, fs)
-plt.ylim(0,1.5)
-plt.xticks([])
-plt.ylabel('FM rate, kHz/ms')
-ax3 = plt.subplot(212)
-mhbc.make_waveform(cf, fs,)
-mhbc.make_waveform(fm, fs,)
-plt.ylabel('CF/FM')
-ax3.legend(custom_lines, ['CF', 'FM'])
+w,s = out_refined_inspector.visualise_fmrate()
+s.set_ylim(0,5)
+s.set_xlim(0.01,0.02)
+w.plot()
+itsfm.make_waveform(cf*4,fs)
+itsfm.make_waveform(fm*4,fs)
+
 
 # %% 
-# From this you can clearly see that the FM parts correspond to tiny peaks in 
-# the `fmrate` which reach around 0.25 kHz/ms. It may of course be no surprise
-# once you know the default `fmrate_threshold` is 0.2 kHz. This rate doesn'
+# From this you can clearly see that the FM part correspond to tiny peaks in 
+# the `fmrate` which reach around 1 kHz/ms. It may of course be no surprise
+# once you know the default `fmrate_threshold` is 1 kHz/ms. This rate doesn'
 # make sense for bat call FM portions as they have much high frequency modulation
-# rates. In general, 0.2 kHz/ms is *very* low, in comparison many bat calls can
-# go from 90-30 kHz (60kHz bandwidth) in about 3ms, this corresponds to 20kHz/ms!
-# The easy way to estimate the relevant `fmrate_threshold` is to eyeball 
+# rates. The easy way to estimate the relevant `fmrate_threshold` is to eyeball 
 # the start and end frequencies of a call part and calculate the fm rate!
 
 # %% 
 # Step 3: Set a relevant `fmrate_threshold`
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # For this example call any FM rate above 0.5kHz/ms will allow a sensible segmentation of the CF and FM
-# parts. Lets set it more conservatively at 1kHz/ms, this will reduce false 
+# parts. Lets set it more conservatively at 2kHz/ms, this will reduce false 
 # positives. In general, for this particular call type, the FM sweep has an approximate
 # rate of 5-6kHz/ms, and so we should definitely be able to pick up the FM region 
-# with a threshold of 1kHz/ms. 
+# with a threshold of 2kHz/ms. 
 
 # add an additional keyword argument
-keywords['fmrate_threshold'] = 1.0 # kHz/ms
+keywords['fmrate_threshold'] = 2.0 # kHz/ms
 
-outputs = mhbc.segment_and_measure_call(audio, fs,**keywords)
-seg_out, call_parts, measurements, backg = outputs
-cf, fm, info = seg_out
-# %% 
-# Let's take a look at the new segmentation results
-mhbc.plot_cffm_segmentation(cf, fm, audio, fs)
-raw_fp, cleaned_fp, fitted_fp = [info[key] for key in ['raw_fp', 'cleaned_fp', 'fitted_fp']]
+output_newfmr = itsfm.segment_and_measure_call(audio, fs,**keywords)
+
+out_newfmr_insp = itsfm.itsFMInspector(output_newfmr, audio, fs)
+out_newfmr_insp.visualise_cffm_segmentation()
 
 # %% 
-# Remember, there was no change to the actual frequency tracking parameters here, 
-# and so there's no change expected in any of the frequency profiles. However, 
-# There is still one thing that's not quite right. The spectrogram doesn't really show an
-# FM segment at the beginning of the call - why is it being detected as one?
-# This could be two things: 1) there's poor tracking of the frequency in the 
-# signal edges, or 2) there is *actually* an frequency modulation, but it's not
-# quite visible. Let's zoom in and take a look. 
-
-plt.figure()
-ax4 = plt.subplot(311)
-mhbc.make_specgram(audio, fs)
-plt.plot(mhbc.make_x_time(raw_fp, fs), raw_fp, label='raw fp')
-plt.plot(mhbc.make_x_time(cleaned_fp, fs), cleaned_fp, label='cleaned fp')
-plt.plot(mhbc.make_x_time(fitted_fp, fs), fitted_fp, label='fitted fp')
-plt.legend()
-plt.xlim(0.0015,0.0035);plt.ylim(0,110000)
-plt.subplot(312, sharex=ax4)
-mhbc.make_waveform(fmrate, fs)
-plt.ylabel('FM rate, kHz/ms')
-ax5 = plt.subplot(313, sharex=ax4)
-mhbc.make_waveform(cf, fs,)
-mhbc.make_waveform(fm, fs,)
-plt.ylabel('CF/FM')
-ax5.legend(custom_lines, ['CF', 'FM'])
-
-
-
-# add an additional keyword argument
-keywords['sample_every'] = 100*10**-6
-
-outputs = mhbc.segment_and_measure_call(audio, fs,**keywords)
-seg_out, call_parts, measurements, backg = outputs
-cf, fm, info = seg_out
-# %% 
-# Let's take a look at the new segmentation results
-mhbc.plot_cffm_segmentation(cf, fm, audio, fs)
-raw_fp, cleaned_fp, fitted_fp = [info[key] for key in ['raw_fp', 'cleaned_fp', 'fitted_fp']]
+# Summary
+# ~~~~~~~
+# This tutorial exposed some of the messy details behind the 
+# PWVD frequency tracking. In most cases, I hope you won't need to 
+# think so much about the parameter choices. However, some basic
+# playing around will definitely be necessary each time you're handling
+# a new type of sound or recording type. Hopefully, this has either allowed 
+# you to get a glimpse into the system. Do let me know if 
+# there's something (or everythin) is confusing, and not clear!

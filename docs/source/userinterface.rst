@@ -1,5 +1,3 @@
-.. _userinterface:
-
 API : The user interface
 >>>>>>>>>>>>>>>>>>>>>>>>
 

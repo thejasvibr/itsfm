@@ -39,7 +39,7 @@ def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
         True indicates an anomalous sample. 
     extrap_window : float>0, optional
         The duration of the extrapolation window in seconds.
-        Defaults to 0.5ms 
+        Defaults to 0.1ms 
         
     Returns
     -------
@@ -65,7 +65,7 @@ def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
 
     '''
     smooth_X = X.copy()
-    extrap_window = kwargs.get('extrap_window', 0.5*10**-3)
+    extrap_window = kwargs.get('extrap_window', 0.1*10**-3)
     ref_region_length = int(extrap_window*fs)
     
     anomalous_broader = ndimage.filters.percentile_filter(anomalous, 100, 

@@ -1,6 +1,6 @@
 """
 Setting the correct `max_acc` value
-===================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Some of the methods in the <INSERTNAME> package estimate the instantaneous
 frequency at sample-level resolution. Most methods will suffer from edge effects

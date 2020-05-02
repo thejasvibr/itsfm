@@ -1,5 +1,5 @@
 itsfm : Identify, Track and Segment sound (by) Frequency (and its) Modulation
-=================================================================================
+=============================================================================
 The `itsfm` package identifies regions of sound with and without frequency modulation, 
 and allows custom measurements to be made on them. It's all in the name. Each of the 
 task behind the identification, tracking and segmenting of a sound can be done independently.
@@ -11,11 +11,17 @@ The basic workflow involves the tracking of a sounds frequency over time, and th
 rate of frequency modulation (FM), which is then used to decide which parts of a sound are frequency
 modulated, and which are not. Here are some examples to show the capabilities of the package. 
 
-Warning
-~~~~~~~
-This page is still under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
-Do not be surprised by dramatic changes.
+*Warning : This page is still under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
+Do not be surprised by dramatic changes.*
 
+Let's cut to the chase : some examples *NOW*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+	:maxdepth:2
+	
+	gallery_dir/index.rst
+	gallery_detailed/index.rst
 
 What the package `does`:
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,11 +43,7 @@ What the package `does not`:
 Installation
 ~~~~~~~~~~~~
 This is a pre-PyPi version of the package. The easiest way to install the package is to head to this `page <https://github.com/thejasvibr/itsfm.git>`_, and 
-download/clone the repository. Go into the downloaded folder and type :command:`python setup.py install`.
-
-.. include:: gallery_dir/index.rst
-
-.. include:: gallery_detailed/index.rst
+download/clone the repository. Go into the downloaded folder and type :code:`python setup.py install`.
 
 
 What the package could do with (future feature ideas):
@@ -61,12 +63,13 @@ Why is everything in this codebase a function? Have you heard of classes?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This is the author's first Python package, and the author admits it may not 
 be the most elegant implementation. The author's previous experience (or lack thereof)  
-working with classes may have left some bad memories :P.However the author also admits
- that many things in the package might have been less cumbersome with the use of classes, 
+working with classes may have left some bad memories :P.However the author also admits 
+that many things in the package might have been less cumbersome with the use of classes,
 and plans to implement it in due time.  
 
 Where to get help
 ~~~~~~~~~~~~~~~~~
+
 Hopefully this web page has enough information. Please check the examples to see
 if the same error messages haven't come up already. If something's not clear or 
 there's something not covered do write to me : thejasvib@gmail.com. I'll try to answer
@@ -74,11 +77,13 @@ within a week.
 
 I found a bug and/or have fixed something
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Please raise an issue or pull request on Github 
 
 
 Acknowledgements
 ~~~~~~~~~~~~~~~~
+
 The PWVD transforms in itsFM rely on the `tftb <https://tftb.readthedocs.io/en/latest/auto_examples/index.html>`_ package by Jaidev Deshpande. 
 I'd like to thank the Neetash MR, Aditya Krishna and Holger R. Goerlitz for helpful discussions that eventually lead down this path, and Diana 
 Schoeppler for discussions that inspired the peak percentage method in this package. I'd also like to thank all the people who happily sent 
@@ -86,6 +91,7 @@ me example data and gave feedback whenever asked!
 
 License
 ~~~~~~~
+
 MIT License
 
 Copyright (c) 2020 Thejasvi Beleyur
@@ -108,16 +114,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
-API Reference
-~~~~~~~~~~~~~
-
 .. toctree::
-   :maxdepth: 3
-  
-   userinterface	
-   segmentation
-   measurement
-   view
-   supportmodules
+   :maxdepth:3
+	
+   api_reference
 

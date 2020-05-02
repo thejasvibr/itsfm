@@ -1,5 +1,3 @@
-.. _supportmodules
-
 API: support modules
 >>>>>>>>>>>>>>>>>>>>
 

@@ -8,7 +8,7 @@ The recording is an excerpt of a bigger recording made by Jarek Matusiak
 
 Note
 >>>>
-As of version 0.1.0, this recording is also a very good example of how
+As of version 0.0.X, this recording is also a very good example of how
 multi-harmonic sounds can't be tracked very well! 
 """
 import matplotlib.pyplot as plt
@@ -19,16 +19,28 @@ import itsfm
 from itsfm.data import example_calls, all_wav_files,folder_with_audio_files
 #
 index = int(np.argwhere(['Parus_major_Poland' in each for each in all_wav_files])[0])
-audio, fs = example_calls[index] # load the relevant example audio
-
+full_audio, fs = example_calls[index] # load the relevant example audio
 
 #
-w,s = itsfm.visualise_sound(audio, fs, fft_size=512)
+w,s = itsfm.visualise_sound(full_audio, fs, fft_size=512)
 s.set_ylim(0,10000)
 
 # %% 
-# The bird song has a relatively constant frequency and frequency modulated elements
-# in it as you can see in the graph above.
+# The complete audio recording takes a long time to run, and so let's focus on
+# the sections between 0.8-1.5s. It contains one example of the three types of 
+# the great tit's calls. 
+t_start, t_stop = 0.8, 1.5
+selection = slice(int(fs*t_start), int(fs*t_stop))
+audio = full_audio[selection]
+
+w,s = itsfm.visualise_sound(audio, fs, fft_size=256)
+s.set_ylim(0,10000)
+
+
+# %% 
+# The bird song has a three types of calls, a smooth frequency modulated sweep
+# a constant frequency tone, and the last element has a rather rapid frequency
+# sweep which then transitions into a constant frequency segment.
 
 # %%
 # Setting the correct signal level
@@ -108,7 +120,7 @@ bird_inspect.visualise_fmrate()
 # The fm segments in the great tits song correspond to an FM rate of >= 0.005 kHz/ms.
 # Remember that all frequency modulation rates are in kHz/ms. Let's set this as the
 # threshold and proceed to segment. 
-non_default_params['fmrate_threshold'] = 0.05 # 
+non_default_params['fmrate_threshold'] = 0.02 # 
 
 output_newrate = itsfm.segment_and_measure_call(audio, fs,
                                         **non_default_params)
@@ -130,6 +142,12 @@ newrate_inspect.visualise_cffm_segmentation()
 # inspect the actual frequency profiles underlying the `fmrate` calcultions
 
 newrate_inspect.visualise_frequency_profiles()
+
+# %% 
+# The issue with the third element is that there's a multiple harmonics
+# and this may cause the local frequency estiamte to vary up and down
+# . We can try to overcome the effect of non-peak frequencies using the 
+# :code:`percentile` parameter. The :code:`percentile` essentially
 
 # %% 
 # *to be completed....*

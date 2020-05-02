@@ -1,5 +1,3 @@
-.. _view:
-
 API : Viewing sounds, parameters and results
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
