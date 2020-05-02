@@ -19,7 +19,7 @@ import itsfm
 from itsfm.data import example_calls, all_wav_files,folder_with_audio_files
 
 great_tit_rec = list(map( lambda X: 'Parus_major_Poland' in X, all_wav_files))
-index = int(np.argwhere(great_tit_rec))
+index = great_tit_rec.index(True)
 full_audio, fs = example_calls[index] # load the relevant example audio
 
 #
