@@ -1,8 +1,8 @@
 include *.png
 include *.wav
 include *.csv
-include measure_horseshoe_bat_calls/*.csv
-include measure_horseshoe_bat_calls/data/*
+include itsfm/*.csv
+include itsfm/data/*
 include docs/*.png
 include docs/*.bat
 include docs/*.txt
