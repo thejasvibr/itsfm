@@ -81,6 +81,6 @@ sphinx_gallery_conf = {
      'examples_dirs': ['../../examples', '../../examples_detailed'],   # path to your example scripts
      'gallery_dirs': ['gallery_dir', 'gallery_detailed'],  # path to where to save gallery generated output
 	 'image_scrapers': ('matplotlib'),
-	 'within_subsection_order': FileNameSortKey,
+	 'within_subsection_order': FileNameSortKey
 						}
 

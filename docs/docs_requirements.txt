@@ -1,8 +1,6 @@
-
 numpy>1.15
 pandas
 soundfile
-peakutils
 scipy
 scikit-image
 matplotlib
