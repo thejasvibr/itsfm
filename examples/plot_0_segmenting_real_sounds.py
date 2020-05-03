@@ -12,7 +12,7 @@ print(contributors)
 
 # %% Let's load the example data from the `data` module of the package
 
-from itsfm.data import example_calls
+from itsfm.data import example_calls, all_wav_files
 
 # %% 
 # Separating the constant frequency (CF) and frequency-modulated parts of a call
