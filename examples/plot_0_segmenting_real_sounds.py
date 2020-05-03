@@ -31,13 +31,12 @@ s.set_ylim(60000, 125000)
 # actual parameter settings for now. We'll ease into it later !
 non_default_parameters = {
                           'segment_method':'pwvd',
-                          'signal_level':-26, # dBrms re 1
+                          'signal_level':-27, # dBrms re 1
                           'fmrate_threshold':2.0, # kHz/ms
                           'max_acc':2.0, # kHz/ms^2
                           'window_size':int(fs*0.0015) # number of samples
                           }
 outputs = itsfm.segment_and_measure_call(audio, fs, 
-                                        
                                         **non_default_parameters)
 
 # load the results into a convenience class 
