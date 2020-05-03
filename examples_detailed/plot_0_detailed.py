@@ -17,13 +17,13 @@ details of course, the original documentation should hopefully be helpful.
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 import itsfm 
-from itsfm.data import example_calls
+from itsfm.data import example_calls, all_wav_files
 
 # a chosen set of tricky calls to illustrate various points
-tricky_indices = [4,5,6,8,11,12,18,25]
-audio_examples = { index: example_calls[index] for index in tricky_indices}
 
-
+tricky_rec = list(map( lambda X: '2018-08-17_23_115' in X, all_wav_files))
+index = tricky_rec.index(True)
+audio, fs = example_calls[index] # load the relevant example audio
 
 # %%
 # Step 1: the right `signal_level`
@@ -32,9 +32,6 @@ audio_examples = { index: example_calls[index] for index in tricky_indices}
 # background and what is signal. The signal of interest is identified as
 # being above a particular dB rms, as calculated y a moving dB rms window
 # of a user-defined `window_size`. 
-
-audio, fs = audio_examples[4]
-itsfm.visualise_sound(audio, fs)
 
 # %% 
 # If we want high temporal resolution to segment out the call, we need a short
