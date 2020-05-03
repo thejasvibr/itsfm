@@ -8,9 +8,12 @@ segmentation and measuring capabilities of the pacakge.
 """
 
 import matplotlib.pyplot as plt
+import numpy as np 
+np.random.seed(82319)
 import itsfm
 from itsfm.simulate_calls import make_call_zoo, add_noise
 from itsfm.segment import segment_call_into_cf_fm
+
 
 fs=30000
 
