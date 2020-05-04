@@ -87,7 +87,8 @@ def measure_terminal_frequency(audio, fs, segment,**kwargs):
     --------
     itsfm.get_terminal_frequency
     '''
-    terminal_freq, threshold = get_terminal_frequency(audio, fs, **kwargs)
+    terminal_freq, threshold = get_terminal_frequency(audio[segment],
+                                                      fs, **kwargs)
     return {'terminal_frequency':terminal_freq,
             'terminal_frequency_threshold':threshold}
     
