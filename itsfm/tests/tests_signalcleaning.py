@@ -173,7 +173,7 @@ class TestExterpolateOverAnomalies(unittest.TestCase):
     def setUp(self):
         self.element = np.linspace(0,10,5000)
         self.input = np.concatenate((self.element[::-1], self.element))
-        self.fs = 2000
+        self.fs = 20000
         self.anomalous = np.concatenate((np.zeros(10, dtype='bool'),
                                          np.ones(4980, dtype='bool'),
                                          np.zeros(10, dtype='bool'))

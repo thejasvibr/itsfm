@@ -20,3 +20,8 @@ Functions which refine, clean and detect outliers.
 
 .. automodule:: itsfm.signal_cleaning
    :members:
+   
+Batch processing
+<<<<<<<<<<<<<<<<
+.. automodule:: itsfm.batch_processing
+   :members:

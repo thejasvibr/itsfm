@@ -19,11 +19,8 @@ The broad idea of this package is to achieve a loose coupling between the I,T, S
 * S : Segment according to the frequency modulation. Calculates the local rate of frequency modulation over a sound and classifies parts of it 
   as frequency modulated (FM) or constant frequency (CF)
 
-The package can be 
-
-
-*Warning : This page is still under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
-Do not be surprised by dramatic changes.*
+*Warning : The docs are constantly under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
+Do not be surprised by dramatic changes, but do come back regularly to see improvements!*
 
 Let's cut to the chase : some examples *NOW*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,6 +30,13 @@ Let's cut to the chase : some examples *NOW*
 	
 	gallery_dir/index.rst
 	gallery_detailed/index.rst
+
+.. toctree::
+   :maxdepth:2
+   :caption: Using itsfm without coding:
+   
+   
+   no_coding.rst
 
 What the package `does`:
 ~~~~~~~~~~~~~~~~~~~~~~~~

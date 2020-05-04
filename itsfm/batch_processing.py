@@ -4,33 +4,20 @@ and the visualisations.
 
 .. code-block:: bash
 
-    $ python -m measure-horseshoe-bat-calls -batchfile template_batchfile.csv
+    $ python -m itsfm -batchfile template_batchfile.csv
 
 """
+from copy import copy
 import os
+import pdb
 import pandas as pd
 import soundfile as sf
 from tqdm import tqdm
-from itsfm.segment_horseshoebat_call import segment_call_into_cf_fm
-from itsfm.segment_horseshoebat_call import segment_call_from_background
-from itsfm.view_horseshoebat_call import check_call_background_segmentation
-from itsfm.view_horseshoebat_call import make_overview_figure
+import itsfm
 from itsfm.user_interface import segment_and_measure_call
 from itsfm.user_interface import save_overview_graphs
+from itsfm.view import itsFMInspector
 from itsfm.sanity_checks import check_preexisting_file
-
-# keyword arguments for cf-fm segmentation
-cf_fm_keywords = ['peak_percentage', 
-                  'window_size',
-                  'lowpass',
-                  'highpass'
-                  'pad_duration'
-                  'min_fm_duration']
-
-# keywords for the visualisation module
-view_keywords = [
-        
-                ]
 
 def run_from_batchfile(batchfile_path):
     '''
@@ -50,82 +37,90 @@ def run_from_batchfile(batchfile_path):
 
     for row_number, one_batchfile_row in tqdm(batch_data.iterrows(),
                                               total=batch_data.shape[0]):
-        subplots_to_graph = []
+
         input_arguments = parse_batchfile_row(one_batchfile_row)
         main_audio, fs = load_raw_audio(input_arguments)
         
         audio_file_name = get_only_filename(input_arguments['audio_path'])
         print('Processing '+audio_file_name+' ...')
-        segment_from_background = to_separate_from_background(input_arguments)
-
         segment_and_measure = segment_and_measure_call(main_audio,
-                                                    fs, segment_from_background,
+                                                           fs, 
                                                     **input_arguments)
-        (cf, fm, info), call_parts, measurements, bg_seg = segment_and_measure
-
-        if segment_from_background:
-            callbg_wavef, _ = check_call_background_segmentation(bg_seg['raw_audio'],
-                                                               fs,
-                                                                bg_seg['call_mask'],
-                                                               **input_arguments)
-            subplots_to_graph.append(callbg_wavef)
+        out_inspect = itsFMInspector(segment_and_measure, main_audio, fs, 
+                                     **input_arguments)
+        (cf, fm, info), call_parts, measurements = segment_and_measure
         
-        overview_figure = make_overview_figure(main_audio, fs,
-                             measurements,
-                             **input_arguments)
-        subplots_to_graph.append(overview_figure)
+        # start making diagnostic plots
+        one = out_inspect.visualise_geq_signallevel()
+        two, _ = out_inspect.visualise_cffm_segmentation()
+        three = out_inspect.visualise_frequency_profiles()
+        four, _ = out_inspect.visualise_fmrate()
+        five, _ = out_inspect.visualise_accelaration()
+        
+        
+        subplots_to_graph = [one, two, three, four, five]
         
         save_overview_graphs(subplots_to_graph, batchfile_name, audio_file_name,
                              row_number, **input_arguments)
         measurements['audio_file'] = audio_file_name
         all_measurements = save_measurements_to_file(measurements_output_file, 
                                   audio_file_name,all_measurements,
-                                  measurements, row_number)
+                                  measurements)
 
 def save_measurements_to_file(output_filepath,
                               audio_file_name, 
-                              previous_rows, measurements, row_number):
+                              previous_rows, measurements):
     '''
+    Continously saves a row to a csv file and updates it. 
+
     Thanks to tmss @ https://stackoverflow.com/a/46775108
     
     Parameters
     ----------
     output_filepath :str/path
+    audio_file_name : str. 
     previous_rows : pd.DataFrame
         All the previous measurements. 
         Can also just have a single row. 
-    row_data : dictionary 
-    row_number : int
-    
+    measurements : pd.DataFrame
+        Current measurements to be incorporated
+
     Returns
     -------
-    None
+    None, previous rows
     
     Notes
     -----
     Main side effect is to write an updated version of the 
     output file. 
     '''
-    current_row = pd.DataFrame(measurements, index=[row_number])
-    if row_number == 0:
-        previous_rows = current_row.copy()
+    #raise NotImplementedError('Long format measurement saving not implemented!!')
+    current_measures = measurements.copy()
+    if len(previous_rows)==0:
+        previous_rows = current_measures.copy()
         previous_rows.sort_index(axis=1, inplace=True)
         check_preexisting_file(output_filepath)
         previous_rows.to_csv(output_filepath, 
                mode='a', index=True, sep=',', encoding='utf-8')
     else:
-        previous_rows = pd.concat((previous_rows, current_row))
-        previous_rows.iloc[row_number: row_number+1,:].to_csv(output_filepath,
-               mode='a', index=True, sep=',', encoding='utf-8', header=False)
+        num_new_rows = current_measures.shape[0]
+        current_last_row = previous_rows.shape[0]        
+        previous_rows = pd.concat((previous_rows, current_measures))
+        
+        new_row, new_row_end = current_last_row, current_last_row+num_new_rows
+        previous_rows.iloc[new_row: new_row_end,:].to_csv(output_filepath,
+                                        mode='a', index=True,
+                                        sep=',', encoding='utf-8',
+                                        header=False)
     return previous_rows
 
 def load_batchfile(batchfile):
     try:
         return pd.read_csv(batchfile)
     except:
-        error_msg = 'could not read batchfile:'+ batchfile+'. Please check file path again'
+        error_msg = 'Could not read batchfile:'+ batchfile+'. Please check file path again'
         raise ValueError(error_msg)
- 
+
 def load_raw_audio(kwargs):
     '''Takes a dictioanry input. 
     All the parameter names need to be keys in the
@@ -209,7 +204,84 @@ def convert_time_to_samples(time, fs):
 to_string = lambda X: str(X)
 to_float = lambda X: float(X)
 to_integer = lambda X: int(X)
+to_bool = lambda X: {'True':True, 'False':False}[X]
 
+def to_list_w_funcs(X, source_module=itsfm.measurement_functions,
+                    **kwargs):
+    """
+    
+
+    Parameters
+    ----------
+    X : str
+        String defining a list with commas as separators
+        eg. "[func_name1, func_name2] "
+    source_module : str, optional 
+        Defaults to itsfm.measurement_functions
+    signs_to_remove : list w str
+        Any special signs to remove from each str
+        in the list of comma separated strings. 
+        Defaults to None. 
+    Returns
+    -------
+    list_w_funcs
+        list with functions belonging to the source module
+
+    Example
+    -------
+    >>> x = "[measure_rms, measure_peak_amplitude]"
+    >>> list_w_funcs = to_list_w_funcs(x)
+
+    """
+    individual_strings = X.split(',')
+    # remove unnecessary punctuations
+    
+    list_w_funcs = []
+    for each in individual_strings:
+        cleaned = remove_punctuations(each, **kwargs)
+        try:
+            list_w_funcs.append(getattr(source_module, cleaned))
+        except:
+            raise ValueError(f"Unable to find function {cleaned} in module {source_module}")
+    return list_w_funcs
+
+
+def remove_punctuations(full_str, **kwargs):
+    """
+    Removes spaces, ], and [ in a string. 
+    Additional signs can be removed too
+
+    Parameters
+    ----------
+    full_str : str
+        A long string with multiple punctuation marks 
+        to be removed (space, comma, ])
+    signs_to_remove : list w str', optional
+        Additional specific punctuation/s to be removed
+        Defaults to None
+    Returns
+    -------
+    clean_str : str
+    """
+    clean_str = copy(full_str)
+    # remove spaces
+    clean_str = clean_str.replace(" ", "")
+    # remove ]
+    clean_str = clean_str.replace("]", "")
+    # remove [
+    clean_str = clean_str.replace("[", "")
+    
+    if kwargs.get('signs_to_remove') is not None:
+        for each in kwargs['signs_to_remove']:
+            clean_str = clean_str.replace(each, "")
+    
+    return clean_str
+        
+    
+    
+
+# dictionary which converts the entries in a column to 
+# their appropriate types
 convert_column_to_proper_type = {
         'audio_path': to_string,
         'start': to_float,
@@ -217,12 +289,15 @@ convert_column_to_proper_type = {
         'channel' : to_integer,
         'peak_percentage' : to_float,
         'window_size' : to_integer,
-        'min_fm_duration': to_float,
-        'lowest_relevant_freq' : to_float,
-        'background_threshold' : to_float,
+        'signal_level' : to_float,
         'terminal_frequency_threshold' : to_float,
         'fft_size' : to_integer,
-        'pad_duration' : to_float
+        'segment_method' : to_string,
+        'tfr_cliprange' : to_float,
+        'pwvd_window' : to_integer,
+        'pwvd_filter' : to_bool,
+        'measurements' : to_list_w_funcs,
+        'sample_every' : to_float
         }
 
 def parse_batchfile_row(one_row):

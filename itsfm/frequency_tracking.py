@@ -226,11 +226,6 @@ def generate_pwvd_frequency_profile(input_signal, fs, **kwargs):
     pwvd_window : float>0, optional 
         The duration of the window used in the PWVD. See pwvd_transform
         for the default value.
-    pwvd_zero_pad : int, optional
-        Number of samples to zero-pad on left and right of the 
-        input_signal. The zero-padding prevents 0's and spikes
-        at the start and end of the signal. Defaults to
-        the equivalent samples for 1ms. 
     tfr_cliprange: float >0, optional
         The clip range in dB.
         Clips all values in the abs(pwvd) time-frequency
@@ -290,12 +285,12 @@ def pwvd_transform(input_signal, fs, **kwargs):
     input_signal : np.array
     fs : float
     
-    window : np.array, optional
+    pwvd_window_type : np.array, optional
         The window to be used for the pseudo wigner-ville distribution.
         If not given, then a hanning signal is used of the default length.
         The window given here supercedes the 'window_length' argument below.
 
-    window_length : float>0, optional 
+    pwvd_window : float>0, optional 
         The duration of the window used in the PWVD. Defaults to 0.001s
 
     Returns
@@ -309,8 +304,8 @@ def pwvd_transform(input_signal, fs, **kwargs):
     [1] Jaidev Deshpande, tftb 0.1.1 ,Python module for time-frequency analysis, 
         https://pypi.org/project/tftb/
     '''
-    window_length = kwargs.get('window_length', 0.001)
-    window = kwargs.get('window', signal.hanning(int(fs*window_length)))
+    window_length = kwargs.get('pwvd_window', 0.001)
+    window = kwargs.get('pwvd_window_type', signal.hanning(int(fs*window_length)))
     analytical = signal.hilbert(input_signal)
     p = PseudoWignerVilleDistribution(analytical, fwindow=window)
     pwvd_output = p.run();

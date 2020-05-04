@@ -14,7 +14,8 @@ import pandas as pd
 from scipy import ndimage
 
 def measure_hbc_call(call, fs, cf, fm, **kwargs):
-    '''Performs common or unique measurements on the 
+    '''Performs common or unique measurements on each of the Cf 
+    and FM segments detected. 
     
     Parameters
     ----------

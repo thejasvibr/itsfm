@@ -427,6 +427,8 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
     medianfilter_length : float>0, optional 
         The median filter kernel size which is used to filter out
         the noise in the frequency profile.
+    sample_every : float, optional 
+        For default see fit_polynomial_on_downsampled_version
     
     Returns
     -------
@@ -454,8 +456,31 @@ def calculate_fm_rate(frequency_profile, fs, **kwargs):
     return fm_rate, fitted
 
 def fit_polynomial_on_downsampled_version(frequency_profile, fs, **kwargs):
-    '''
-    '''
+    """Chooses a subset of all points in the input frequency_profile 
+    and fits a piecewise polynomial on it. The start and end of 
+    the frequency profile are not altered, and chosen as they 
+    are. 
+
+    Parameters
+    ----------
+    frequency_profile : np.array
+        The estimated instantaneous frequency in Hz at each sample. 
+    fs : float>0
+    sample_every : float>0, optional     
+        The time gap between consecutive points. 
+        Defaults to a calculated value which 
+        corresponds to 1% of the frequency profiles
+        duration. 
+    interpolation_kind : int, optional 
+        The polynomial order to use while fitting the points. 
+        Defaults to 1, which is a piecewise linear fit. 
+
+    Returns
+    -------
+    fitted : np.array
+        Same size as frequency_profile. 
+    """
+    
     sample_every = kwargs.get('sample_every') #seconds
     if sample_every is None:
         sample_every = fraction_duration(frequency_profile,fs, 0.01)
