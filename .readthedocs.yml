@@ -12,4 +12,4 @@ python:
   system_packages : True 
 
 conda:
-  environment: docs/conda_env.yml
+  environment: conda_env.yml
