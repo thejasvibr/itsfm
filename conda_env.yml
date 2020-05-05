@@ -5,13 +5,4 @@ dependencies:
   - python=3.7
   - pip 
   - pip:
-    - numpy>1.15
-    - pandas
-    - scipy
-    - scikit-image
-    - matplotlib
-    - tftb
-    - recommonmark
-    - sphinx==2.4.4
-    - sphinx-gallery==0.6.1
-    - sphinx_rtd_theme
+    - -r file:docs_requirements.txt
