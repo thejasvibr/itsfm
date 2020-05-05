@@ -19,6 +19,7 @@ The line above loads the 11th row (0-based indexing!!) of the template_batchfile
 from copy import copy
 import os
 import pdb
+import matplotlib.pyplot as plt
 import pandas as pd
 try:
 	import soundfile as sf
@@ -88,6 +89,7 @@ def run_from_batchfile(batchfile_path, one_row=None):
         all_measurements = save_measurements_to_file(measurements_output_file, 
                                   audio_file_name,all_measurements,
                                   measurements)
+        plt.close('all')
 
 def save_measurements_to_file(output_filepath,
                               audio_file_name, 
