@@ -73,7 +73,7 @@ master_doc = 'index'
 autodoc_member_order = 'bysource'
 
 # Add a logo
-html_logo = '../measure_CF_calls_logo_v1.0.png'
+html_logo = '../itsfm_logo.png'
 
 # sphinx gallery
 from sphinx_gallery.sorting import FileNameSortKey
