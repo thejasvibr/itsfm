@@ -5,6 +5,7 @@ scikit-image
 soundfile
 matplotlib
 tftb
+tqdm
 recommonmark
 sphinx==2.4.4
 sphinx-gallery==0.6.1
