@@ -133,5 +133,13 @@ SOFTWARE.
 API reference
 ~~~~~~~~~~~~~
 
-.. include:: api_reference.rst
+.. toctree::
+   :maxdepth:1
+   :caption: API reference:
+	
+   userinterface.rst
+   segmentation
+   measurement
+   view
+   supportmodules
 
