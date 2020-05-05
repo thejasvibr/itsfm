@@ -75,7 +75,7 @@ Run only a single row
 
 To quickly test which parameters work best, you can also just run single examples by using the :code:`one_row` argument. This approach allows
 you to troubleshoot a single problematic audio clip and quickly change the parameters for that file until it makes sense or works. 
-The example below will run the 10th  row in the batchfile. 
+The example below will run the 11th  row in the batchfile. 
 
 .. code-block:: bash
 

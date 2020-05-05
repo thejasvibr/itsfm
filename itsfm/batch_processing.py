@@ -12,7 +12,7 @@ Also allows the user to run only one specific row of the whole batch file
 
     $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
 
-The line above loads the 11th row (1-based indexing!!) of the template_batchfile
+The line above loads the 11th row (0-based indexing!!) of the template_batchfile
 
 
 """
@@ -46,7 +46,7 @@ def run_from_batchfile(batchfile_path, one_row=None):
     batch_data = load_batchfile(batchfile_path)
     if one_row is not None:
         try:
-            batch_data = make_to_oned_dataframe(batch_data.loc[one_row-1])
+            batch_data = make_to_oned_dataframe(batch_data.loc[one_row])
         except:
             print(f"Unable to subset batch file with row number: {one_row}")
 
