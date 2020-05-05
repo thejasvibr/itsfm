@@ -1,6 +1,17 @@
 name: itsfm_env
+channels:
+  - conda-forge
 dependencies:
   - python=3.7
   - pip 
   - pip:
-    - - r file:docs/docs_requirements.txt
+    - numpy>1.15
+    - pandas
+    - scipy
+    - scikit-image
+    - matplotlib
+    - tftb
+    - recommonmark
+    - sphinx==2.4.4
+    - sphinx-gallery==0.6.1
+    - sphinx_rtd_theme
