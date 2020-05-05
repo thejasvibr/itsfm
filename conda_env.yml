@@ -1,0 +1,7 @@
+name: itsfm_env
+dependencies:
+  - python=3.7
+  - pysoundfile
+  - pip 
+  - pip:
+    - - r file:docs/docs_requirements.txt
