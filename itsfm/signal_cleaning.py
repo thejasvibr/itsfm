@@ -67,10 +67,12 @@ def exterpolate_over_anomalies(X, fs, anomalous, **kwargs):
     smooth_X = X.copy()
     extrap_window = kwargs.get('extrap_window', 0.1*10**-3)
     ref_region_length = int(extrap_window*fs)
-    
-    anomalous_broader = ndimage.filters.percentile_filter(anomalous, 100, 
+    try:
+        anomalous_broader = ndimage.filters.percentile_filter(anomalous, 100, 
                                                               ref_region_length)
-    
+    except:
+        raise ValueError(f"Unable to percentile filter with kernel size {ref_region_length} and sampling rate {fs}")
+
     anomalous_labelled, num_regions = ndimage.label(anomalous_broader)
     if num_regions == 0:
         return smooth_X

@@ -22,6 +22,11 @@ parser.add_argument('-batchfile',
                     default=None,
                     help='Path to the batch file. A .csv file is expected')
 
+parser.add_argument('-one_row', 
+                    action="store", dest="one_row", 
+                    default=None,
+                    type=int,
+                    help='A specific row to be loaded from the batch file. Integer>=0')
 
 def main(arg_parser):
     '''
@@ -32,7 +37,7 @@ def main(arg_parser):
 
     if args.batchfile:
         print('batch file detected, starting batch analyses now...')
-        batch.run_from_batchfile(args.batchfile)       
+        batch.run_from_batchfile(args.batchfile, args.one_row)       
         pass    
 
 

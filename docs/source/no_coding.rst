@@ -70,6 +70,17 @@ It is possible to use a combination of default and non-default values. Whether d
 For instance, in the extended batch file above, a non-default :code:`fft_size` is used for the first file, and the other files have above
 have a default value. 
 
+Run only a single row
+<<<<<<<<<<<<<<<<<<<<<
+
+To quickly test which parameters work best, you can also just run single examples by using the :code:`one_row` argument. This approach allows
+you to troubleshoot a single problematic audio clip and quickly change the parameters for that file until it makes sense or works. 
+The example below will run the 10th  row in the batchfile. 
+
+.. code-block:: bash
+
+    $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
+
 Which argument/s can be specified?
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 The exact arguments that can be specified depend on which level you'd like to apply control, and therefore the relevant functions need 

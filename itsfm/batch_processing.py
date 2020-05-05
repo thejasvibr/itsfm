@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 """Runs the batch processing option. The main outputs are the call measurements
-and the visualisations. 
+and the visualisations. (See __main__.py)
 
 .. code-block:: bash
 
     $ python -m itsfm -batchfile template_batchfile.csv
+
+Also allows the user to run only one specific row of the whole batch file 
+
+.. code-block:: bash
+
+    $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
+
+The line above loads the 11th row (1-based indexing!!) of the template_batchfile
+
 
 """
 from copy import copy
@@ -22,15 +31,25 @@ from itsfm.user_interface import save_overview_graphs
 from itsfm.view import itsFMInspector
 from itsfm.sanity_checks import check_preexisting_file
 
-def run_from_batchfile(batchfile_path):
+def run_from_batchfile(batchfile_path, one_row=None):
     '''
     Parameters
     ----------
     batchfile_path : str/path
         Path to a batchfile 
-
+    one_row : int
+        A specific row to be loaded from the whole batchfile
+        The first row starts with 1!!!
+    
+    
     '''
     batch_data = load_batchfile(batchfile_path)
+    if one_row is not None:
+        try:
+            batch_data = make_to_oned_dataframe(batch_data.loc[one_row-1])
+        except:
+            print(f"Unable to subset batch file with row number: {one_row}")
+
     batchfile_name = get_only_filename(batchfile_path)
 
     analysis_name = '_'.join(['measurements',batchfile_name])
@@ -341,4 +360,27 @@ def parse_batchfile_row(one_row):
                 pass
     
     return arguments
+
+
+def make_to_oned_dataframe(oned_series):
+    """
+    
+
+    Parameters
+    ----------
+    oned_series : pd.Series
+        One dimensional pd.Series with columns and values
+
+    Returns
+    -------
+    oned_df
+
+    """
+    columns = oned_series.index.to_list()
+    values = oned_series.values
+    
+    entries = data={key:value for key, value in zip(columns, values)}
+    oned_df = pd.DataFrame(data=entries, index=[0])
+    return oned_df
+    
     
