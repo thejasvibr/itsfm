@@ -2,6 +2,7 @@ numpy>1.15
 pandas
 scipy
 scikit-image
+soundfile
 matplotlib
 tftb
 recommonmark

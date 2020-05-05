@@ -11,7 +11,10 @@ from copy import copy
 import os
 import pdb
 import pandas as pd
-import soundfile as sf
+try:
+	import soundfile as sf
+except:
+	print('Cannot import SoundFile!!') # a hack for rtd build to pass.
 from tqdm import tqdm
 import itsfm
 from itsfm.user_interface import segment_and_measure_call

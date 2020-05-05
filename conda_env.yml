@@ -1,6 +1,0 @@
-name: itsfm_env
-
-dependencies:
-  - pysoundfile
-
-
