@@ -68,15 +68,17 @@ class itsFMInspector:
         try:
             self.fmrate = self.info['fmrate']
             plt.figure()
-            a = plt.subplot(211)
-            plt.title('FM Rate')
-            make_specgram(self.whole_audio, self.fs, **self.kwargs)
-            b = plt.subplot(212, sharex=a)
+            a = plt.subplot(311)
             make_waveform(self.fmrate, self.fs)
             plt.ylabel('FM rate, kHz/ms')
-            return a,b 
+            b = plt.subplot(312)
+            plt.title('FM Rate')
+            make_specgram(self.whole_audio, self.fs, **self.kwargs)
+            c = plt.subplot(313)
+            make_waveform(self.whole_audio, self.fs)
+            return a, b, c
         except:
-            raise AttributeError('No fmrate variable found in the output!')
+            raise AttributeError('Cannot make fmrate plot. Check if variable found in the output!')
 
     def visualise_accelaration(self):
         '''
@@ -88,15 +90,16 @@ class itsFMInspector:
             self.acc_profile = self.info['acc_profile']
 
             plt.figure()
-            a = plt.subplot(211)
-            plt.title('FM Rate')
-            make_specgram(self.whole_audio, self.fs, **self.kwargs)
-            b = plt.subplot(212, sharex=a)
+            a = plt.subplot(311)
             make_waveform(self.acc_profile, self.fs)
             plt.ylabel('Accelaration, $kHz/ms^{2}$')
-            return a,b 
+            b = plt.subplot(312, sharex=a)
+            make_specgram(self.whole_audio, self.fs, **self.kwargs)
+            c = plt.subplot(313, sharex=a)
+            make_waveform(self.whole_audio, self.fs)
+            return a, b, c
         except:
-            raise AttributeError('No accelaration variable found in the output!')
+            raise AttributeError('Cannot make accelaration profile plot')
 
     def visualise_cffm_segmentation(self):
         '''
@@ -123,13 +126,16 @@ class itsFMInspector:
         elif isinstance(fp_type, str):
             all_fps = [fp_type]
     
-        fig,ax = plt.subplots()
-        s = make_specgram(self.whole_audio, self.fs, **self.kwargs);
+        plt.figure()
+        a = plt.subplot(211)
+        make_specgram(self.whole_audio, self.fs, **self.kwargs);
         time_axis = make_x_time(self.whole_audio, self.fs)
         for each_fp in all_fps:
             plt.plot(time_axis, self.info[each_fp], label=each_fp)
         plt.legend()
-        return ax
+        b = plt.subplot(212, sharex=a)
+        make_waveform(self.whole_audio, self.fs,)
+        return a,b
     
     def visualise_geq_signallevel(self):
         '''
@@ -140,18 +146,23 @@ class itsFMInspector:
         ed, and only regions above it are 
         
         '''
-        fig,ax = plt.subplots()
-        s = make_specgram(self.whole_audio, self.fs, **self.kwargs);
         time_axis = make_x_time(self.whole_audio, self.fs)
-        ymin, ymax = ax.get_ylim()
-        
         above_siglevel = np.zeros(self.whole_audio.size)
-        
+        plt.figure()
+        a = plt.subplot(211)
+        s = make_specgram(self.whole_audio, self.fs, **self.kwargs);
+        ymin, ymax = a.get_ylim()
         for each in self.info['geq_signal_level']:
             above_siglevel[each] = 1 
-        plt.plot(time_axis, above_siglevel*ymax*0.5, label='$\geq$ signal level')
+        plt.plot(time_axis, above_siglevel*ymax*0.5, 
+                         label='$\geq$ signal level',
+                         color='C1')
         plt.legend()
-        return ax
+        b = plt.subplot(212, sharex=a)
+        make_waveform(self.whole_audio, self.fs)
+        wave_max = np.max(np.abs(self.whole_audio))
+        plt.plot(time_axis, above_siglevel*wave_max, label='$\geq$ signal level')
+        return a, b
         
         
         

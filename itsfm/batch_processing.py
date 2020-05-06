@@ -40,7 +40,7 @@ def run_from_batchfile(batchfile_path, one_row=None):
         Path to a batchfile 
     one_row : int
         A specific row to be loaded from the whole batchfile
-        The first row starts with 1!!!
+        The first row starts with 0
     
     
     '''
@@ -74,11 +74,11 @@ def run_from_batchfile(batchfile_path, one_row=None):
         (cf, fm, info), call_parts, measurements = segment_and_measure
         
         # start making diagnostic plots
-        one = out_inspect.visualise_geq_signallevel()
+        one, _ = out_inspect.visualise_geq_signallevel()
         two, _ = out_inspect.visualise_cffm_segmentation()
-        three = out_inspect.visualise_frequency_profiles()
-        four, _ = out_inspect.visualise_fmrate()
-        five, _ = out_inspect.visualise_accelaration()
+        three,_ = out_inspect.visualise_frequency_profiles()
+        four, _, _ = out_inspect.visualise_fmrate()
+        five, _, _ = out_inspect.visualise_accelaration()
         
         
         subplots_to_graph = [one, two, three, four, five]
