@@ -11,7 +11,7 @@ The code snippet below recreates the call with the above parameters
 
 .. code-block:: python
 
-    from itsfm.view_horseshoebat_call import visualise_call
+    from itsfm.view_horseshoebat_call import visualise_sound
     from itsfm.simulate_calls import make_cffm_call
 
     call_parameters = {'cf':(100000, 0.01),
@@ -23,7 +23,7 @@ The code snippet below recreates the call with the above parameters
     synthetic_call, freq_profile = make_cffm_call(call_parameters, fs) 
     
     # plot 
-    wavef, spec = visualise_call(synthetic_call, fs, fft_size=512)
+    wavef, spec = visualise_sound(synthetic_call, fs, fft_size=512)
     spec.set_ylim(0,125000)
 
 Note

@@ -4,6 +4,7 @@ scipy
 scikit-image
 soundfile
 matplotlib
+seaborn
 tftb
 tqdm
 recommonmark
