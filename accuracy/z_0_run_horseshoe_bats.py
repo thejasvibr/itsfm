@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-CF/FM call segmentation
-=======================
+Running CF-FM call segmentation
+===============================
 Here we will run the :code:`segment_and_measure` function and store the 
 results of how long each Cf/FM segment is. 
 

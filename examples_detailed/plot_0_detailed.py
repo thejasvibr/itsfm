@@ -190,13 +190,16 @@ out_refined_inspector.visualise_cffm_segmentation()
 seg_out, call_parts, msmts = outputs_refined 
 cf, fm, info = seg_out 
 
-w,s = out_refined_inspector.visualise_fmrate()
-s.set_ylim(0,5)
-s.set_xlim(0.01,0.02)
+w,s,a = out_refined_inspector.visualise_fmrate()
+w.set_ylim(0,5)
+t_min, t_max = 0.01, 0.02
+w.set_xlim(t_min, t_max)
+s.set_xlim(t_min, t_max)
+a.set_xlim(t_min, t_max)
 w.plot()
 itsfm.make_waveform(cf*4,fs)
 itsfm.make_waveform(fm*4,fs)
-
+plt.tight_layout()
 
 # %% 
 # From this you can clearly see that the FM part correspond to tiny peaks in 

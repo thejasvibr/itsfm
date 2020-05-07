@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-CF-FM call segmentation
-=======================
+CF-FM call segmentation accuracy
+================================
 This page will illustrate the accuracy with which `itsfm` can segment CF-FM parts of a 
 CF-FM call. To see what a CF-FM call looks like check out the bat-call example 
 in the 'Basic Examples' page. 
@@ -24,8 +24,8 @@ import numpy as np
 import pandas as pd 
 import seaborn as sns
 
-obtained = pd.read_csv('sim_cffm_calls/obtained_horseshoe_sim.csv')
-synthesised = pd.read_csv('sim_cffm_calls/horseshoe_test_parameters.csv')
+obtained = pd.read_csv('obtained_horseshoe_sim.csv')
+synthesised = pd.read_csv('horseshoe_test_parameters.csv')
 
 # %% 
 # Let's look at the obtained regions and their durations
