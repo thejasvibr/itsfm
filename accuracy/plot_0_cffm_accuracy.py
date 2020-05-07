@@ -49,6 +49,7 @@ synthesised.columns
 
 synth_regions = synthesised.loc[:,['cf_duration', 'upfm_duration','downfm_duration']]
 synth_regions['other'] = np.nan
+synth_regions['call_number'] = obtained['call_number']
 
 # %% 
 # Comparing the synthetic and the obtained results
@@ -58,21 +59,30 @@ synth_regions['other'] = np.nan
 
 accuracy = obtained/synth_regions
 accuracy['call_number'] = obtained['call_number']
-
 # %% 
 # Overall accuracy of segmentation:
+accuracy_reformat = accuracy.melt(id_vars=['call_number'], 
+                                            var_name='Region type',
+                                            value_name='Accuracy')
+    
+ax = sns.boxplot(x='Region type', y = 'Accuracy',
+                         data=accuracy_reformat)
 
-ax = sns.boxplot(x='region_type', y = 'duration',
-                         data=accuracy.melt(id_vars=['call_number'], 
-                                            var_name='region_type',
-                                            value_name='duration'))
+ax = sns.swarmplot(x='Region type', y = 'Accuracy',
+                         data=accuracy_reformat,
+                         alpha=0.5)
 
 
 
 # %% 
 # Some bad identifications
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-# As we can see there are a few regions where a 3rd
+# As we can see there are a few regions where the accuracy is very low, let's
+# investigate which of these calls are doing badly. 
+
+accuracy[accuracy['cf_duration']<0.5]
+
+
 
 
 

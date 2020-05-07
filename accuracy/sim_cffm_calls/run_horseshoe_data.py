@@ -9,6 +9,11 @@ Dataset creation
 ~~~~~~~~~~~~~~~~
 The synthetic dataset has already been created in a separate module. 
 See 'Generating the CF-FM synthetic calls' in the main page. 
+
+It can take long
+~~~~~~~~~~~~~~~~
+We're running a few hundred synthetic audio clips with a few seconds (1-10s)
+needed per iteration. This could mean, it might take a while(5,10 or more minutes)!
 """
 
 import h5py
@@ -19,7 +24,6 @@ from tqdm import tqdm
 # %% 
 # Now, let's load each synthetic call and proceed to save the 
 # results. 
-
 
 obtained = []
 

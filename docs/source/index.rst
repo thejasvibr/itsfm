@@ -26,17 +26,21 @@ Let's cut to the chase : some examples *NOW*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
-	:maxdepth:2
+	:maxdepth:4
+	:caption: Examples!
 	
 	gallery_dir/index.rst
 	gallery_detailed/index.rst
 
 .. toctree::
-   :maxdepth:2
    :caption: Using itsfm without coding:
    
-   
    no_coding.rst
+
+.. toctree::
+   :caption: itsfm Accuracy
+   
+   gallery_accuracy/index.rst
 
 What the package `does`:
 ~~~~~~~~~~~~~~~~~~~~~~~~
