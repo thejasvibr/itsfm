@@ -4,7 +4,30 @@ Here are the most common errors and the probable causes for them. When I use the
 in the sense of `bad` for that particular signal! Especially while analysing bioacoustic recordings, a parameter
 value that works for one recording may not necessarily work for another one! 
 
-Bad `signal_level` or `window_size`
+
+1. Bad `signal_level`
+>>>>>>>>>>>>>>>>>>>>>
+
+.. code::bash
+    $ ValueError: No regions above signal level found!
+
+Easy, reduce the `signal_level` and try again. 
+
+2. Bad `signal_level`
+>>>>>>>>>>>>>>>>>>>>>
+
+.. code::bash
+
+    $ IndexError: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices
+
+This region is caused by a very small region of the signal being selected. The PWVD transform works by choosing a small window of samples
+on the left and right of the current sample. If the region above `signal_level` is very small, and not greater than this small window
+of samples this error is raised. By default, the `isfm` window size is set to the numebr of samples corresponding to 1ms. 
+
+Alter `signal_level` or `window_size` to get a more continuous moving dB rms profile. See below also. 
+
+
+3. Bad `signal_level` or `window_size`
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .. code:: bash
@@ -44,3 +67,7 @@ A closer inspection of this particular audio file may reveal more.
 
 #. Reduce the `signal_level` for this particular audio. When the `signal_level` is set too high, the frequency 
 profile of irrelevant parts may be getting analysed, leading to odd and rough frequency profiles. 
+
+
+
+
