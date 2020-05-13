@@ -8,7 +8,8 @@ value that works for one recording may not necessarily work for another one!
 1. Bad `signal_level`
 >>>>>>>>>>>>>>>>>>>>>
 
-.. code::bash
+.. code:: bash
+
     $ ValueError: No regions above signal level found!
 
 Easy, reduce the `signal_level` and try again. 
@@ -16,7 +17,7 @@ Easy, reduce the `signal_level` and try again.
 2. Bad `signal_level`
 >>>>>>>>>>>>>>>>>>>>>
 
-.. code::bash
+.. code:: bash
 
     $ IndexError: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices
 
@@ -28,13 +29,11 @@ Alter `signal_level` or `window_size` to get a more continuous moving dB rms pro
 
 
 3. Bad `signal_level` or `window_size`
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 .. code:: bash
 
     $ ValueError: Shape of array too small to calculate a numerical gradient, at least (edge_order + 1) elements are required
-
-
 
 The actual signal in an audio file is detected by the segment of audio that's above a user-defined `signal_level`. When the 
 `signal_level` is set poorly or results in very short chunks of audio (<3 samples), then typically this error is thrown:
@@ -66,7 +65,7 @@ signal -- and thus this warning.
 A closer inspection of this particular audio file may reveal more.
 
 #. Reduce the `signal_level` for this particular audio. When the `signal_level` is set too high, the frequency 
-profile of irrelevant parts may be getting analysed, leading to odd and rough frequency profiles. 
+   profile of irrelevant parts may be getting analysed, leading to odd and rough frequency profiles. 
 
 
 
