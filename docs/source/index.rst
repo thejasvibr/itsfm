@@ -88,9 +88,16 @@ and plans to implement it in due time.
 
 Where to get help
 ~~~~~~~~~~~~~~~~~
+.. toctree::
+	:maxdepth:2
+	:caption: Errors
 
-Hopefully this web page has enough information. Please check the examples to see
-if the same error messages haven't come up already. If something's not clear or 
+	common_errors.rst	
+	
+
+Hopefully this web page has enough information. Use the search bar to check if the error/issue 
+you're encountering has already been documented. Also do check the examples to see
+if the same error messages have been explained. If something's not clear or 
 there's something not covered do write to me : thejasvib@gmail.com. I'll try to answer
 within a week. 
 

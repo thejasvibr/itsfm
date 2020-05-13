@@ -87,3 +87,20 @@ The exact arguments that can be specified depend on which level you'd like to ap
 to be looked up. For instance, if I wanted to make sure the frequency profile of a sound was sampled every 1ms to generate the FM rate profile. 
 I'd look up the :code:`itsfm.segment.whole_audio_fmrate` source code to find the `sample_every` optional argument. A column names `sample_every`
 will allow the custom definition of a downsampling intensity for that row. In most cases the approach aligned above should work, especially if the parameter value is a float. Results may vary if the type of the csv file cell entry are mis-interpreted.
+
+Running one row - when it stops halfway
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Sometimes, the given parameter values will lead to the processing stopping halfway through because of unexpected situations (eg. very short audio snippets after thresholding). When this happens, the parameters need to be changed till it works. The current batchfile processing 
+does not allow skipping of files. Figure out the correct set of parameters for the problematic audio by changing the parameters for the row corresponding to that audio,
+and running that row as described above. 
+
+Measurement file already exists
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+It is very likely that you may get this error message on trying to run a batchfile after the first run:
+
+.. code-block:: bash 
+
+    $ ValueError: The file: measurements_basic_batchfile.csv already exists- please move it elsewhere or rename it!
+
+This is because only one measurement file is allowed to be there in the folder where batchfile processing is being done. This feature prevents the accidental overwriting of results! To prevent this error from appearing again, delete, rename or move the current measurements file. 
+
