@@ -28,6 +28,18 @@ parser.add_argument('-one_row',
                     type=int,
                     help='A specific row to be loaded from the batch file. Integer>=0')
 
+parser.add_argument('-from', 
+                    action="store", dest="_from", 
+                    default=None,
+                    type=int,
+                    help='A specific row to start the batchfile run from. Row numbers start with 0.')
+
+parser.add_argument('-till', 
+                    action="store", dest="_till", 
+                    default=None,
+                    type=int,
+                    help='A specific row to run the batchfile till. Row numbers end at Nrows-1.')
+
 def main(arg_parser):
     '''
     '''
@@ -37,7 +49,7 @@ def main(arg_parser):
 
     if args.batchfile:
         print('batch file detected, starting batch analyses now...')
-        batch.run_from_batchfile(args.batchfile, args.one_row)       
+        batch.run_from_batchfile(args.batchfile, **args.__dict__)       
         pass    
 
 

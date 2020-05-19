@@ -1,5 +1,8 @@
 itsfm : Identify, Track and Segment sound (by) Frequency (and its) Modulation
-=============================================================================
+============================================================================
+
+Introduction
+~~~~~~~~~~~~
 The `itsfm` package identifies regions of sound with and without frequency modulation, 
 and allows custom measurements to be made on them. It's all in the name. Each of the 
 task behind the identification, tracking and segmenting of a sound can be done independently.
@@ -22,6 +25,9 @@ The broad idea of this package is to achieve a loose coupling between the I,T, S
 *Warning : The docs are constantly under construction, and is likely to change fairly regularly like the stairs in Hogwarts.
 Do not be surprised by dramatic changes, but do come back regularly to see improvements!*
 
+
+
+   
 Let's cut to the chase : some examples *NOW*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

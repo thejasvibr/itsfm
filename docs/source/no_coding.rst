@@ -81,9 +81,38 @@ The example below will run the 11th  row in the batchfile.
 
     $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
 
+Running parts of a batchfile
+----------------------------
+Stuff happens and an analysis run can stop anytime as it runs throug the batchfile because some of the parameters don't make sense.
+To continue from a desired row or run only a selected set of rows you can use the :code:`-from` and :code:`-till` arguments. 
+
+.. code-block:: shell
+
+    $ python -m itsfm -batchfile template_batchfile.csv -from 10
+  
+The example above will run the analysis from the 11th row and proceed till the last row of the batchfile. 
+
+.. code-block:: shell
+
+    $ python -m itsfm -batchfile template_batchfile.csv -till 10
+  
+The example above will run the analysis from the 1st till 11th row and proceed till the last row of the batchfile. 
+
+.. code-block:: shell
+
+    $ python -m itsfm -batchfile template_batchfile.csv -from 5 -till 10
+ 
+The example above runs `itsfm` analysis from the 6th-11th rows of a batchfile. 
+
 Which argument/s can be specified?
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 The exact arguments that can be specified depend on which level you'd like to apply control, and therefore the relevant functions need 
 to be looked up. For instance, if I wanted to make sure the frequency profile of a sound was sampled every 1ms to generate the FM rate profile. 
 I'd look up the :code:`itsfm.segment.whole_audio_fmrate` source code to find the `sample_every` optional argument. A column names `sample_every`
 will allow the custom definition of a downsampling intensity for that row. In most cases the approach aligned above should work, especially if the parameter value is a float. Results may vary if the type of the csv file cell entry are mis-interpreted.
+
+
+
+
+
+

@@ -7,12 +7,22 @@ CF-FM call. To see what a CF-FM call looks like check out the bat-call example
 in the 'Basic Examples' page. 
 
 The synthetic data has already been generated and run with the :code:`segment_and_measure`
-function, and now we'll compare the accuracy with which it has all happened. Here we 
-will only be seeing if the durations of each of the segment parts have been picked
+function, and now we'll compare the accuracy with which it has all happened.
+
+A CF-FM bat call typically has three parts to it, 1) an 'up' FM, where the  
+frequency of the call increases, 2) a 'CF' part, where the frequency is 
+stable, and then 3) a 'down' FM, where the frequency drops. The synthetic
+data is basically a set of CF-FM calls with a combination of upFM, downFM
+and CF part durations, bandwidths,etc. 
+
+Here we will only be seeing if the durations of each of the segment parts have been picked
 up properly or not. We will *not* be performing any accuracy assessments on 
 the exact parameters (eg. peak frequency, rms, etc) because it is assumed that 
-if the call parts can be identified properly then the measurements will 
+if the call parts can be identified by their durations then the measurements will 
 in turn be as expected. 
+
+There is no silence in the synthetic calls, and no noise too. This is the 
+situation which should provide the highest accuracy. 
 
 What happened before
 ~~~~~~~~~~~~~~~~~~~~
@@ -29,7 +39,7 @@ synthesised = pd.read_csv('horseshoe_test_parameters.csv')
 
 # %% 
 # Let's look at the obtained regions and their durations
-obtained.head()
+obtained
 
 # %% 
 # We can see the output has each CF/FM region labelled by the order in which
@@ -43,7 +53,7 @@ obtained.columns = ['call_number','cf_duration',
 # Let's look at the synthetic call parameters. There's a bunch of parameters
 # that're not interesting for this accuracy exercise and so let's remove them 
 
-synthesised.head()
+synthesised
 
 synthesised.columns
 
@@ -71,8 +81,6 @@ ax = sns.boxplot(x='Region type', y = 'Accuracy',
 ax = sns.swarmplot(x='Region type', y = 'Accuracy',
                          data=accuracy_reformat,
                          alpha=0.5)
-
-
 
 # %% 
 # Some bad identifications

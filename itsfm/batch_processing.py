@@ -20,6 +20,7 @@ from copy import copy
 import os
 import pdb
 import matplotlib.pyplot as plt
+import numpy as np 
 import pandas as pd
 try:
 	import soundfile as sf
@@ -30,27 +31,32 @@ import itsfm
 from itsfm.user_interface import segment_and_measure_call
 from itsfm.user_interface import save_overview_graphs
 from itsfm.view import itsFMInspector
-from itsfm.sanity_checks import check_preexisting_file
+from itsfm.sanity_checks import check_preexisting_file, make_sure_its_positive
 
-def run_from_batchfile(batchfile_path, one_row=None):
+def run_from_batchfile(batchfile_path, **kwargs):
     '''
     Parameters
     ----------
     batchfile_path : str/path
         Path to a batchfile 
-    one_row : int
-        A specific row to be loaded from the whole batchfile
-        The first row starts with 0
     
+    Keyword Arguments
+    -----------------
+    one_row : int, optional
+        A specific row to be loaded from the whole batchfile
+        The first row starts with 0. Defaults to None
+    _from : int, optional 
+        Row to start the batchfile processing from. 
+        Defaults to None
+    _till : int, optional
+        Row to end the batchfile processing. 
+        Defaults to None
     
     '''
     batch_data = load_batchfile(batchfile_path)
-    if one_row is not None:
-        try:
-            batch_data = make_to_oned_dataframe(batch_data.loc[one_row])
-        except:
-            print(f"Unable to subset batch file with row number: {one_row}")
-
+    final_batch_data = subset_batch_data(batch_data, **kwargs)
+    
+    
     batchfile_name = get_only_filename(batchfile_path)
 
     analysis_name = '_'.join(['measurements',batchfile_name])
@@ -58,8 +64,8 @@ def run_from_batchfile(batchfile_path, one_row=None):
 
     all_measurements = []
 
-    for row_number, one_batchfile_row in tqdm(batch_data.iterrows(),
-                                              total=batch_data.shape[0]):
+    for row_number, one_batchfile_row in tqdm(final_batch_data.iterrows(),
+                                              total=final_batch_data.shape[0]):
 
         input_arguments = parse_batchfile_row(one_batchfile_row)
         main_audio, fs = load_raw_audio(input_arguments)
@@ -90,6 +96,80 @@ def run_from_batchfile(batchfile_path, one_row=None):
                                   audio_file_name,all_measurements,
                                   measurements)
         plt.close('all')
+
+def subset_batch_data(batch_data, **kwargs):
+    '''
+    Parameters
+    ----------
+    batch_data : pd.DataFrame
+    
+    Keyword Arguments
+    -----------------
+    one_row : int, optional
+        Defaults to None
+    _from : int, optional
+        Defaults to None
+    _till : int, optional
+        The row number the analysis should run till, including the end point.
+        Remember the row numbering starts from 0!
+        Defaults to None
+    
+    Returns 
+    -------
+    subset_batch_data : pd.DataFrame
+        Either a copy of batch_data or a part of batch_data
+    
+    Example
+    -------
+    # let's get only one row from the fake batch data file
+    >>> batch = pd.DataFrame(data={'a':range(10), 'b':range(10)})
+    >>> onerow = subset_batch_data(batch, one_row=5)
+    >>> print(onerow)
+    # get a limited range of the dataframe
+    >>> part = subset_batch_data(batch, _from=3, _till=8)
+    >>> print(part)
+    '''
+    # check that one_row is not being used in conjunction with 
+    # from or till 
+    
+    if kwargs.get('one_row') is not None:
+        onerow_used_properly(**kwargs)
+        one_row = kwargs.get('one_row')
+        try:
+            subset_batch_data = make_to_oned_dataframe(batch_data.loc[one_row])
+            return subset_batch_data
+        except:
+            print(f"Unable to subset batch file with row number: {one_row}")
+
+    if kwargs.get('_from') is None:    
+        start_row = 0   
+    else:
+        start_row = kwargs.get('_from')
+    
+    if kwargs.get('_till') is None:
+        end_row = batch_data.shape[0]
+    else:
+        end_row = kwargs.get('_till')
+    
+    if end_row < start_row:
+        raise ValueError('end row : {end_row} is before start row: {start_row}')
+    elif np.logical_or(end_row <0, start_row<0):
+        raise ValueError('One of either end row : {end_row} or start row: {start_row} are <0!')
+
+    subset_batch_data = batch_data.loc[start_row:end_row,:]
+    return subset_batch_data
+        
+        
+    
+def onerow_used_properly(**kwargs):
+    '''Checks that the -one_row argument is not 
+    used in conjunction with -from or -till
+    '''
+    if kwargs.get('one_row') is not None:
+        from_till = [ kwargs.get('_from', 0), kwargs.get('_till', 0)]
+        if any(from_till):
+            raise ImproperArguments('one_row is being used with either -from or -till. This is not allowed!')
+    
 
 def save_measurements_to_file(output_filepath,
                               audio_file_name, 
@@ -385,4 +465,5 @@ def make_to_oned_dataframe(oned_series):
     oned_df = pd.DataFrame(data=entries, index=[0])
     return oned_df
     
-    
+class ImproperArguments(ValueError):
+    pass
