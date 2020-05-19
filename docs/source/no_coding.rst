@@ -104,15 +104,20 @@ The example above will run the analysis from the 1st till 11th row and proceed t
  
 The example above runs `itsfm` analysis from the 6th-11th rows of a batchfile. 
 
+Measurement file already exists
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+It is very likely that you may get this error message on trying to run a batchfile after the first run:
+
+.. code-block:: bash 
+
+    $ ValueError: The file: measurements_basic_batchfile.csv already exists- please move it elsewhere or rename it!
+
+This is because only one measurement file is allowed to be there in the folder where batchfile processing is being done. This feature prevents the accidental overwriting of results! To prevent this error from appearing again, delete, rename or move the current measurements file. 
+
+
 Which argument/s can be specified?
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 The exact arguments that can be specified depend on which level you'd like to apply control, and therefore the relevant functions need 
 to be looked up. For instance, if I wanted to make sure the frequency profile of a sound was sampled every 1ms to generate the FM rate profile. 
 I'd look up the :code:`itsfm.segment.whole_audio_fmrate` source code to find the `sample_every` optional argument. A column names `sample_every`
 will allow the custom definition of a downsampling intensity for that row. In most cases the approach aligned above should work, especially if the parameter value is a float. Results may vary if the type of the csv file cell entry are mis-interpreted.
-
-
-
-
-
-
