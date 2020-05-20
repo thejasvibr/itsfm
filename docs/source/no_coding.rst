@@ -121,6 +121,10 @@ Set it to :code:`True` and any file starting with `measurement` will be deleted 
 
 `Warning` : use this being aware that this involves file deletion! It's fine if you plan to run the whole batchfile at one stretch later anyway. 
 
+.. code-block:: shell
+
+    $ python -m itsfm -batchfile template_batchfile.csv -batchfile yourbatchfilehere.csv -del_measurement True
+
 
 Which argument/s can be specified?
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
