@@ -17,6 +17,7 @@ The line above loads the 11th row (0-based indexing!!) of the template_batchfile
 
 """
 from copy import copy
+from glob import glob 
 import os
 import pdb
 import matplotlib.pyplot as plt
@@ -52,10 +53,11 @@ def run_from_batchfile(batchfile_path, **kwargs):
         Row to end the batchfile processing. 
         Defaults to None
     
+    
     '''
+    measurement_file_action(**kwargs)
     batch_data = load_batchfile(batchfile_path)
     final_batch_data = subset_batch_data(batch_data, **kwargs)
-    
     
     batchfile_name = get_only_filename(batchfile_path)
 
@@ -158,8 +160,22 @@ def subset_batch_data(batch_data, **kwargs):
 
     subset_batch_data = batch_data.loc[start_row:end_row,:]
     return subset_batch_data
-        
-        
+
+def  measurement_file_action(**kwargs):
+    '''
+    Either lets the measurement file remain, or deletes it if present
+    
+    Keyword Arguments
+    -----------------
+    del_measurement : boolean 
+        True means all files starting with 'measurement' are deleted
+
+    '''
+    if kwargs.get('del_measurement'):
+        # check if there is a measurement file already in the folder
+        measurement_file_match = glob('measurement*')
+        if len(measurement_file_match) > 0:
+            [os.remove(each) for each in measurement_file_match]
     
 def onerow_used_properly(**kwargs):
     '''Checks that the -one_row argument is not 

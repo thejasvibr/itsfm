@@ -82,7 +82,7 @@ The example below will run the 11th  row in the batchfile.
     $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
 
 Running parts of a batchfile
-----------------------------
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Stuff happens and an analysis run can stop anytime as it runs throug the batchfile because some of the parameters don't make sense.
 To continue from a desired row or run only a selected set of rows you can use the :code:`-from` and :code:`-till` arguments. 
 
@@ -113,6 +113,13 @@ It is very likely that you may get this error message on trying to run a batchfi
     $ ValueError: The file: measurements_basic_batchfile.csv already exists- please move it elsewhere or rename it!
 
 This is because only one measurement file is allowed to be there in the folder where batchfile processing is being done. This feature prevents the accidental overwriting of results! To prevent this error from appearing again, delete, rename or move the current measurements file. 
+
+Suppressing the '..already exists' error
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+It can be irritating to encounter the '...already exists' error while trying to maintain a fast back and forth between results and parameter values. To prevent this error from happening - just use the :code:`-del_measurement` argument. 
+Set it to :code:`True` and any file starting with `measurement` will be deleted before the actual `itsfm` run. 
+
+`Warning` : use this being aware that this involves file deletion! It's fine if you plan to run the whole batchfile at one stretch later anyway. 
 
 
 Which argument/s can be specified?

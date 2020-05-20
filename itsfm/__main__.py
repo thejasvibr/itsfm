@@ -40,6 +40,12 @@ parser.add_argument('-till',
                     type=int,
                     help='A specific row to run the batchfile till. Row numbers end at Nrows-1.')
 
+parser.add_argument('-del_measurement', 
+                    action="store", dest="del_measurement", 
+                    default=False,
+                    type=bool,
+                    help='Whether to delete the measurement file if it already exists')
+
 def main(arg_parser):
     '''
     '''
