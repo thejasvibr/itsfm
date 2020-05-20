@@ -49,6 +49,21 @@ The two options to fix this error are:
 
 #. set a new `signal_level` which will make sure the moving dB rms profile is above it and matches the duration of the original signal 
 
+4. Bad `signal_level` or `window_size`
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+The FM rate profile of a sound is calculated by down-sampling the cleaned frequency 
+profile. The down-sampling is done by taking a sample every now and then as defined 
+byt the inter-sample duration. The inter-sample duration typically defaults to 1 percent of the frequency profiles length. When a bad signal level is given, there 
+can be very short audio segments that are detected, and thus when the FM rate needs 
+to be calculated, things break because 1% of an already very short sound may be 
+less than the inter-sample duration itself -- and therefore this message.  
+
+
+
+.. code:: bash
+
+    $ ValueError: The suggested duration 3.16e-06 is less than                         the inter-sample distance (1/fs): 4e-06
+
 
 Anomaly spans whole array
 >>>>>>>>>>>>>>>>>>>>>>>>>
