@@ -3,18 +3,26 @@ Segmenting with the PWVD method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The 'PWVD' method stands for the Pseudo Wigner-Ville Distribution. It is a class
 of time-frequency representations that can be used to be gain very high spectro-
-temporal resolution of a sound [1,2]. 
+temporal resolution of a sound [1,2], and can outdo the spectrogram in terms 
+of how well it allows the tracking of frequency over time. 
 
 How does it work?
 >>>>>>>>>>>>>>>>>
 The PWVD is made by performing a local auto-correlation at each sample in the
 audio signal, with a window applied onto it later. The FFT of this windowed-
-auto correlation reveals the local spectro-temporal content. The 'tftb' package [3] 
-is used to generate the PWVD representation in this package. The website is also a
+auto correlation reveals the local spectro-temporal content. However, because
+of the fact that there are so many auto-correlations `and`  FFT's involved
+in its construction - the PWVD can therefore take much more time to generate. 
+
+
+Note
+>>>>
+The 'tftb' package [3] is used to generate the PWVD representation in this package. The website is also a
 great place to see more examples and great graphics of the PWVD and alternate
 time-frequency distributions!.
 
 References
+>>>>>>>>>>
 
 [1] Cohen, L. (1995). Time-frequency analysis (Vol. 778). Prentice hall.
 
@@ -27,6 +35,7 @@ References
 # Let's begin by making a synthetic CF-FM call which looks a lot like a horseshoe/leaf nosed bat's call 
 
 import matplotlib.pyplot as plt
+import numpy as np 
 import scipy.signal as signal 
 import itsfm
 from itsfm.frequency_tracking import generate_pwvd_frequency_profile
@@ -56,6 +65,21 @@ pwvd = pwvd_transform(cffm_call, fs)
 
 plt.figure()
 plt.imshow(abs(pwvd), origin='lower')
+num_rows = pwvd.shape[0]
+plt.yticks(np.linspace(0,num_rows,11), np.linspace(0, fs*0.5, 11))
+plt.ylabel('Frequency, Hz')
+plt.xticks(np.linspace(0,num_rows,5), 
+           np.round(np.linspace(0, cffm_call.size/fs, 5),3))
+plt.xlabel('Time,seconds')
+
+# %% 
+# In comparison to the 'crisp' time-frequency representation of the 
+# PWVD, let's compare how a spectrogram with comparable parameters
+# looks:
+
+onems_samples = int(fs*0.001)
+plt.figure()
+out = plt.specgram(cffm_call, Fs=fs, NFFT=onems_samples, noverlap=onems_samples-1)
 
 # %% 
 # The dominant frequency at each sample can be tracked to see how the 
@@ -70,38 +94,3 @@ cf, fm, info = segment_call_into_cf_fm(cffm_call, fs, segment_method='pwvd',
 # dictionary with content that varies according to the segmentation method used. For instance:
 
 info.keys()
-
-# %%
-#  To illustrate how exactly the method works, let's check out the output from the `info` dictionary. 
-
-#plt.figure()
-#plt.plot(info['cf_dbrms'], label='CF emphasised')
-#plt.plot(info['fm_dbrms'],  label='FM emphasised')
-#plt.ylabel('Signal level, dB rms')
-#plt.legend()
-
-# %%
-# You can see the FM dBrms peaks towards the end and the start, while the CF peaks at the middle. The peak percentage method 
-# relies on subtracting the two from each other to see which parts of the call the FM and CF are dominant. We thus get this 
-# from the previous dBrms profiles
-
-#plt.figure()
-#plt.plot(info['cf_re_fm'], label='relative CF')
-#plt.plot(info['fm_re_cf'], label='relative FM')
-#plt.legend()
-#plt.ylabel('CF/FM relative level')
-
-# %%
-# And thus, we can see that wherever the relative FM/CF is >0, we can safely assign it to a segment of that type. 
-# Compare the relative levels and the final segmented values below. 
-#
-#plt.figure()
-#plt.subplot(211) 
-#plt.plot(cf, label='segmented CF')
-#plt.plot(fm, label='segmented FM')
-#plt.legend()
-#plt.subplot(212)
-#plt.plot(info['cf_re_fm'], label='relative CF')
-#plt.plot(info['fm_re_cf'], label='relative FM')
-#plt.legend()
-#plt.ylabel('CF/FM relative level')
