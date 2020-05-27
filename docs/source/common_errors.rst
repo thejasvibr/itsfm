@@ -58,12 +58,12 @@ can be very short audio segments that are detected, and thus when the FM rate ne
 to be calculated, things break because 1% of an already very short sound may be 
 less than the inter-sample duration itself -- and therefore this message.  
 
-
-
 .. code:: bash
 
     $ ValueError: The suggested duration 3.16e-06 is less than                         the inter-sample distance (1/fs): 4e-06
 
+Alter the `signal_level` or `window_size` to get a more continuous dB rms profile 
+of the sound. 
 
 Anomaly spans whole array
 >>>>>>>>>>>>>>>>>>>>>>>>>

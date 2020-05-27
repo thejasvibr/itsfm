@@ -70,34 +70,36 @@ def run_from_batchfile(batchfile_path, **kwargs):
                                               total=final_batch_data.shape[0]):
 
         input_arguments = parse_batchfile_row(one_batchfile_row)
-        main_audio, fs = load_raw_audio(input_arguments)
-        
-        audio_file_name = get_only_filename(input_arguments['audio_path'])
-        print('Processing '+audio_file_name+' ...')
-        segment_and_measure = segment_and_measure_call(main_audio,
-                                                           fs, 
-                                                    **input_arguments)
-        out_inspect = itsFMInspector(segment_and_measure, main_audio, fs, 
-                                     **input_arguments)
-        (cf, fm, info), call_parts, measurements = segment_and_measure
-        
-        # start making diagnostic plots
-        one, _ = out_inspect.visualise_geq_signallevel()
-        two, _ = out_inspect.visualise_cffm_segmentation()
-        three,_ = out_inspect.visualise_frequency_profiles()
-        four, _, _ = out_inspect.visualise_fmrate()
-        five, _, _ = out_inspect.visualise_accelaration()
-        
-        
-        subplots_to_graph = [one, two, three, four, five]
-        
-        save_overview_graphs(subplots_to_graph, batchfile_name, audio_file_name,
-                             row_number, **input_arguments)
-        measurements['audio_file'] = audio_file_name
-        all_measurements = save_measurements_to_file(measurements_output_file, 
-                                  audio_file_name,all_measurements,
-                                  measurements)
-        plt.close('all')
+        row_skip = input_arguments.get('skip', False)
+        if not row_skip:            
+            main_audio, fs = load_raw_audio(input_arguments)
+            
+            audio_file_name = get_only_filename(input_arguments['audio_path'])
+            print('Processing '+audio_file_name+' ...')
+            segment_and_measure = segment_and_measure_call(main_audio,
+                                                               fs, 
+                                                        **input_arguments)
+            out_inspect = itsFMInspector(segment_and_measure, main_audio, fs, 
+                                         **input_arguments)
+            (cf, fm, info), call_parts, measurements = segment_and_measure
+            
+            # start making diagnostic plots
+            one, _ = out_inspect.visualise_geq_signallevel()
+            two, _ = out_inspect.visualise_cffm_segmentation()
+            three,_ = out_inspect.visualise_frequency_profiles()
+            four, _, _ = out_inspect.visualise_fmrate()
+            five, _, _ = out_inspect.visualise_accelaration()
+            
+            
+            subplots_to_graph = [one, two, three, four, five]
+            
+            save_overview_graphs(subplots_to_graph, batchfile_name, audio_file_name,
+                                 row_number, **input_arguments)
+            measurements['audio_file'] = audio_file_name
+            all_measurements = save_measurements_to_file(measurements_output_file, 
+                                      audio_file_name,all_measurements,
+                                      measurements)
+            plt.close('all')
 
 def subset_batch_data(batch_data, **kwargs):
     '''
@@ -417,7 +419,8 @@ convert_column_to_proper_type = {
         'pwvd_window' : to_integer,
         'pwvd_filter' : to_bool,
         'measurements' : to_list_w_funcs,
-        'sample_every' : to_float
+        'sample_every' : to_float,
+        'skip': to_bool
         }
 
 def parse_batchfile_row(one_row):

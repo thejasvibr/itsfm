@@ -70,6 +70,12 @@ It is possible to use a combination of default and non-default values. Whether d
 For instance, in the extended batch file above, a non-default :code:`fft_size` is used for the first file, and the other files have above
 have a default value. 
 
+Skip a row
+<<<<<<<<<<
+There may be times when the raw data is truly bad (or empty, or missing) and you want to skip a particular row in the batchfile. 
+This can be done by add a 'skip' column, and adding :code:`True` in that particular row. Remember to fill out the rest of 
+the rows with :code:`DEFAULT`. 
+
 Run only a single row
 <<<<<<<<<<<<<<<<<<<<<
 
@@ -80,6 +86,7 @@ The example below will run the 11th  row in the batchfile.
 .. code-block:: bash
 
     $ python -m itsfm -batchfile template_batchfile.csv -one_row 10
+
 
 Running parts of a batchfile
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<
