@@ -36,7 +36,7 @@ parameters['segment_method'] = 'pwvd'
 parameters['window_size'] = int(fs*0.001)
 parameters['fmrate_threshold'] = 2.0
 parameters['max_acc'] = 10
-parameters['extrap_window'] = 50*10**-6
+parameters['extrap_window'] = 75*10**-6
 
 synthesised = pd.read_csv('horseshoe_test_parameters.csv')
 for call_num in tqdm(range(synthesised.shape[0])):

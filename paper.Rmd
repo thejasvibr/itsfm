@@ -1,0 +1,42 @@
+---
+title: "itsFM, an open-source package to reliably segment sounds by frequency modulation"
+author: Thejasvi Beleyur
+  
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+
+## Abstract 
+
+
+## Introduction 
+
+Separating animal vocalisations into their component parts allows probing their biomechanical execution and sensory function [Coen fast muscles papers;echolocation papers?]. 
+
+## Methods and comparison to pre-existing methodology
+
+
+
+
+## Results 
+
+
+## Discussion
+
+- itsFM being open-source, should not have any access issues. The one primary requirement of course is that the user must have some kind of coding experience. However, with the use of a non-GUI platform, there's 
+
+## Further venues for work
+- The use of itsFM in other types of vocalisations still needs to be explored. For instance, bird calls have been analysed (See DOCSLINK). The current frequency tracking implementation only tracks a single frequency per point of time, and thus is not able to handle multi-harmonic sounds with equal harmonic emphasis very well. 
+- 
+
+
+
+
+
+
+
+
+
+

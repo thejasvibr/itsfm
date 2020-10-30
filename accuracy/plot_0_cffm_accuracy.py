@@ -30,9 +30,14 @@ To see more on the details of the generation and running of the synthetic data
 see the modules `CF/FM call segmentation` and `Generating the CF-FM synthetic calls`
 
 """
+import h5py
+import itsfm
+import matplotlib.pyplot as plt
+plt.rcParams['agg.path.chunksize'] = 10000
 import numpy as np
 import pandas as pd 
 import seaborn as sns
+import tqdm
 
 obtained = pd.read_csv('obtained_horseshoe_sim.csv')
 synthesised = pd.read_csv('horseshoe_test_parameters.csv')
@@ -88,8 +93,86 @@ ax = sns.swarmplot(x='Region type', y = 'Accuracy',
 # As we can see there are a few regions where the accuracy is very low, let's
 # investigate which of these calls are doing badly. 
 
-accuracy[accuracy['cf_duration']<0.5]
+poor_msmts = accuracy[accuracy['cf_duration']<0.5].index
 
+# %% 
+# Now, let's troubleshooot this particular set of poor measurements fully.
+
+simcall_params = pd.read_csv('horseshoe_test_parameters.csv')
+obtained_params = pd.read_csv('obtained_horseshoe_sim.csv')
+
+obtained_params.loc[poor_msmts,:]
+
+# %% 
+# There are two CF regions being recognised, one of them is just extremely short.
+# Where is this coming from? Let's take a look at the actual frequency tracking output,
+# by re-running the ```itsfm``` routine once more:
+
+
+f = h5py.File('horseshoe_test.hdf5', 'r')
+
+fs = float(f['fs'][:])
+
+parameters = {}
+parameters['segment_method'] = 'pwvd'
+parameters['window_size'] = int(fs*0.001)
+parameters['fmrate_threshold'] = 2.0
+parameters['max_acc'] = 10
+parameters['extrap_window'] = 75*10**-6
+
+raw_audio = {}
+
+synthesised = pd.read_csv('horseshoe_test_parameters.csv')
+for call_num in tqdm.tqdm(poor_msmts.to_list()):
+    synthetic_call = f[str(call_num)][:]
+    raw_audio[str(call_num)] = synthetic_call
+    output = itsfm.segment_and_measure_call(synthetic_call, fs, **parameters)
+                                    
+    seg_output, call_parts, measurements= output
+    
+    # # save the long format output into a wide format output to
+    # # allow comparison
+    # sub = measurements[['region_id', 'duration']]
+    # sub['call_number'] = call_num
+    # region_durations = sub.pivot(index='call_number',
+    #                              columns='region_id', values='duration')
+    # obtained.append(region_durations)
+
+f.close()
+
+call_num = str(poor_msmts[0])
+
+plt.figure()
+plt.specgram(raw_audio[call_num], Fs=fs)
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[2]['cleaned_fp'])
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[0]*4000,'w')
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[1]*4000,'k')
+
+
+plt.figure()
+plt.subplot(211)
+plt.specgram(raw_audio[call_num], Fs=fs)
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[2]['raw_fp'])
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[0]*4000,'w')
+plt.plot(np.linspace(0,raw_audio[call_num].size/fs,raw_audio[call_num].size),
+         seg_output[1]*4000,'k')
+plt.subplot(212)
+plt.plot(raw_audio[call_num])
+
+
+
+parameters = {}
+parameters['segment_method'] = 'peak_percentage'
+parameters['window_size'] = int(fs*0.001)
+parameters['fmrate_threshold'] = 2.0
+parameters['max_acc'] = 10
+parameters['extrap_window'] = 50*10**-6
+output = itsfm.segment_and_measure_call(synthetic_call, fs, **parameters)
 
 
 
