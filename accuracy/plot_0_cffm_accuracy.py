@@ -30,7 +30,6 @@ To see more on the details of the generation and running of the synthetic data
 see the modules `CF/FM call segmentation` and `Generating the CF-FM synthetic calls`
 
 """
-import h5py
 import itsfm
 import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize'] = 10000
@@ -236,6 +235,9 @@ obtained_params.loc[poor_msmts,:]
 # There are two CF regions being recognised, one of them is just extremely short.
 # Where is this coming from? Let's take a look at the actual frequency tracking output,
 # by re-running the ```itsfm``` routine once more:
+
+    
+import h5py
 
 
 f = h5py.File('horseshoe_test.hdf5', 'r')

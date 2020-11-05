@@ -60,21 +60,26 @@ outputs = itsfm.segment_and_measure_call(audio, fs,
 
 output_inspect = itsfm.itsFMInspector(outputs, audio, fs)
 
-
-
 # %% 
 # Verifying the CF-FM segmentations
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# Here, let's see where the calls are in time and how they match the spectrogram output
+# Here, let's see what the output of the peak-percentage method shows
 
 output_inspect.visualise_cffm_segmentation()
 plt.tight_layout()
 plt.savefig('pwvd_cffm_segmentation.png')
-output_inspect.visualise_cffm_segmentation()
-plt.tight_layout()
 
 
+# %% 
+# Low/high passed audio profiles 
+# ------------------------------
+# Let's also take a look at the low and high -passed audio profiles. 
+# The regions where the dB rms of the high-passed audio is greater than 
+# the low-passed audio is considered CF and vice-versa is considered FM. 
 
 spec, profiles = output_inspect.visualise_pkpctage_profiles()
 profiles.legend(loc=9, frameon=False)
 plt.savefig('pkpctage_profiles.png')
+
+# %% 
+# The two profiles match the expected CF/FM regions fairly well. 
