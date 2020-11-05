@@ -181,6 +181,9 @@ def segment_by_peak_percentage(call, fs, **kwargs):
     ----------
     call : np.array
     fs : float>0
+    peak_percentage : 0<float<1, optional
+        This is the fraction of the peak at which low and high-pass filtering happens.
+        Defaults to 0.98.
     
     Returns
     -------
@@ -211,7 +214,7 @@ def segment_by_peak_percentage(call, fs, **kwargs):
 
     See Also
     --------
-    pre_process_for_segmentation
+    itsfm.segment.pre_process_for_segmentation for further keyword arguments related to high/low pass filtering.
     '''
     cf_dbrms, fm_dbrms = pre_process_for_segmentation(call, fs, **kwargs)
     fm_re_cf = fm_dbrms - cf_dbrms
@@ -243,7 +246,7 @@ def segment_by_pwvd(call, fs, **kwargs):
     fmrate_threshold : float >=0
         The threshold rate of frequency modulation in kHz/ms. Beyond this value a segment
         of audio is considered a frequency modulated region. 
-        Defaults to 0.2 kHz/ms
+        Defaults to 1.0 kHz/ms
 
     
     Returns
@@ -838,6 +841,10 @@ def pre_process_for_segmentation(call, fs, **kwargs):
     -------
     cf_dbrms, fm_dbrms : np.arrays
         The dB rms profile of the high + low passed versions of the input audio.
+    
+    See Also
+    --------
+    itsfm.segment.low_and_highpass_around_threshold
     '''
     peak_percentage = kwargs.get('peak_percentage', 0.99)
     if peak_percentage >= 1.0:
@@ -879,15 +886,21 @@ def low_and_highpass_around_threshold(audio, fs, threshold_frequency, **kwargs):
     pad_duration : float>0, optional
         Zero-padding duration in seconds before low+high pass filtering. 
         Defaults to 0.1 seconds.
+    double_pass: bool, optional 
+        Low/high pass filter the audio twice. This has been noticed to help 
+        with segmentation accuracy, especially for calls with short CF/FM
+        segments where edge effects are particularly noticeable. Defaults to
+        False
 
     Returns
     -------
     lp_audio, hp_audio : np.arrays
         The low and high pass filtered versions of the input audio. 
-        
     '''
     lowpass = kwargs.get('lowpass', signal.ellip(2,3,10, threshold_frequency/(0.5*fs), 'lowpass'))
     highpass = kwargs.get('highpass', signal.ellip(2,3,10, threshold_frequency/(0.5*fs), 'highpass'))
+    double_pass = kwargs.get('double_pass', False)
+
     pad_duration = kwargs.get('pad_duration', 0.1)
     make_sure_its_positive(pad_duration, variable='pad_duration')
     pad_length = int(pad_duration*fs)
@@ -896,11 +909,18 @@ def low_and_highpass_around_threshold(audio, fs, threshold_frequency, **kwargs):
     audio_padded = np.pad(audio, [pad_length]*2, mode='constant', constant_values=(0,0))
 
     lp_audio_raw = signal.filtfilt(lowpass[0], lowpass[1], audio_padded)
-    lp_audio = lp_audio_raw[pad_length:-pad_length]
-    
     hp_audio_raw = signal.filtfilt(highpass[0], highpass[1], audio_padded)
-    hp_audio = hp_audio_raw[pad_length:-pad_length]
     
+    
+    if double_pass:
+        kwargs['double_pass'] = False
+        # the double passed lp and hp versions of the audio segment
+        lp_audio_raw , _ = low_and_highpass_around_threshold(lp_audio_raw, fs, threshold_frequency, **kwargs)
+        _, hp_audio_raw = low_and_highpass_around_threshold(hp_audio_raw, fs, threshold_frequency, **kwargs)
+    
+    lp_audio = lp_audio_raw[pad_length:-pad_length]
+    hp_audio = hp_audio_raw[pad_length:-pad_length]
+        
     return lp_audio, hp_audio
 
 def get_thresholds_re_max(cf_dbrms, fm_dbrms):

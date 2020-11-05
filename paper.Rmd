@@ -1,36 +1,117 @@
 ---
-title: "itsFM, an open-source package to reliably segment sounds by frequency modulation"
-author: Thejasvi Beleyur
-  
+title: "itsfm, an open-source package to reliably segment and measure sounds by frequency modulation"
+author: | 
+        | Thejasvi Beleyur^[Email: thejasvib@gmail.com]
+        | Acoustic and Functional Ecology, Max-Planck Institute for Ornithology, Seewiesen. 
+
 output:
-  pdf_document:
+  bookdown::pdf_document2: 
     keep_tex: true
+    fig_caption: yes
+toc : FALSE
 ---
 
-
-## Abstract 
-
-
-## Introduction 
-
-Separating animal vocalisations into their component parts allows probing their biomechanical execution and sensory function [Coen fast muscles papers;echolocation papers?]. 
-
-## Methods and comparison to pre-existing methodology
+## Abstract {-}
+Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow . Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow .Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow .Miaowe miaow miaow miaow miaow Miaowe miaow miaow miaow miaow .Miaowe miaow miaow miaow miaow.
 
 
+## Introduction  
+
+- Separating animal vocalisations into their component parts allows probing their biomechanical execution and sensory function [Coen fast muscles papers;echolocation papers?;batbioacousticsMetznerchapter]. 
+
+- Whether a sound is CF or FM can reveal a lot about the biomechanics (muscular control, wing movement) being exerted at the point of sound production. Moreover, quantifying the dynamics of the sound itself can reveal the sensory adaptations and/or biomechanical capabilities of the animal.
+
+- Echolocating animals present a particularly nice example of how analysing vocalisations tell us about the sensorimotor decisions of the animal.
+A lot of research focus has gone primarily into the CF Doppler shifting behaviour (Siemers, Beedlholm etc.), and relatively less about how bats alter the sub-parts of their calls. 
+Tian & Schnitzler 1997: define FM as 0.8kHz (also, about 1 % of CF peak) below 2nd harmonic of 'CF component' - measure duration and other parameters after segmentation.
+
+* Vater et al. 2003: durations of CF +FM and FM bandwidth seem to be measured manually from a spectrogram
+* Hage et al. JEB 2012 : iFM and tFM bandwidths measured by automatically measuring peak frequency at start, middle and end of the call - actually kind of neat..hmm. And fully automated
+* Fawcett et al. 2015, JEB : Measure tFM and iFM duration using a 256 point FFT window + min freq (-10dB peak frequency) -- but don't specify how the FM components were selected. It seems like they were done manually. 
+* Schoeppler et al 2018, Sci. Rep: define FM as 660 Hz (~1% of CF peak freq.) below the CF2 frequency. *H. armiger*. Tracked frequency with a spectrogram??
+* Lu et al. 2020, JEB : CF and FM segmented by an elliptic filter set at 2kHz below the CF peak frequency. *H. armiger* too , almost 3% of the peak frequency... In general there is a lack of uploaded scripts, focus on proprietary software and in particular a general sparsity of description of methods. 
+* Gessinger et al. 2020, RSOS: studying QCF calls of L. aurita. To calculate CF peak frequency, seem to manually discard the initial and end parts of the call. While maybe reasonable - not very well scalable with increasing number of samples
+
+- While the focus of this package has been on CF-FM calls, the use of ```itsfm```, its use need not be restricted to only echolocation calls - but can be used to study any sound.
+
+## Package description 
+```itsfm``` currently provides two main approaches to segment the CF and FM components, the 'peak-percentage' and 'pwvd' methods. 
+
+### Peak-percentage segmentation 
+The ```peak-percentage``` method is best for sounds with one or more dominant CF components of the same frequency, and FM components that are below the CF component's frequency (Figure \ref{fig:peak-percentage}). A typical rhinolophid/hipposiderid CF-FM call is the simplest example for which this method works. This method's implementation is inspired by previously published efforts to segment CF-FM calls into their respective components [luetal2020,tianschnitzler,schoeppleretal]. The approach implemented here creates two versions of the raw audio that are low and high passed at a threshold frequency. The threshold frequency is calculated as a fixed percentage of the raw audio's peak frequency, eg. 99%. The dB rms profile of the low and high passed audio are then calculated and compared by subtraction. Continuous regions where the low-passed audio is greater than the high-passed audio are considered FM regions, and CF regions where it is vice-versa. 
+
+The peak-percentage method is relatively easy to parameterise as it accepts two intuitive input parameters, the ```peak_percentage``` (peak percentage value between 0-1) and ```window_size``` (the number of samples for the window used to calculate the dB rms profile over). A set of additional optional parameters may also be specified. The default low/high pass filter used is a second order elliptic filter with 3dB ripple (pass band) and 10dB minimum attenuation in the stop band. The user may also optionally specify their own recursive filter coefficients. 
+
+A major drawback in the peak-percentage method is its limited use-cases. Sounds must be sufficiently similar to the ideal input spectro-temporal shape of a classic CF-FM call, or they will be mis-segmented. Not even all CF-FM calls are likely to be segmented properly, eg. approach calls with shorter CF segments and longer FM segments. If the CF segment of the input sound does not contribute majorly to the spectrum, then the peak-percentage method fails. Experience with field recordings having off-axis CF-FM bat calls shows that the peak-percentage method also fails here because the CF component may not be as dominant as in on-axis recordings of the same call. Despite the limitations in the types of sounds that can be segmented, the peak-percentage method may also be used for certain types of bird calls with long CF and short FM calls (eg. those emitted by the *Pachycephala* genus)
+
+### PWVD segmentation 
+The ```pwvd``` method  (Figure \ref{fig:pwvd}) tracks the frequency modulation over the course of the input sound. Regions with an above threshold frequency modulation are considered FM regions, and those below are considered CF regions. The frequency modulation over the course of a sound is estimated by first generating a a sample-level 'frequency profile' through the use of the Pseudo Wigner-Ville Distribution (PWVD). The PWVD  is a relatively underutilised method in bioacoustics [but see Paper1,Paper2,Paper3] which generates time-frequency representations with high spectro-temporal resolution [PWVD book]. The first derivative of the frequency profile is used to generate the frequency modulation rate profile of the sound and thus segment regions that are above or below the threshold. 
+
+The ```pwvd``` method requires somewhat more parametrisation and methodological understand than the ```peak-percentage``` method. Its effectiveness is dependent on the ```fmrate_threshold``` (frequency modulation threshold, in kHz/ms), ```pwvd_window``` size (number of samples used to form the 'slices' of the time-frequency representation), ```tfr_cliprange``` (permitted dynamic range in dB, used to clip the time-frequency representation and remove noise). In addition to these primary parameters, the ```pwvd``` method can be further fine-tuned to improve segmentation. The  frequency profile is currently generated by tracking the dominant frequency over each slice of the PWVD representation. The dominant frequency approach is susceptible to noise and changes in sound levels over time, and thus requires additional correction routines that interpolate between problematically tracked regions. The problematic regions are identified by measuring the accelaration (second derivative) of the sound's frequency profile. Regions above a user-set threshold are considered 'spiky' and are interpolated or extrapolated based on neighbouring regions frequency estimates. 
+
+Even though the ```pwvd``` method requires some effort to parameterise, the flexibility it provides allows the analysis of a much wider-range of sounds than the ```peak-percentage``` method. The CF/FM segmentation is independent of the actual call shape, and even complex sounds such as bat social calls and bird songs could be segmented through this method. A major drawback of the current ```pwvd``` implementation is its inability to reliably segment multi-harmonic sounds. Multi-harmonic sounds present a challenge for the simple dominant-frequency based frequency tracking in place currently, and alternative algorithms will be a focus of future development. 
+
+### Supporting methods
+
+Along with the primary methods that segment sounds into their component CF and FM regions, ```itsfm``` has a collection of supporting methods that allow quantification, visualisation and batch-processing. A series of inbuilt measurement functions allow region-specific measurements such as duration, rms, peak-frequency, or terminal frequency to be measured. Custom measurements may also be specified for the user on each segmented region. A sound analysed with the ```pwvd``` method generates more than the identified CF/FM regions. Raw and noise-corrected data on the frequency profile of the sound and the rate of frequency modulation over time are of interest to researchers studying the speed at which vocalisations can be modulated from a behavioural and biomechanical viewpoint [@metzner;@Hage]. Along with the background data used to form the segmentations, ```itsfm``` also provides a series of inbuilt visualisation functions to visualise the input sound itself (```visualise_sound```) and generate diagnostic plots of the segmentation output through the ```itsFMInspector``` class and ```visualise_cffm_segmentation``` (Figure \ref(fig:cffmseg)). 
+
+```{r cffmseg, echo=FALSE,fig.cap="Diagnostic plot showing the CF/FM segmentation output of a *Rhinolophus euryale/mehelyi* call"}
+include_graphics('examples/pwvd_cffm_segmentation.png')
+```
 
 
-## Results 
+Handling audio recordings made in the field calls for the individual handling of each recording. To aid the reproducible processing of multiple files with unique input parameters ```itsfm``` can also be called through a command-line interface that accepts batch files in the form of the CSV format. The batch files contain column-wise input parameters for each row that defines the path to an audio file. To facilitate iterative parameter optimisation, the user can choose to select only a few audio recordings or the entire set of files defined in the batch file. For each processed audio file, the diagnostic plot and measurements are saved in the working folder.
+Handling audio recordings made in the field calls for the individual handling of each recording. To aid the reproducible processing of multiple files with unique input parameters ```itsfm``` can also be called through a command-line interface that accepts batch files in the form of the CSV format. The batch files contain column-wise input parameters for each row that defines the path to an audio file. To facilitate iterative parameter optimisation, the user can choose to select only a few audio recordings or the entire set of files defined in the batch file. For each processed audio file, the diagnostic plot and measurements are saved in the working folder.
+
+## Methods evaluation 
+To test the accuracy of the segmentation methods implemented in the ```itsfm``` package, I generated a set of synthetic CF-FM calls with known segment durations and spectral properties. Synthetic calls were generated based on calls broadly based on the structure of rhinolophid and hipposiderid call parameters using the package's inbuilt ```make_cffm_call``` function. A set of 324 synthetic calls were made through a combination of parameters in Table \@ref(tab:synthtable)
+
+```{r synthtable, echo=FALSE}
+library(knitr)
+cf.durations <- c(0.005,0.010,0.015)
+cf.peakfreq <- c(40000, 60000, 90000)
+fm.durations <- c(0.001, 0.002, NA)
+fm.bw <- c(5000, 10000, 20000)
+
+tabledata <- as.matrix(rbind(cf.durations, cf.peakfreq, fm.durations, fm.bw))
+rownames(tabledata) <- c("CF duration (s)","CF peak frequency (kHz)","i/t FM duration (s)","i/t FM bandwidth (s)")
+
+opts <- options(knitr.kable.NA = "")
+knitr::kable(tabledata, col.names = c('', 'Parameter values', ''), digits=c(5,5,5), format.args = list(scientific = FALSE),
+             caption="Parameter values used to generate synthetic CF-FM calls. The parameters broadly reflect the call shape of a rhinolophid/hipposiderid CFFM bat calls. iFM and tFM regions were generated from the same FM parameter set. 324 calls = 9 CF combintations x 6 iFM combinations x 6 tFM combinations.")
+
+```
+
+### Synthetic dataset creation 
+
+### Results 
+
+I tested the accuracy of call component segmentation as seen in Figure \ref{fig:performance}.
+
+```{r performance, echo=FALSE,out.width="100%", fig.cap="\\label{fig:performance} asdf;lkj asdf;ljkwqrepoiu  asdffff"}
+library(knitr)
+include_graphics('accuracy/pwvd-pkpct-comparison.png')
+
+```
 
 
 ## Discussion
 
-- itsFM being open-source, should not have any access issues. The one primary requirement of course is that the user must have some kind of coding experience. However, with the use of a non-GUI platform, there's 
+- itsfm being open-source, should not have any access issues. The one primary requirement of course is that the user must have some kind of coding experience. However, with the use of a non-GUI platform, there's 
 
 ## Further venues for work
-- The use of itsFM in other types of vocalisations still needs to be explored. For instance, bird calls have been analysed (See DOCSLINK). The current frequency tracking implementation only tracks a single frequency per point of time, and thus is not able to handle multi-harmonic sounds with equal harmonic emphasis very well. 
-- 
+- The use of itsfm in other types of vocalisations still needs to be explored. For instance, bird calls have been analysed (See DOCSLINK). The current frequency tracking implementation only tracks a single frequency per point of time, and thus is not able to handle multi-harmonic sounds with equal harmonic emphasis very well. 
+- Future implementations of frequency tracking need to apply more sophisticated problem-region detection and also frequency tracking (eg. Viterbi path)
 
+## Open-source software and packages used
+```itsfm``` is written in the Python language [], and relies on the numpy, scipy, matplotlib and tftb 
+
+## Supporting information 
+The ```itsfm``` package can be downloaded from the Python package index (PyPi) with the command ```pip install itsfm```. The latest versions of the package is accessible at [https://github.com/thejasvibr/itsfm](https://github.com/thejasvibr/itsfm). Online documentation with detailed examples and troubleshooting guides can be accessed at [https://itsfm.readthedocs.io](https://itsfm.readthedocs.io)
+
+
+## Acknowledgements
+I would like to thank Diana Schoeppler for sharing know-how on analysing CF-FM calls and Neetash MR for helpful discussions. TB was funded by the DAAD and the IMPRS for Organismal Biology. 
 
 
 

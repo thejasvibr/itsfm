@@ -63,7 +63,8 @@ output_inspect.measurements
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # Here, let's see where the calls are in time and how they match the spectrogram output
 output_inspect.visualise_cffm_segmentation()
-
+plt.tight_layout()
+plt.savefig('pwvd_cffm_segmentation.png')
 # %% 
 # Even without understanding what's happening here, you can see the 
 # 'sloped' regions are within the red boxes, and the 'relatively even 
@@ -78,12 +79,30 @@ output_inspect.visualise_cffm_segmentation()
 # can be calculated for each region. Using a threshold rate of the
 # frequency modulation, call regions above and below it can be easily identified!
 
-output_inspect.visualise_frequency_profiles()
+s,w = output_inspect.visualise_frequency_profiles()
+s.legend_.remove()
 
+handles, labels = s.get_legend_handles_labels()
+labels_new = ['Raw frequency profile (FP)','Error corrected FP','Downsampled FP']
+l = s.legend(handles, labels_new, loc=8, fontsize=11,
+               borderaxespad=0., frameon=False, labelcolor='w')
+s.set_ylabel('Frequency, Hz', labelpad=-1.5)
+plt.savefig('pwvd_freqprofiles.png')
 # %% 
 # You can see from the plot above that the frequency profile of the sound
 # shows a relatively constant frequency region of the call in middle and 
 # with frequency modulated regions in the middle.
+
+
+# %% 
+# The underlying frequency modulation rate
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# 
+
+fmrate_plot, spec, waveform = output_inspect.visualise_fmrate()
+fmrate_plot.hlines(2,0,audio.size/fs, linestyle='dotted',label='2 kHz threshold')
+fmrate_plot.legend(frameon=False)
+plt.savefig('pwvd_fmrate_diagnostic.png')
 
 # %% 
 # Performing measurements on the CF and FM parts of a call

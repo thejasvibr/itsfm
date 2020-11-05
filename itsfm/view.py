@@ -71,10 +71,10 @@ class itsFMInspector:
             a = plt.subplot(311)
             make_waveform(self.fmrate, self.fs)
             plt.ylabel('FM rate, kHz/ms')
-            b = plt.subplot(312)
-            plt.title('FM Rate')
+            b = plt.subplot(312,sharex=a)
             make_specgram(self.whole_audio, self.fs, **self.kwargs)
-            c = plt.subplot(313)
+            b.set_ylabel('Frequency, Hz', labelpad=-1.5)
+            c = plt.subplot(313,sharex=a)
             make_waveform(self.whole_audio, self.fs)
             return a, b, c
         except:
