@@ -137,6 +137,18 @@ class itsFMInspector:
         make_waveform(self.whole_audio, self.fs,)
         return a,b
     
+    def visualise_pkpctage_profiles(self):
+        '''
+        '''
+        plt.figure()
+        a = plt.subplot(211)
+        make_specgram(self.whole_audio, self.fs, **self.kwargs);
+        a.set_ylabel('Frequency, Hz', labelpad=-1.5)
+        b = plt.subplot(212, sharex=a)
+        plot_dbrms_cffmprofiles(self.seg_details,self.fs)
+        return a,b 
+       
+    
     def visualise_geq_signallevel(self):
         '''
         Some tracking/segmentation methods rely on using only
@@ -163,7 +175,6 @@ class itsFMInspector:
         wave_max = np.max(np.abs(self.whole_audio))
         plt.plot(time_axis, above_siglevel*wave_max, label='$\geq$ signal level')
         return a, b
-        
         
         
         
@@ -408,4 +419,33 @@ def plot_cf_measurements(call, fs, measures, subplot, **kwargs):
     subplot.hlines(peak_frequency,measures['cf_start'],
                                measures['cf_end'], 'b')
     return subplot 
+
+
+def plot_dbrms_cffmprofiles(seg_details, fs):
+    '''
+    Makes a plot with CF anf FM dB rms profiles. This method only works for 
+    peak-percentage based segmentation. 
     
+    Parameters
+    ----------
+    seg_details : tuple
+        Tuple with 3 entries. The third entry needs to be a dictionary with 
+        at least the following keys : 'cf_re_fm' and 'fm_re_cf'
+    fs : float>0
+        Sample rate in Hz
+    
+    Returns 
+    -------
+    matplotlib plot
+    '''
+    time_axis = np.linspace(0,seg_details[2]['cf_re_fm'].size/fs,seg_details[2]['cf_re_fm'].size)
+    try:
+        plt.plot(time_axis, seg_details[2]['cf_re_fm'], label='$high - low$ passed dBrms')
+        plt.plot(time_axis, seg_details[2]['fm_re_cf'], label='$low - high$ passed dBrms', linestyle='dotted')
+        plt.legend(frameon=False)
+    except:
+        raise KeyError('Unable to find cf_re_fm and fm_re_cf keys in the segmentation output. Are you sure this is output from peak percentage method?')
+
+        
+
+
