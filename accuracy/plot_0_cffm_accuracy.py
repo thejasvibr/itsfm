@@ -45,64 +45,9 @@ synthesised = pd.read_csv('horseshoe_test_parameters.csv')
 # Let's look at the obtained regions and their durations
 obtained
 
-# %% 
-# We can see the output has each CF/FM region labelled by the order in which
-# they're found. Let's re-label these to match the names of the synthesised
-# call parameter dataframe. 'upfm' is fm1, 'downfm' is fm2. 
-
-obtained.columns = ['call_number','cf_duration',
-                    'upfm_duration', 'downfm_duration', 'other']
-
-# %% 
-# Let's look at the synthetic call parameters. There's a bunch of parameters
-# that're not interesting for this accuracy exercise and so let's remove them 
-
-synthesised
-
-synthesised.columns
-
-synth_regions = synthesised.loc[:,['cf_duration', 'upfm_duration','downfm_duration']]
-synth_regions['other'] = np.nan
-synth_regions['call_number'] = obtained['call_number']
-
-# %% 
-# Comparing the synthetic and the obtained results
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# We have the two datasets formatted properly, now let's compare the 
-# accuracy of `itsfm`.
-
-accuracy = obtained/synth_regions
-accuracy['call_number'] = obtained['call_number']
-# %% 
-# Overall accuracy of segmentation:
-accuracy_reformat = accuracy.melt(id_vars=['call_number'], 
-                                            var_name='Region type',
-                                            value_name='Accuracy')
-
-accuracy_reformat = accuracy_reformat[accuracy_reformat['Region type']!='other']
-
-plt.figure()
-
-ax = sns.boxplot(x='Region type', y = 'Accuracy',
-                         data=accuracy_reformat)
-
-ax = sns.swarmplot(x='Region type', y = 'Accuracy',
-                         data=accuracy_reformat,
-                         alpha=0.5)
-
-
-
-# %% 
-# Peak-percentage method accuracy
-# -------------------------------
-# Now let's take a look at the peak percentage method's accuracy
-
-obtained_pkpct = pd.read_csv('obtained_pkpct_horseshoe_sim.csv')
-
-obtained_pkpct.head()
 
 # %%
-# It can clearly be seen that there are some calls with *multiple* segments detected. 
+# There are some calls with *multiple* segments detected. 
 # This multiplicity of segments typically results from false positive detections, 
 # where the CF-FM ratio jumps above 0 spuriously for a few samples. Let's take a look
 # at some of these situations. 
@@ -136,6 +81,69 @@ def identify_valid_segmentations(df):
                                           all_otherrows_nan(row, rest_columns)])
     return all_valid_rows
 
+valid_pwvd_segmentations = identify_valid_segmentations(obtained)
+
+print(f'{sum(valid_pwvd_segmentations)/valid_pwvd_segmentations.size} of all calls could be segmented correctly')
+
+# %% 
+# We can see the output has each CF/FM region labelled by the order in which
+# they're found. Let's re-label these to match the names of the synthesised
+# call parameter dataframe. 'upfm' is fm1, 'downfm' is fm2. 
+
+valid_obtained = obtained[valid_pwvd_segmentations]
+
+
+valid_obtained.columns = ['call_number','cf_duration',
+                    'upfm_duration', 'downfm_duration', 'other']
+
+
+
+# %% 
+# Let's look at the synthetic call parameters. There's a bunch of parameters
+# that're not interesting for this accuracy exercise and so let's remove them 
+
+synthesised
+
+synthesised.columns
+
+synth_regions = synthesised.loc[valid_pwvd_segmentations,['cf_duration', 'upfm_duration','downfm_duration']]
+synth_regions['other'] = np.nan
+synth_regions['call_number'] = valid_obtained['call_number']
+
+# %% 
+# Comparing the synthetic and the obtained results
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# We have the two datasets formatted properly, now let's compare the 
+# accuracy of `itsfm`.
+
+pwvd_accuracy = valid_obtained/synth_regions
+pwvd_accuracy['call_number'] = valid_obtained['call_number']
+# %% 
+# Overall accuracy of segmentation:
+pwvd_accuracy_reformat = pwvd_accuracy.melt(id_vars=['call_number'], 
+                                            var_name='Region type',
+                                            value_name='Accuracy')
+
+pwvd_accuracy_reformat = pwvd_accuracy_reformat[pwvd_accuracy_reformat['Region type']!='other']
+
+plt.figure()
+
+ax = sns.boxplot(x='Region type', y = 'Accuracy',
+                         data=pwvd_accuracy_reformat)
+
+ax = sns.swarmplot(x='Region type', y = 'Accuracy',
+                         data=pwvd_accuracy_reformat,
+                         alpha=0.5)
+
+# %% 
+# Peak-percentage method accuracy
+# -------------------------------
+# Now let's take a look at the peak percentage method's accuracy
+
+obtained_pkpct = pd.read_csv('obtained_pkpct_horseshoe_sim.csv')
+
+obtained_pkpct.head()
+
 calls_w_3segs = identify_valid_segmentations(obtained_pkpct)
 
 print(f'{np.sum(calls_w_3segs)/calls_w_3segs.size} % of calls have 3 segments')
@@ -151,8 +159,13 @@ pkpct_well_segmented = pkpct_well_segmented.drop(['cf2','fm3','fm4'],axis=1)
 pkpct_well_segmented.columns = ['call_number','cf_duration',
                     'upfm_duration', 'downfm_duration', 'other']
 
-pkpct_accuracy = pkpct_well_segmented/synth_regions.loc[calls_w_3segs,:]
 
+synth_regions_pkpct = synthesised.loc[calls_w_3segs,['cf_duration', 'upfm_duration','downfm_duration']]
+synth_regions_pkpct['other'] = np.nan
+synth_regions_pkpct['call_number'] = pkpct_well_segmented['call_number']
+
+pkpct_accuracy = pkpct_well_segmented/synth_regions_pkpct
+pkpct_accuracy['call_number'] = pkpct_well_segmented['call_number']
 
 # Overall accuracy of segmentation:
 pkpct_accuracy_reformat = pkpct_accuracy.melt(id_vars=['call_number'], 
@@ -175,7 +188,7 @@ ax = sns.swarmplot(x='Region type', y = 'Accuracy',
 # Putting it all together: PWVD vs peak percentage
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-pwvd_accuracy = accuracy_reformat.copy()
+pwvd_accuracy = pwvd_accuracy_reformat.copy()
 pwvd_accuracy['method'] = 'pwvd'
 
 pkpct_accuracy = pkpct_accuracy_reformat.copy()
@@ -268,7 +281,6 @@ for call_num in tqdm.tqdm(poor_msmts.to_list()):
     #                              columns='region_id', values='duration')
     # obtained.append(region_durations)
 
-f.close()
 
 call_num = str(poor_msmts[0])
 
@@ -331,6 +343,7 @@ corrected_obtained = corrected_obtained.loc[:,corrected_obtained.columns!='cf2']
 corrected_obtained.columns = ['call_number','cf_duration',
                     'upfm_duration', 'downfm_duration', 'other']
 
+
 corrected_accuracy = corrected_obtained/synth_regions
 corrected_accuracy['call_number'] = corrected_obtained['call_number']
 corrected_accuracy_reformat = corrected_accuracy.melt(id_vars=['call_number'], 
@@ -346,4 +359,81 @@ ax = sns.swarmplot(x='Region type', y = 'Accuracy',
                          data=corrected_accuracy_reformat,
                          alpha=0.5)
 
+
+# %% 
+# Figuring out what happened with the peak-percentage segmentation 
+# ----------------------------------------------------------------
+# 
+
+calls_w_3segs = identify_valid_segmentations(obtained_pkpct)
+poor_pkpct = obtained_pkpct[~calls_w_3segs]
+
+synthesised['upfm_bandwidth'] = synthesised['cf_peak_frequency']-synthesised['upfm_terminal_frequency']
+synthesised['downfm_bandwidth'] = synthesised['cf_peak_frequency']-synthesised['downfm_terminal_frequency']
+
+for each in ['upfm','downfm']:
+    values, counts = np.unique(synthesised[~calls_w_3segs][each+'_bandwidth'], return_counts=True)
+    print(values, counts)
+
+# %% 
+# It seems like bandwidth has a role, and somehow only the iFM components are more affected than the tFM components - why is this?
+
+
+pkpctg_parameters = {}
+pkpctg_parameters['segment_method'] = 'peak_percentage'
+pkpctg_parameters['peak_percentage'] = 0.99
+pkpctg_parameters['window_size'] = 125
+pkpctg_parameters['double_pass'] = True
+
+for call_num in tqdm.tqdm(poor_pkpct['call_number'].tolist()[-2:]):
+    synthetic_call = f[str(call_num)][:]
+    raw_audio[str(call_num)] = synthetic_call
+    output = itsfm.segment_and_measure_call(synthetic_call, fs, **pkpctg_parameters)
+                                    
+    seg_output, call_parts, measurements= output
+    
+
+out_vis = itsfm.itsFMInspector(output, synthetic_call, fs)
+out_vis.visualise_cffm_segmentation()
+out_vis.visualise_pkpctage_profiles()
+# %% 
+# It'd be good to compare the accuracy with a bunch of other potentially relevant parameters. 
+
+# %% 
+# Which call parameters correspond to lower accuracy in general?
+# Let's compare the poor segmentation calls (arbit defined as 0.8 relative accuracy)
+# to those that are more accurate
+pkpct_low_accuracy = pkpct_accuracy_reformat[pkpct_accuracy_reformat['Accuracy']<0.8]
+pkpct_lowacc_calls = np.unique(pkpct_low_accuracy['call_number'])
+
+lowacc_callprops = synthesised[synthesised['Unnamed: 0'].isin(pkpct_lowacc_calls)]
+lowacc_callprops['highacc'] = False
+highacc_callprops = synthesised[~synthesised['Unnamed: 0'].isin(pkpct_lowacc_calls)]
+highacc_callprops['highacc'] = True
+
+highlow_callprops = pd.concat([lowacc_callprops, highacc_callprops])
+
+cf_gb = highlow_callprops.groupby(['cf_peak_frequency','cf_duration', 'upfm_bandwidth',
+                                   'upfm_duration', 'downfm_bandwidth','downfm_duration'])
+poor = []
+for params, df in cf_gb:
+    accuracy = sum(df['highacc'])/df.shape[0]
+    print(f'{params} has {accuracy} accuracy')
+    if accuracy == 0:
+        poor.append(params)
+# %% 
+# The pattern in poor peak %age segmentations
+# -------------------------------------------
+# The pattern is clear - the calls with higher CF peak frequencies (there are no 40kHz peak frequency calls here!) and 
+# one or both FM components of low bandwidth are poorly segmented! In the sense
+# of 'poorly' segmented, there is a creation of a few very short false positive
+# CF and FM segments adjacent to each other.
+
+# This is happening probably because the 'peak-percentage' filter cutoff is a function of the CF peak frequency.
+# At high CF frequencies eg. 60/90 kHz, a 99% thresold means the filter is set at 
+# 600-900 Hz from the peak frequency. 600-900 Hz already corresponds to a large
+# fraction of a 5kHz FM sweep, including windowing. 
+
+# close the file with all the synthetic calls
+f.close()
 
