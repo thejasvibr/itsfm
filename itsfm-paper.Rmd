@@ -8,6 +8,8 @@ output:
   bookdown::pdf_document2: 
     keep_tex: true
     fig_caption: yes
+    toc: false
+
 bibliography: references.bib
 ---
 ```{r, echo=FALSE}
@@ -17,9 +19,6 @@ library(knitr)
 library(flextable)
 #knitr::opts_chunk$set(fig.pos = 'H')
 ```
-## Things to be done 
-1. check figures?
-
 
 ## Abstract {-#abstractitsfm}
 Analysing animal vocalisations in detail provides insights into the biomechanics, decision making and sensory processes behind their behaviours. Echolocating bats, and in particular, the CF-FM calls of high-duty cycle bats serve as a convenient model system to illustrate this point. The CF component in the CF-FM call is used for prey detection and the FM component is used in target ranging. According to the behavioural context at hand such as flight with conspecifics or prey capture, bats choose to increase the duration, intensity or spectral range of the components differently. Studying the call component alterations requires an objective methodology that first  segments the components and then allows measurements on them. Studies till now have segmented the call components manually, or automatically using what I term the 'peak-frequency' method. Manual segmentation is error prone, while the 'peak-frequency' method requires on-axis recordings for good results. Despite multiple papers using a peak-frequency based segmentation, there remain no publicly available software implementations. ```itsfm``` is an open-source package that fills this gap with two implemntations that can segment CF-FM calls, one of them being an implementation of the peak-percentage method. ```itsfm``` additionally introduces the 'pseudo-Wigner-Ville distribution' (PWVD) method for call segmentation, thus allowing the segmentation of calls captured under a wider variety of recording conditions. I create a synthetic dataset and assess the performance of the PWVD method and the 'peak-frequency' method. The PWVD performs consistently well in call component segmentation in comparison to the peak-percentage method. I also discuss the supporting methods in the ```itsfm``` package that can help the further automatic segmentation, measurement and analysis of sounds.  Though originally developed for the segmentation and measurement of CF-FM bat calls, the methods in ```itsfm``` are species-agnostic, and may be used for vocalisations of any type. 
