@@ -198,7 +198,7 @@ def clean_up_spikes(whole_freqeuncy_profile, fs, **kwargs):
     nonzero_freqs, num_regions = ndimage.label(whole_freqeuncy_profile>0)
     segment_locations = ndimage.find_objects(nonzero_freqs)
     
-    if len(segments) <1 : 
+    if len(segment_locations) <1 : 
         raise ValueError('No non-zero frequency sounds found..!')
     
     de_spiked = np.zeros(whole_freqeuncy_profile.size)
