@@ -305,7 +305,7 @@ def pwvd_transform(input_signal, fs, **kwargs):
         https://pypi.org/project/tftb/
     '''
     window_length = kwargs.get('pwvd_window', 0.001)
-    window = kwargs.get('pwvd_window_type', signal.hanning(int(fs*window_length)))
+    window = kwargs.get('pwvd_window_type', np.hanning(int(fs*window_length)))
     analytical = signal.hilbert(input_signal)
     p = PseudoWignerVilleDistribution(analytical, fwindow=window)
     pwvd_output = p.run();

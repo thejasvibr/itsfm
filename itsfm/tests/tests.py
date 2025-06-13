@@ -83,7 +83,7 @@ class TestGetFMRegions(unittest.TestCase):
     def test_invalid_and_onefms(self):
         valid_fm = get_fm_regions(self.short_and_longfm, 
                                   fs=1.0, min_fm_duration=3.0)
-        expected = np.bool8(np.concatenate((np.zeros(5),np.ones(3))))
+        expected = np.bool_(np.concatenate((np.zeros(5),np.ones(3))))
         input_and_output_same = np.array_equal(valid_fm, expected)
         self.assertTrue(input_and_output_same)
     
